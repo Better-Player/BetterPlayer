@@ -1,0 +1,8 @@
+# BetterPlayer configuration file
+# The open source Discord music bot
+
+# Your bot token
+botToken: ""
+
+# Prefix
+commandPrefix: "!"
