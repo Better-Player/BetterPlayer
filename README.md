@@ -19,7 +19,7 @@ public class FunCommandExecutor implements CommandExecutor {
 }
 ```
 and register it:
-```
+```java
 BetterPlayer betterPlayer = BetterPlayer.getBetterPlayer();
 CommandManager commandManager = betterPlayer.getCommandManager();
 commandManager.register("funcommand", new FunCommandExecutor());
