@@ -27,9 +27,10 @@ public class BetterPlayer {
 	private Config config;
 	
 	private static boolean DEBUG = false;
+	private static boolean isReady = false;
+	private static BetterPlayer INSTANCE;
 	
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) {		
 		List<String> argsList = Arrays.asList(args);
 		
 		if(argsList.contains("--debug")) DEBUG = true;
@@ -38,9 +39,13 @@ public class BetterPlayer {
 		BetterPlayer betterPlayer = new BetterPlayer();
 		betterPlayer.init();
 		betterPlayer.setupShutdown();
+		
+		isReady = true;
 	}
 	
 	private void init() {
+		INSTANCE = this;
+
 		config = new Config(this);
 		config.read();
 		
@@ -128,5 +133,13 @@ public class BetterPlayer {
 		
 		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
 		System.out.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][DEBUG] " + log);
+	}
+	
+	public static BetterPlayer getBetterPlayer() {
+		if(isReady) {
+			return INSTANCE;
+		} else {
+			return null;
+		}
 	}
 }
