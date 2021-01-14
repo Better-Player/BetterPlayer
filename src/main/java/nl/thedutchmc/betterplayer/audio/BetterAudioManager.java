@@ -17,6 +17,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import nl.thedutchmc.betterplayer.JdaHandler;
+import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
 import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 
 public class BetterAudioManager {
@@ -104,6 +105,19 @@ public class BetterAudioManager {
 		return this.queueManager;
 	}
 	
+	public AudioObject getCurrentlyPlaying(long guildId) {
+		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		if(qi == null) return null;
+		
+		AudioPlayer ap = audioPlayers.get(guildId);
+		
+		if(ap == null) return null;
+		AudioTrack at = ap.getPlayingTrack();
+		
+		AudioObject ao = new AudioObject(at, ap, qi.getTrackName());
+		return ao;
+	}
+	
 	public long getGuildId(AudioPlayer audioPlayer) {
 		
 		long result = 0L;
@@ -117,11 +131,7 @@ public class BetterAudioManager {
 	}
 	
 	public boolean isPlaying(long guildId) {
-		AudioPlayer ap = audioPlayers.get(guildId);
-		
-		System.out.println("ap: " + ap);
-		System.out.println("track: " + ap.getPlayingTrack());
-		
+		AudioPlayer ap = audioPlayers.get(guildId);		
 		return ap.getPlayingTrack() != null;
 	}
 	

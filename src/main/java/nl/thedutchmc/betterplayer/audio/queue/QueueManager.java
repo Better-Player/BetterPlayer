@@ -25,12 +25,15 @@ public class QueueManager {
 		queues.remove(guildId);
 	}
 	
-	public QueueItem getNextItemInQueue(long guildId) {
+	public QueueItem getCurrentQueueItem(long guildId) {
 		List<QueueItem> queue = queues.get(guildId);
 		int queueIndex = queueIndexes.get(guildId);
-				
+		
+		System.out.println(queue.size());
+		System.out.println(queueIndex);
+		
 		if(queueIndex > (queue.size() -1))  {
-			queueIndex = queue.size() -1;
+			return null;
 		}
 				
 		return queue.get(queueIndex);
@@ -39,12 +42,7 @@ public class QueueManager {
 	public void incrementQueueIndex(long guildId) {
 		
 		int queueIndex = queueIndexes.get(guildId);
-		
-		System.out.println("oldindex " + queueIndex);
-
-		queueIndexes.put(guildId, (queueIndex +1));
-		
-		System.out.println("newindex " + queueIndexes.get(guildId));
+		queueIndexes.put(guildId, (queueIndex +1));		
 	}
 	
 	public void addToQueue(QueueItem newQueueItem, long guildId) {

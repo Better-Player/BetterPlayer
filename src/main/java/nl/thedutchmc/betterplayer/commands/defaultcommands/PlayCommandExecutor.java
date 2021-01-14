@@ -33,7 +33,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 
-		if(!new VoiceChannelVerify().verify(betterPlayer, parameters)) {
+		if(!new VoiceChannelVerify().verify(betterPlayer, parameters, true)) {
 			return;
 		}
 		
@@ -56,6 +56,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 		urlParameters.put("videoCategoryId", "10"); //Only get music
 		urlParameters.put("type", "video");
 		urlParameters.put("q", query);
+		urlParameters.put("maxResults", "1");
 		
 		ResponseObject ro = null;
 		try {
@@ -169,23 +170,4 @@ public class PlayCommandExecutor implements CommandExecutor {
 			break;
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }

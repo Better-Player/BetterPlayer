@@ -51,5 +51,6 @@ public class CommandManager {
 		register("pause", new PauseCommandExecutor());
 		register("resume", new ResumeCommandExecutor(), "continue");
 		register("queue", new QueueCommandExecutor(), "q");
+		register("forceskip", new ForceSkipExecutor(), "fs");
 	}
 }

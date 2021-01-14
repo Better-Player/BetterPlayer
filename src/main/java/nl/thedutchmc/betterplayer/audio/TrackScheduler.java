@@ -21,9 +21,11 @@ public class TrackScheduler extends AudioEventAdapter {
 		long guildId = betterAudioManager.getGuildId(audioPlayer);		
 		QueueManager qm = betterAudioManager.getQueueManager();
 		qm.incrementQueueIndex(guildId);
-		QueueItem qi = qm.getNextItemInQueue(guildId);
-
-		System.out.println(qi.getTrackName());
+		QueueItem qi = qm.getCurrentQueueItem(guildId);
+		
+		if(qi == null) {
+			return;
+		}
 		
 		betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
 	}

@@ -11,7 +11,7 @@ public class PauseCommandExecutor implements CommandExecutor {
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		
-		if(!new VoiceChannelVerify().verify(betterPlayer, parameters)) {
+		if(!new VoiceChannelVerify().verify(betterPlayer, parameters, false)) {
 			return;
 		}
 		

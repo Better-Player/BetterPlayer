@@ -11,7 +11,7 @@ import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
 public class VoiceChannelVerify {
 
-	public boolean verify(BetterPlayer betterPlayer, CommandParameters parameters) {
+	public boolean verify(BetterPlayer betterPlayer, CommandParameters parameters, boolean joinIfNotConnected) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
 		Guild g = jda.getGuildById(parameters.getGuildId());
 		User sender = jda.getUserById(parameters.getSenderId());
@@ -44,8 +44,13 @@ public class VoiceChannelVerify {
 		}
 		
 		if(!botInVc) {
-			senderChannel.sendMessage("BetterPlayer is not connected to a voice channel!").queue();
-			return false;
+			if(joinIfNotConnected) {
+				betterPlayer.getBetterAudioManager().joinAudioChannel(userVc.getIdLong());
+				return true;
+			} else {
+				senderChannel.sendMessage("BetterPlayer is not connected to a voice channel!").queue();
+				return false;
+			}
 		}
 		
 		if(!botVc.equals(userVc)) {

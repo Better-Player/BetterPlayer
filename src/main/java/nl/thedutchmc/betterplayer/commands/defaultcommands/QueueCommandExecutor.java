@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.audio.AudioObject;
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
 import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
@@ -19,7 +20,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		
-		if(!new VoiceChannelVerify().verify(betterPlayer, parameters)) {
+		if(!new VoiceChannelVerify().verify(betterPlayer, parameters, false)) {
 			return;
 		}
 		
@@ -43,9 +44,10 @@ public class QueueCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
-		QueueItem qiNow = queue.get(queueIndex);
+		AudioObject currentlyPlaying = bam.getCurrentlyPlaying(parameters.getGuildId());
+		
 		eb.appendDescription("__Now Playing:__\n");
-		eb.appendDescription(qiNow.getTrackName() + "\n\n");
+		eb.appendDescription(currentlyPlaying.getName() + "\n\n");
 		
 		if(queue.size() != 1) {
 			eb.appendDescription("__Up Next:__\n");
