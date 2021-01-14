@@ -30,8 +30,8 @@ commandManager.register("funcommand", new FunCommandExecutor());
 and done!
 
 ## Dependencies
-- (JDA by DV8FromTheWorld)[https://github.com/DV8FromTheWorld/JDA]
-- (LavaPlayer by Sedmelluq)[https://github.com/sedmelluq/lavaplayer]
-- (Snakeyaml by Andrey Somov)[https://bitbucket.org/asomov/snakeyaml/src/master/]
-- (HttpLib by me)[https://github.com/TheDutchMC/HttpLib]
-- (JSON by Apache)[https://mvnrepository.com/artifact/org.json/json]
+- [JDA by DV8FromTheWorld](https://github.com/DV8FromTheWorld/JDA)
+- [LavaPlayer by Sedmelluq](https://github.com/sedmelluq/lavaplayer)
+- [Snakeyaml by Andrey Somov](https://bitbucket.org/asomov/snakeyaml/src/master/)
+- [HttpLib by me](https://github.com/TheDutchMC/HttpLib)
+- [JSON by Apache](https://mvnrepository.com/artifact/org.json/json)
