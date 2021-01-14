@@ -32,6 +32,6 @@ public class CommandParameters {
 	}
 	
 	public boolean hasArgs() {
-		return args != null;
+		return args != null && args.length != 0;
 	}
 }

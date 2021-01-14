@@ -6,3 +6,6 @@ botToken: ""
 
 # Prefix
 commandPrefix: "!"
+
+# API Key
+googleApikey: ""

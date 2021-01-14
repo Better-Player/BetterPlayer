@@ -13,6 +13,14 @@ import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
 public class JoinCommandExecutor implements CommandExecutor {
 
+	private boolean fromOtherExecutor = false;
+	
+	public JoinCommandExecutor() {}
+	
+	public JoinCommandExecutor(boolean fromOtherExecutor) {
+		this.fromOtherExecutor = true;
+	}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
@@ -22,18 +30,20 @@ public class JoinCommandExecutor implements CommandExecutor {
 		VoiceChannel vcConnected = null;
 		
 		Guild g = jda.getGuildById(parameters.getGuildId());
-		vcLoop: for(VoiceChannel vc : g.getVoiceChannels()) {
+		for(VoiceChannel vc : g.getVoiceChannels()) {
 			for(Member m : vc.getMembers()) {
 				if(m.getUser().equals(sender)) {
-					vcConnected = vc;
-					break vcLoop;
+					vcConnected = vc;					
 				}
 			}
 		}
 		
 		TextChannel tc = jda.getTextChannelById(parameters.getChannelId());
 		if(vcConnected != null) {
-			tc.sendMessage("Joining channel: " + vcConnected.getName()).queue();
+			
+			if(!fromOtherExecutor) {
+				tc.sendMessage("Joining channel: " + vcConnected.getName()).queue();
+			}
 			
 			BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 			bam.joinAudioChannel(vcConnected.getIdLong());

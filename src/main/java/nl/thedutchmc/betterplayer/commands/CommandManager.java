@@ -5,26 +5,32 @@ import java.util.HashMap;
 import java.util.List;
 
 import nl.thedutchmc.betterplayer.BetterPlayer;
-import nl.thedutchmc.betterplayer.commands.defaultcommands.HelpCommandExecutor;
-import nl.thedutchmc.betterplayer.commands.defaultcommands.JoinCommandExecutor;
-import nl.thedutchmc.betterplayer.commands.defaultcommands.LeaveCommandExecutor;
+import nl.thedutchmc.betterplayer.commands.defaultcommands.*;
 
 public class CommandManager {
 
 	private BetterPlayer betterPlayer;
 	private HashMap<String, CommandExecutor> executors = new HashMap<>();
+	private String apiKey;
+
 	
-	public CommandManager(BetterPlayer betterPlayer) {
+	public CommandManager(BetterPlayer betterPlayer, String apiKey) {
 		this.betterPlayer = betterPlayer;
+		this.apiKey = apiKey;
+		
 		setupDefault();
 	}
 	
-	public void register(String name, CommandExecutor executor) {
+	public void register(String name, CommandExecutor executor, String... aliases) {
 		executors.put(name, executor);
+		
+		for(String alias : aliases) {
+			executors.put(alias, executor);
+		}
 	}
 	
 	public boolean fireCommand(String name, CommandParameters parameters) {
-		CommandExecutor executor = executors.get(name);
+		CommandExecutor executor = executors.get(name);		
 		if(executor == null) {
 			return false;
 		}
@@ -41,5 +47,9 @@ public class CommandManager {
 		register("join", new JoinCommandExecutor());
 		register("help", new HelpCommandExecutor());
 		register("leave", new LeaveCommandExecutor());
+		register("play", new PlayCommandExecutor(apiKey), "p");
+		register("pause", new PauseCommandExecutor());
+		register("resume", new ResumeCommandExecutor(), "continue");
+		register("queue", new QueueCommandExecutor(), "q");
 	}
 }

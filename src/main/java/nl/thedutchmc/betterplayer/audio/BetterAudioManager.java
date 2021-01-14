@@ -3,6 +3,7 @@ package nl.thedutchmc.betterplayer.audio;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -16,11 +17,13 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import nl.thedutchmc.betterplayer.JdaHandler;
+import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 
 public class BetterAudioManager {
 
 	private final AudioPlayerManager playerManager;
 	private final TrackScheduler trackScheduler;
+	private final QueueManager queueManager;
 	private final JdaHandler jdaHandler;
 	
 	private HashMap<Long, AudioPlayer> audioPlayers = new HashMap<>();
@@ -30,6 +33,7 @@ public class BetterAudioManager {
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);
 		
+		queueManager = new QueueManager(this);
 		trackScheduler = new TrackScheduler(this);
 		
 		this.jdaHandler = jdaHandler;
@@ -39,7 +43,9 @@ public class BetterAudioManager {
 		AudioPlayer audioPlayer = playerManager.createPlayer();
 		audioPlayer.addListener(trackScheduler);
 		
-		audioPlayers.put(guildId, audioPlayer);
+		if(!audioPlayers.containsKey(guildId)) {
+			audioPlayers.put(guildId, audioPlayer);
+		}
 	}
 	
 	public void joinAudioChannel(long channelId) {
@@ -52,9 +58,7 @@ public class BetterAudioManager {
 		am.setSelfDeafened(true);
 		am.setSendingHandler(new AudioPlayerSendHandler(audioPlayers.get(targetChannel.getGuild().getIdLong())));
 		
-		connectedChannels.add(targetChannel);
-		
-		//loadTrack("RsEZmictANA", targetChannel.getGuild().getIdLong());	
+		connectedChannels.add(targetChannel);		
 	}
 	
 	public void leaveAudioChannel(VoiceChannel voiceChannel) {
@@ -75,6 +79,50 @@ public class BetterAudioManager {
 		}
 		
 		audioPlayers.remove(voiceChannel.getGuild().getIdLong());
+	}
+	
+	public boolean setPauseState(long guildId, boolean pauseState) {
+		AudioPlayer audioPlayer = audioPlayers.get(guildId);
+		if(audioPlayer == null) {
+			return false;
+		}
+		
+		audioPlayer.setPaused(pauseState);
+		return true;
+	}
+	
+	public boolean getPauseState(long guildId) {
+		AudioPlayer audioPlayer = audioPlayers.get(guildId);
+		if(audioPlayer == null) {
+			return true;
+		}
+		
+		return audioPlayer.isPaused();
+	}
+	
+	public QueueManager getQueueManager() {
+		return this.queueManager;
+	}
+	
+	public long getGuildId(AudioPlayer audioPlayer) {
+		
+		long result = 0L;
+		for(Map.Entry<Long, AudioPlayer> entry : audioPlayers.entrySet()) {
+			if(entry.getValue().equals(audioPlayer)) {
+				return entry.getKey();
+			}
+		}
+		
+		return result;
+	}
+	
+	public boolean isPlaying(long guildId) {
+		AudioPlayer ap = audioPlayers.get(guildId);
+		
+		System.out.println("ap: " + ap);
+		System.out.println("track: " + ap.getPlayingTrack());
+		
+		return ap.getPlayingTrack() != null;
 	}
 	
 	public List<VoiceChannel> getConnectedVoiceChannels() {

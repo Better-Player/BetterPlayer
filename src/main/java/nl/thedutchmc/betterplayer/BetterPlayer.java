@@ -52,7 +52,7 @@ public class BetterPlayer {
 		jdaHandler = new JdaHandler(this);	
 		betterAudioManager = new BetterAudioManager(jdaHandler);
 		
-		commandManager = new CommandManager(this);
+		commandManager = new CommandManager(this, (String) config.getConfigValue("googleApikey"));
 		
 		eventManager = new EventManager((String) config.getConfigValue("commandPrefix"), commandManager);
 
@@ -76,6 +76,10 @@ public class BetterPlayer {
 	
 	public BetterAudioManager getBetterAudioManager() {
 		return this.betterAudioManager;
+	}
+	
+	public static boolean isDebug() {
+		return DEBUG;
 	}
 	
 	public JdaHandler getJdaHandler() {
