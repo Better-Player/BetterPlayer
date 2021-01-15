@@ -6,17 +6,17 @@ import java.util.List;
 
 import nl.thedutchmc.betterplayer.BetterPlayer;
 import nl.thedutchmc.betterplayer.commands.defaultcommands.*;
+import nl.thedutchmc.betterplayer.config.Config;
 
 public class CommandManager {
 
 	private BetterPlayer betterPlayer;
 	private HashMap<String, CommandExecutor> executors = new HashMap<>();
-	private String apiKey;
-
+	private Config config;
 	
-	public CommandManager(BetterPlayer betterPlayer, String apiKey) {
+	public CommandManager(BetterPlayer betterPlayer, Config config) {
 		this.betterPlayer = betterPlayer;
-		this.apiKey = apiKey;
+		this.config = config;
 		
 		setupDefault();
 	}
@@ -47,7 +47,7 @@ public class CommandManager {
 		register("join", new JoinCommandExecutor());
 		register("help", new HelpCommandExecutor());
 		register("leave", new LeaveCommandExecutor());
-		register("play", new PlayCommandExecutor(apiKey), "p");
+		register("play", new PlayCommandExecutor((boolean) config.getConfigValue("useGoogleApi"), (String) config.getConfigValue("googleApikey")), "p");
 		register("pause", new PauseCommandExecutor());
 		register("resume", new ResumeCommandExecutor(), "continue");
 		register("queue", new QueueCommandExecutor(), "q");

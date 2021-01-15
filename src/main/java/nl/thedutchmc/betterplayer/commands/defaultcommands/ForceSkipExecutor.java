@@ -10,6 +10,7 @@ import nl.thedutchmc.betterplayer.BetterPlayer;
 import nl.thedutchmc.betterplayer.audio.AudioObject;
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
+import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
@@ -26,13 +27,18 @@ public class ForceSkipExecutor implements CommandExecutor {
 		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
 		User sender = jda.getUserById(parameters.getSenderId());
 		
-		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
+		long guildId = parameters.getGuildId();
 		
-		AudioObject currentlyPlaying = bam.getCurrentlyPlaying(parameters.getGuildId());
+		BetterAudioManager betterAudioManager = betterPlayer.getBetterAudioManager();
+		AudioObject currentlyPlaying = betterAudioManager.getCurrentlyPlaying(guildId);
 		
-		//bam.getQueueManager().incrementQueueIndex(parameters.getGuildId());
-		QueueItem qi = bam.getQueueManager().getCurrentQueueItem(parameters.getGuildId());
-		bam.loadTrack(qi.getIdentifier(), parameters.getGuildId());
+		QueueManager qm = betterAudioManager.getQueueManager();
+		qm.incrementQueueIndex(guildId);
+		QueueItem qi = qm.getCurrentQueueItem(guildId);
+		
+		if(qi != null) {
+			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
+		}
 		
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Force skipped " + currentlyPlaying.getName(), "https://google.com", sender.getEffectiveAvatarUrl())

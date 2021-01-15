@@ -47,13 +47,13 @@ public class QueueCommandExecutor implements CommandExecutor {
 		AudioObject currentlyPlaying = bam.getCurrentlyPlaying(parameters.getGuildId());
 		
 		eb.appendDescription("__Now Playing:__\n");
-		eb.appendDescription(currentlyPlaying.getName() + "\n\n");
+		eb.appendDescription(currentlyPlaying.getArtist() + " - " + currentlyPlaying.getName() + "\n\n");
 		
 		if(queue.size() != 1) {
 			eb.appendDescription("__Up Next:__\n");
 			for(int i = (queueIndex +1); i < queue.size(); i++) {
 				QueueItem qi = queue.get(i);
-				eb.appendDescription("**" + i + ".** " + qi.getTrackName() + "\n");
+				eb.appendDescription("**" + i + ".** " + qi.getTrackArtist() + " - " + qi.getTrackName() + "\n");
 			}
 		}
 

@@ -9,13 +9,16 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import net.dv8tion.jda.api.entities.TextChannel;
+import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.Utils;
 import nl.thedutchmc.httplib.Http;
 import nl.thedutchmc.httplib.Http.RequestMethod;
 import nl.thedutchmc.httplib.Http.ResponseObject;
 
 public class YoutubeSearch {
 	
-	public VideoDetails search(String[] searchTerms) {
+	public VideoDetails searchViaFrontend(String[] searchTerms) {
 		//Join the search terms together with '+' as delimiter.
 		String q = String.join("+", searchTerms);
 		
@@ -61,9 +64,7 @@ public class YoutubeSearch {
 				.getJSONObject("sectionListRenderer")
 				.getJSONArray("contents");
 				
-		//String videoId = "";
-		VideoDetails details = new VideoDetails();
-		outerJsonParseLoop: for(Object o : contentsChild) {
+		for(Object o : contentsChild) {
 			JSONObject oJson = (JSONObject) o;
 			JSONArray musicShelfRendererContents = oJson
 					.getJSONObject("musicShelfRenderer")
@@ -73,7 +74,7 @@ public class YoutubeSearch {
 				JSONObject o1Json = (JSONObject) o1;
 
 				JSONObject renderer = o1Json.getJSONObject("musicResponsiveListItemRenderer");
-				details.Id = renderer
+				String id = renderer
 						.getJSONObject("overlay")
 						.getJSONObject("musicItemThumbnailOverlayRenderer")
 						.getJSONObject("content")
@@ -88,7 +89,7 @@ public class YoutubeSearch {
 						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
 						.getJSONObject("text")
 						.getJSONArray("runs");
-				details.Title = textParts.getJSONObject(0).getString("text");
+				String title = textParts.getJSONObject(0).getString("text");
 
 				textParts = renderer
 						.getJSONArray("flexColumns")
@@ -96,19 +97,128 @@ public class YoutubeSearch {
 						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
 						.getJSONObject("text")
 						.getJSONArray("runs");
-				details.Channel = textParts.getJSONObject(2).getString("text");
-				details.Duration = textParts.getJSONObject(6).getString("text");
+				String channel = textParts.getJSONObject(2).getString("text");
+				String duration = textParts.getJSONObject(6).getString("text");
 
 				JSONArray thumbnails = renderer
 						.getJSONObject("thumbnail")
 						.getJSONObject("musicThumbnailRenderer")
 						.getJSONObject("thumbnail")
 						.getJSONArray("thumbnails");
-				details.Thumbnail = thumbnails.getJSONObject(0).getString("url");
-				break outerJsonParseLoop;
+				String thumbnailUrl = thumbnails.getJSONObject(0).getString("url");
+				
+				return new VideoDetails(id, duration, thumbnailUrl, title, channel);		
 			}
 		}
+		return null;
+	}
+	
+	public VideoDetails searchViaApi(String apiKey, String[] searchTerms, TextChannel senderChannel) {
+		String query = String.join(" ", searchTerms);
+		
+		HashMap<String, String> urlParameters = new HashMap<>();
+		urlParameters.put("key", apiKey);
+		urlParameters.put("snippet", "snippet");
+		urlParameters.put("videoCategoryId", "10"); //Only get music
+		urlParameters.put("type", "video");
+		urlParameters.put("q", query);
+		urlParameters.put("maxResults", "1");
+		
+		
+		/*
+		 * We no longer search via the API. Not until YT increases the quota, at least. It's too expensive in terms of quota.
+		 */
+		ResponseObject ro = null;
+		try {
+			ro = new Http(BetterPlayer.isDebug()).makeRequest(
+					RequestMethod.GET, 
+					"https://www.googleapis.com/youtube/v3/search", 
+					urlParameters,
+					null, 
+					null,
+					new HashMap<>());
+		} catch(MalformedURLException e) {
+			BetterPlayer.logError("MalformedURLException occured when querying YouTube! Use --debug for more details");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
 			
-		return details;
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		} catch(IOException e) {
+			BetterPlayer.logError("IOException occured when querying YouTube! Use --debug for more details");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		}
+		
+		if(ro.getResponseCode() != 200) {
+			BetterPlayer.logDebug("Got non-200 status code when querying YouTube!");
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		}
+		
+		JSONObject response = new JSONObject(ro.getMessage());
+		JSONArray items = response.getJSONArray("items");
+		
+		String videoId = "";
+		for(Object oItem : items) {
+			JSONObject jsonItem = (JSONObject) oItem;
+			videoId = jsonItem.getJSONObject("id").getString("videoId");
+			break;
+		}
+		
+		//Get details about the video found
+		urlParameters.clear();
+		urlParameters.put("key", apiKey);
+		urlParameters.put("part", "snippet,contentDetails");
+		urlParameters.put("id", videoId);
+		
+		ro = null;
+		try {
+			ro = new Http(BetterPlayer.isDebug()).makeRequest(
+					RequestMethod.GET,
+					"https://www.googleapis.com/youtube/v3/videos", 
+					urlParameters,
+					null,
+					null, 
+					new HashMap<>());
+		} catch (MalformedURLException e) {
+			BetterPlayer.logError("MalformedURLException occured when querying YouTube for video details! Use --debug for more details");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		} catch (IOException e) {
+			BetterPlayer.logError("IOException occured when querying YouTube for video details! Use --debug for more details");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		}
+		
+		if(ro.getResponseCode() != 200) {
+			BetterPlayer.logDebug("Got non-200 status code when querying YouTube!");
+			senderChannel.sendMessage("An unknown error occured. Please try again later!").queue();
+			return null;
+		}
+		
+		response = new JSONObject(ro.getMessage());
+		items = response.getJSONArray("items");
+		for(Object oItem : items) {
+			JSONObject jsonItem = (JSONObject) oItem;
+			JSONObject snippet = jsonItem.getJSONObject("snippet");
+			
+			String title = snippet.getString("title");
+			String thumbnailUrl = snippet.getJSONObject("thumbnails").getJSONObject("default").getString("url");
+			String channel = snippet.getString("channelTitle");
+			
+			JSONObject contentDetails = jsonItem.getJSONObject("contentDetails");
+			String duration = contentDetails.getString("duration").replace("PT", "").replace("M", ":").replace("S", "");
+			
+			return new VideoDetails(videoId, duration, thumbnailUrl, title, channel);
+			
+		}
+		
+		return null;
 	}
 }

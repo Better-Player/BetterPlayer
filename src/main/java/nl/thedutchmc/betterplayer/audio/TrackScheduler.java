@@ -18,16 +18,19 @@ public class TrackScheduler extends AudioEventAdapter {
 	
 	@Override
 	public void onTrackEnd(AudioPlayer audioPlayer, AudioTrack currentTrack, AudioTrackEndReason endReason) {
-		long guildId = betterAudioManager.getGuildId(audioPlayer);		
-		QueueManager qm = betterAudioManager.getQueueManager();
-		qm.incrementQueueIndex(guildId);
-		QueueItem qi = qm.getCurrentQueueItem(guildId);
-		
-		if(qi == null) {
-			return;
+		if(endReason == AudioTrackEndReason.FINISHED) {
+			
+			long guildId = betterAudioManager.getGuildId(audioPlayer);		
+			QueueManager qm = betterAudioManager.getQueueManager();
+			qm.incrementQueueIndex(guildId);
+			QueueItem qi = qm.getCurrentQueueItem(guildId);
+			
+			if(qi == null) {
+				return;
+			}
+			
+			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
 		}
-		
-		betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
 	}
 	
 	public void queue(AudioTrack audioTrack, long guildId) {

@@ -17,7 +17,6 @@ import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.commands.CommandManager;
 import nl.thedutchmc.betterplayer.config.Config;
 import nl.thedutchmc.betterplayer.events.EventManager;
-import nl.thedutchmc.betterplayer.search.YoutubeSearch;
 
 public class BetterPlayer {
 
@@ -53,7 +52,7 @@ public class BetterPlayer {
 		jdaHandler = new JdaHandler(this);	
 		betterAudioManager = new BetterAudioManager(jdaHandler);
 		
-		commandManager = new CommandManager(this, (String) config.getConfigValue("googleApikey"));
+		commandManager = new CommandManager(this, config);
 		
 		eventManager = new EventManager((String) config.getConfigValue("commandPrefix"), commandManager);
 

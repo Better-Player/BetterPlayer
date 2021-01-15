@@ -7,5 +7,7 @@ botToken: ""
 # Prefix
 commandPrefix: "!"
 
-# API Key
+# API
+useGoogleApi: false
 googleApikey: ""
+

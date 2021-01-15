@@ -28,10 +28,7 @@ public class QueueManager {
 	public QueueItem getCurrentQueueItem(long guildId) {
 		List<QueueItem> queue = queues.get(guildId);
 		int queueIndex = queueIndexes.get(guildId);
-		
-		System.out.println(queue.size());
-		System.out.println(queueIndex);
-		
+				
 		if(queueIndex > (queue.size() -1))  {
 			return null;
 		}

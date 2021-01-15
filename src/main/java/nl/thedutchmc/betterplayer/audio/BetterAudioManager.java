@@ -114,7 +114,7 @@ public class BetterAudioManager {
 		if(ap == null) return null;
 		AudioTrack at = ap.getPlayingTrack();
 		
-		AudioObject ao = new AudioObject(at, ap, qi.getTrackName());
+		AudioObject ao = new AudioObject(at, ap, qi.getTrackName(), qi.getTrackArtist());
 		return ao;
 	}
 	
