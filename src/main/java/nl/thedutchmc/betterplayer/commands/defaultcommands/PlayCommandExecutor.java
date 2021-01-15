@@ -22,6 +22,7 @@ import nl.thedutchmc.betterplayer.search.YoutubeSearch;
 import nl.thedutchmc.httplib.Http;
 import nl.thedutchmc.httplib.Http.RequestMethod;
 import nl.thedutchmc.httplib.Http.ResponseObject;
+import nl.thedutchmc.betterplayer.search.*;
 
 public class PlayCommandExecutor implements CommandExecutor {
 
@@ -104,9 +105,9 @@ public class PlayCommandExecutor implements CommandExecutor {
 		}*/
 		
 		//Perform a search via YT's frontend
-		String videoId = new YoutubeSearch().search(parameters.getArgs());
+		VideoDetails details = new YoutubeSearch().search(parameters.getArgs());
 		
-		//Get details about the video found
+		/*///Get details about the video found
 		HashMap<String, String> urlParameters = new HashMap<>();
 		urlParameters.put("key", apiKey);
 		urlParameters.put("part", "snippet,contentDetails");
@@ -146,37 +147,36 @@ public class PlayCommandExecutor implements CommandExecutor {
 		for(Object oItem : items) {
 			JSONObject jsonItem = (JSONObject) oItem;
 			JSONObject snippet = jsonItem.getJSONObject("snippet");
-			
-			String title = snippet.getString("title");
-			String thumbnailUrl = snippet.getJSONObject("thumbnails").getJSONObject("default").getString("url");
+			*/
+			//String title = snippet.getString("title");
+			//String thumbnailUrl = snippet.getJSONObject("thumbnails").getJSONObject("default").getString("url");
 			User author = jda.getUserById(parameters.getSenderId());
-			String channel = snippet.getString("channelTitle");
+			//String channel = snippet.getString("channelTitle");
 			
-			JSONObject contentDetails = jsonItem.getJSONObject("contentDetails");
-			String duration = contentDetails.getString("duration").replace("PT", "").replace("M", ":").replace("S", "");
+			//JSONObject contentDetails = jsonItem.getJSONObject("contentDetails");
+			//String duration = contentDetails.getString("duration").replace("PT", "").replace("M", ":").replace("S", "");
 			
 			QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
 			
-			QueueItem qi = new QueueItem(videoId, title);
+			QueueItem qi = new QueueItem(details.Id, details.Title);
 			qm.addToQueue(qi, parameters.getGuildId());
 			
 			//System.out.println(betterPlayer.getBetterAudioManager().isPlaying(parameters.getGuildId()));
 			
 			if(!betterPlayer.getBetterAudioManager().isPlaying(parameters.getGuildId())) {
-				betterPlayer.getBetterAudioManager().loadTrack(videoId, parameters.getGuildId());
+				betterPlayer.getBetterAudioManager().loadTrack(details.Id, parameters.getGuildId());
 			}
 			
 			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle(title)
-					.setThumbnail(thumbnailUrl)
+					.setTitle(details.Title)
+					.setThumbnail(details.Thumbnail)
 					.setColor(Color.GRAY)
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
-					.addField("Channel", channel, true)
-					.addField("Duration", duration, true)
+					.addField("Channel", details.Channel, true)
+					.addField("Duration", details.Duration, true)
 					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
 			senderChannel.sendMessage(eb.build()).queue();
-			break;
-		}
+			//break;
 	}
 }
