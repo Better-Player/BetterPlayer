@@ -14,7 +14,7 @@ import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
-public class ForceSkipExecutor implements CommandExecutor {
+public class ForceSkipCommandExecutor implements CommandExecutor {
 
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

@@ -3,6 +3,8 @@ package nl.thedutchmc.betterplayer.search;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -34,11 +36,13 @@ public class YoutubeSearch {
 		//Make a request to YouTube Music
 		ResponseObject ro = null;
 		try {
-			ro = new Http(true).makeRequest(RequestMethod.GET, "https://music.youtube.com/search", params, null, null, headers);
+			ro = new Http(BetterPlayer.isDebug()).makeRequest(RequestMethod.GET, "https://music.youtube.com/search", params, null, null, headers);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			//TODO error handling
 		} catch (IOException e) {
 			e.printStackTrace();
+			//TODO error handling
 		}
 				
 		//Get the full webpage from the ResponseObject
@@ -66,6 +70,9 @@ public class YoutubeSearch {
 				
 		for(Object o : contentsChild) {
 			JSONObject oJson = (JSONObject) o;
+			
+			if(!oJson.has("musicShelfRenderer")) return null;
+			
 			JSONArray musicShelfRendererContents = oJson
 					.getJSONObject("musicShelfRenderer")
 					.getJSONArray("contents");
@@ -97,7 +104,7 @@ public class YoutubeSearch {
 						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
 						.getJSONObject("text")
 						.getJSONArray("runs");
-				String channel = textParts.getJSONObject(2).getString("text");
+				String channel = Utils.fixArtistName(textParts.getJSONObject(2).getString("text"));
 				String duration = textParts.getJSONObject(6).getString("text");
 
 				JSONArray thumbnails = renderer
@@ -113,6 +120,59 @@ public class YoutubeSearch {
 		return null;
 	}
 	
+	public List<VideoDetails> searchPlaylistViaApi(String apiKey, String playlistId, TextChannel senderChannel, String nextPageToken) {
+		
+		HashMap<String, String> urlParameters = new HashMap<>();
+		urlParameters.put("key", apiKey);
+		urlParameters.put("playlistId", playlistId);
+		urlParameters.put("maxResults", "50");
+		urlParameters.put("part", "snippet");
+		
+		if(nextPageToken != null) {
+			urlParameters.put("pageToken", nextPageToken);
+		}
+		
+		ResponseObject ro = null;
+		try {
+			ro = new Http(BetterPlayer.isDebug()).makeRequest(RequestMethod.GET, "https://www.googleapis.com/youtube/v3/playlistItems", urlParameters, null, null, new HashMap<>());
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+			//TODO error handling
+		} catch(IOException e) {
+			e.printStackTrace();
+			//TODO error handling
+		}
+		
+		if(ro.getResponseCode() != 200) {
+			BetterPlayer.logError(ro.getConnectionMessage());
+			return null;
+		}
+			
+		List<VideoDetails> result = new LinkedList<>();
+		
+		JSONObject response = new JSONObject(ro.getMessage());
+		
+		System.out.println(response.toString());
+
+		if(response.has("nextPageToken")) {
+			String nextPageTokenInRequest = response.getString("nextPageToken");
+			result.addAll(searchPlaylistViaApi(apiKey, playlistId, senderChannel, nextPageTokenInRequest));
+		}
+		
+		JSONArray items = response.getJSONArray("items");
+		for(Object o : items) {
+			JSONObject item = (JSONObject) o;			
+			JSONObject snippet = item.getJSONObject("snippet");
+			
+			String videoId = snippet.getJSONObject("resourceId").getString("videoId");
+
+			VideoDetails vd = getVideoDetails(apiKey, videoId, senderChannel);
+			result.add(vd);
+		}
+		
+		return result;
+	}
+	
 	public VideoDetails searchViaApi(String apiKey, String[] searchTerms, TextChannel senderChannel) {
 		String query = String.join(" ", searchTerms);
 		
@@ -124,10 +184,6 @@ public class YoutubeSearch {
 		urlParameters.put("q", query);
 		urlParameters.put("maxResults", "1");
 		
-		
-		/*
-		 * We no longer search via the API. Not until YT increases the quota, at least. It's too expensive in terms of quota.
-		 */
 		ResponseObject ro = null;
 		try {
 			ro = new Http(BetterPlayer.isDebug()).makeRequest(
@@ -167,13 +223,17 @@ public class YoutubeSearch {
 			break;
 		}
 		
+		return getVideoDetails(apiKey, videoId, senderChannel);
+	}
+	
+	public VideoDetails getVideoDetails(String apiKey, String videoId, TextChannel senderChannel) {
 		//Get details about the video found
-		urlParameters.clear();
+		HashMap<String, String> urlParameters = new HashMap<>();
 		urlParameters.put("key", apiKey);
 		urlParameters.put("part", "snippet,contentDetails");
 		urlParameters.put("id", videoId);
 		
-		ro = null;
+		ResponseObject ro = null;
 		try {
 			ro = new Http(BetterPlayer.isDebug()).makeRequest(
 					RequestMethod.GET,
@@ -202,21 +262,20 @@ public class YoutubeSearch {
 			return null;
 		}
 		
-		response = new JSONObject(ro.getMessage());
-		items = response.getJSONArray("items");
+		JSONObject response = new JSONObject(ro.getMessage());
+		JSONArray items = response.getJSONArray("items");
 		for(Object oItem : items) {
 			JSONObject jsonItem = (JSONObject) oItem;
 			JSONObject snippet = jsonItem.getJSONObject("snippet");
 			
 			String title = snippet.getString("title");
 			String thumbnailUrl = snippet.getJSONObject("thumbnails").getJSONObject("default").getString("url");
-			String channel = snippet.getString("channelTitle");
+			String channel =  Utils.fixArtistName(snippet.getString("channelTitle"));
 			
 			JSONObject contentDetails = jsonItem.getJSONObject("contentDetails");
 			String duration = contentDetails.getString("duration").replace("PT", "").replace("M", ":").replace("S", "");
 			
 			return new VideoDetails(videoId, duration, thumbnailUrl, title, channel);
-			
 		}
 		
 		return null;

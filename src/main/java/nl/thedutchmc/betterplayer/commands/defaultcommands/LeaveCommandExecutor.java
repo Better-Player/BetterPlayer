@@ -24,6 +24,8 @@ public class LeaveCommandExecutor implements CommandExecutor {
 			}
 		}
 		
+		betterPlayer.getBetterAudioManager().getQueueManager().clearQueue(guildId);
+		
 		JDA jda = betterPlayer.getJdaHandler().getJda();
 		TextChannel tc = jda.getTextChannelById(parameters.getChannelId());
 		

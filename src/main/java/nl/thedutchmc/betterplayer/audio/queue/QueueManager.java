@@ -25,6 +25,15 @@ public class QueueManager {
 		queues.remove(guildId);
 	}
 	
+	public QueueItem getQueueItemAtIndex(long guildId, int index) {
+		List<QueueItem> queue = queues.get(guildId);
+		if(index >= queue.size()) {
+			return null;
+		}
+		
+		return queue.get(index);
+	}
+	
 	public QueueItem getCurrentQueueItem(long guildId) {
 		List<QueueItem> queue = queues.get(guildId);
 		int queueIndex = queueIndexes.get(guildId);
@@ -34,6 +43,19 @@ public class QueueManager {
 		}
 				
 		return queue.get(queueIndex);
+	}
+	
+	public boolean deleteItemFromQueue(long guildId, int queueIndex) {
+		List<QueueItem> queue = queues.get(guildId);
+		
+		if(queueIndex >= queue.size()) {
+			return false;
+		}
+		
+		queue.remove(queueIndex);
+		queues.put(guildId, queue);
+		
+		return true;
 	}
 	
 	public void incrementQueueIndex(long guildId) {

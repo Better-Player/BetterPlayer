@@ -53,7 +53,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 			eb.appendDescription("__Up Next:__\n");
 			for(int i = (queueIndex +1); i < queue.size(); i++) {
 				QueueItem qi = queue.get(i);
-				eb.appendDescription("**" + i + ".** " + qi.getTrackArtist() + " - " + qi.getTrackName() + "\n");
+				eb.appendDescription("**" + (i - queueIndex) + ".** " + qi.getTrackArtist() + " - " + qi.getTrackName() + "\n");
 			}
 		}
 

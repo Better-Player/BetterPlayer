@@ -51,6 +51,9 @@ public class CommandManager {
 		register("pause", new PauseCommandExecutor());
 		register("resume", new ResumeCommandExecutor(), "continue");
 		register("queue", new QueueCommandExecutor(), "q");
-		register("forceskip", new ForceSkipExecutor(), "fs");
+		register("forceskip", new ForceSkipCommandExecutor(), "fs");
+		register("nowplaying", new NowPlayingCommandExecutor(), "np");
+		register("clearqueue", new ClearQueueCommandExecutor(), "clear", "c");
+		register("remove", new RemoveCommandExecutor(), "delete", "rm", "del");
 	}
 }
