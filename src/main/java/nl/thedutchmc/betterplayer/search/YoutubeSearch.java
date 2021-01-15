@@ -152,8 +152,6 @@ public class YoutubeSearch {
 		
 		JSONObject response = new JSONObject(ro.getMessage());
 		
-		System.out.println(response.toString());
-
 		if(response.has("nextPageToken")) {
 			String nextPageTokenInRequest = response.getString("nextPageToken");
 			result.addAll(searchPlaylistViaApi(apiKey, playlistId, senderChannel, nextPageTokenInRequest));
