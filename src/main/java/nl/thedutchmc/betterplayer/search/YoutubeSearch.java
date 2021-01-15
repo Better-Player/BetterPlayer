@@ -15,7 +15,7 @@ import nl.thedutchmc.httplib.Http.ResponseObject;
 
 public class YoutubeSearch {
 	
-	public String search(String[] searchTerms) {
+	public VideoDetails search(String[] searchTerms) {
 		//Join the search terms together with '+' as delimiter.
 		String q = String.join("+", searchTerms);
 		
@@ -61,7 +61,8 @@ public class YoutubeSearch {
 				.getJSONObject("sectionListRenderer")
 				.getJSONArray("contents");
 				
-		String videoId = "";
+		//String videoId = "";
+		VideoDetails details = new VideoDetails();
 		outerJsonParseLoop: for(Object o : contentsChild) {
 			JSONObject oJson = (JSONObject) o;
 			JSONArray musicShelfRendererContents = oJson
@@ -70,19 +71,44 @@ public class YoutubeSearch {
 			
 			for(Object o1 : musicShelfRendererContents) {
 				JSONObject o1Json = (JSONObject) o1;
-				videoId = o1Json
-						.getJSONObject("musicResponsiveListItemRenderer")
+
+				JSONObject renderer = o1Json.getJSONObject("musicResponsiveListItemRenderer");
+				details.Id = renderer
 						.getJSONObject("overlay")
 						.getJSONObject("musicItemThumbnailOverlayRenderer")
 						.getJSONObject("content")
 						.getJSONObject("musicPlayButtonRenderer")
 						.getJSONObject("playNavigationEndpoint")
 						.getJSONObject("watchEndpoint")
-						.getString("videoId");				
+						.getString("videoId");
+
+				JSONArray textParts = renderer
+						.getJSONArray("flexColumns")
+						.getJSONObject(0)
+						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
+						.getJSONObject("text")
+						.getJSONArray("runs");
+				details.Title = textParts.getJSONObject(0).getString("text");
+
+				textParts = renderer
+						.getJSONArray("flexColumns")
+						.getJSONObject(1)
+						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
+						.getJSONObject("text")
+						.getJSONArray("runs");
+				details.Channel = textParts.getJSONObject(2).getString("text");
+				details.Duration = textParts.getJSONObject(6).getString("text");
+
+				JSONArray thumbnails = renderer
+						.getJSONObject("thumbnail")
+						.getJSONObject("musicThumbnailRenderer")
+						.getJSONObject("thumbnail")
+						.getJSONArray("thumbnails");
+				details.Thumbnail = thumbnails.getJSONObject(0).getString("url");
 				break outerJsonParseLoop;
 			}
 		}
 			
-		return videoId;
+		return details;
 	}
 }
