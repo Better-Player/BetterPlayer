@@ -1,0 +1,11 @@
+# BetterPlayer configuration file
+# The open source Discord music bot
+
+# Your bot token
+botToken: "Nzk5Mjk0NTc4NjUzMTM0OTE5.YABfFQ.5JoPXrl2V6ZLRUJbYllFQQ7NhKs"
+
+# Prefix
+commandPrefix: "!"
+
+# API Key
+googleApikey: "AIzaSyBzRcB7AZ3WYFGejkd_H7wOyLaqE0BAwWk"

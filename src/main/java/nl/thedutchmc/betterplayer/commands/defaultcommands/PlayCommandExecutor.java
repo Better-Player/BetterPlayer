@@ -18,6 +18,7 @@ import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
 import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
+import nl.thedutchmc.betterplayer.search.YoutubeSearch;
 import nl.thedutchmc.httplib.Http;
 import nl.thedutchmc.httplib.Http.RequestMethod;
 import nl.thedutchmc.httplib.Http.ResponseObject;
@@ -48,6 +49,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 		JoinCommandExecutor jce = new JoinCommandExecutor(true);
 		jce.fireCommand(betterPlayer, parameters);
 		
+		/*
 		String query = String.join(" ", parameters.getArgs());
 		
 		HashMap<String, String> urlParameters = new HashMap<>();
@@ -57,8 +59,12 @@ public class PlayCommandExecutor implements CommandExecutor {
 		urlParameters.put("type", "video");
 		urlParameters.put("q", query);
 		urlParameters.put("maxResults", "1");
+		*/
 		
-		ResponseObject ro = null;
+		/*
+		 * We no longer search via the API. Not until YT increases the quota, at least. It's too expensive in terms of quota.
+		 */
+		/*ResponseObject ro = null;
 		try {
 			ro = new Http(BetterPlayer.isDebug()).makeRequest(
 					RequestMethod.GET, 
@@ -95,15 +101,18 @@ public class PlayCommandExecutor implements CommandExecutor {
 			JSONObject jsonItem = (JSONObject) oItem;
 			videoId = jsonItem.getJSONObject("id").getString("videoId");
 			break;
-		}
+		}*/
+		
+		//Perform a search via YT's frontend
+		String videoId = new YoutubeSearch().search(parameters.getArgs());
 		
 		//Get details about the video found
-		urlParameters.clear();
+		HashMap<String, String> urlParameters = new HashMap<>();
 		urlParameters.put("key", apiKey);
 		urlParameters.put("part", "snippet,contentDetails");
 		urlParameters.put("id", videoId);
 		
-		ro = null;
+		ResponseObject ro = null;
 		try {
 			ro = new Http(BetterPlayer.isDebug()).makeRequest(
 					RequestMethod.GET,
@@ -132,8 +141,8 @@ public class PlayCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
-		response = new JSONObject(ro.getMessage());
-		items = response.getJSONArray("items");
+		JSONObject response = new JSONObject(ro.getMessage());
+		JSONArray items = response.getJSONArray("items");
 		for(Object oItem : items) {
 			JSONObject jsonItem = (JSONObject) oItem;
 			JSONObject snippet = jsonItem.getJSONObject("snippet");
@@ -164,7 +173,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
 					.addField("Channel", channel, true)
 					.addField("Duration", duration, true)
-					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
 			senderChannel.sendMessage(eb.build()).queue();
 			break;

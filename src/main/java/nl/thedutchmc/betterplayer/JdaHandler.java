@@ -23,7 +23,7 @@ public class JdaHandler {
 						GatewayIntent.GUILD_MESSAGES,
 						GatewayIntent.GUILD_VOICE_STATES)
 				.setAutoReconnect(true)
-				.setActivity(Activity.playing("Better than Rythm (TM)"));
+				.setActivity(Activity.playing("https://github.com/TheDutchMC/BetterPlayer"));
 
 		try {
 			jda = jdaBuilder.build();

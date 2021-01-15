@@ -17,6 +17,7 @@ import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.commands.CommandManager;
 import nl.thedutchmc.betterplayer.config.Config;
 import nl.thedutchmc.betterplayer.events.EventManager;
+import nl.thedutchmc.betterplayer.search.YoutubeSearch;
 
 public class BetterPlayer {
 

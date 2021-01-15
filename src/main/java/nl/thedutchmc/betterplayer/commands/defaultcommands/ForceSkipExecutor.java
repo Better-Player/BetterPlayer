@@ -37,7 +37,7 @@ public class ForceSkipExecutor implements CommandExecutor {
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Force skipped " + currentlyPlaying.getName(), "https://google.com", sender.getEffectiveAvatarUrl())
 				.setColor(Color.GRAY)
-				.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		
 		senderChannel.sendMessage(eb.build()).queue();
 	}
