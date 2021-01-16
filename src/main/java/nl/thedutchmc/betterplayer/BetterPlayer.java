@@ -35,7 +35,7 @@ public class BetterPlayer {
 		
 		if(argsList.contains("--debug")) DEBUG = true;
 		
-		
+		//Start up BetterPlayer
 		BetterPlayer betterPlayer = new BetterPlayer();
 		betterPlayer.init();
 		betterPlayer.setupShutdown();
@@ -46,27 +46,33 @@ public class BetterPlayer {
 	private void init() {
 		INSTANCE = this;
 
+		//Read the config
 		config = new Config(this);
 		config.read();
 		
-		jdaHandler = new JdaHandler(this);	
+		//Create all objects required for operation
+		jdaHandler = new JdaHandler(this);
 		betterAudioManager = new BetterAudioManager(jdaHandler);
-		
 		commandManager = new CommandManager(this, config);
-		
 		eventManager = new EventManager((String) config.getConfigValue("commandPrefix"), commandManager);
 
+		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
 	}
 	
 	private void setupShutdown() {
+		
+		//Before our application is terminated by the JVM we want to try to properly stop all we need to
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
+				
+				//Disconnect from all connected voice channels
 				betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
 					betterAudioManager.leaveAudioChannel(vc);
 				});
 				
+				//Shutdown the JDA. This is guaranteed to throw errors, but we do not care for them.
 				try {
 					jdaHandler.shutdownJda();
 				} catch(Exception e) {}
@@ -74,31 +80,57 @@ public class BetterPlayer {
 		}, "shutdown-thread"));
 	}
 	
-	public BetterAudioManager getBetterAudioManager() {
-		return this.betterAudioManager;
-	}
-	
+	/**
+	 * Get the DEBUG flag. True if debug is enabled, false if it is not
+	 * @return Returns the debug status
+	 */
 	public static boolean isDebug() {
 		return DEBUG;
 	}
 	
+	/**
+	 * Get the BetterAudioManager
+	 * @return Returns the BetterAudioManager
+	 */
+	public BetterAudioManager getBetterAudioManager() {
+		return this.betterAudioManager;
+	}
+	
+	/**
+	 * Get the JdaHandler
+	 * @return Returns the JdaHandler
+	 */
 	public JdaHandler getJdaHandler() {
 		return this.jdaHandler;
 	}
 	
+	/**
+	 * Get the EventManager
+	 * @return Returns the EventManager
+	 */
 	public EventManager getEventManager() {
 		return this.eventManager;
 	}
 	
+	/**
+	 * Get the CommandManager
+	 * @return Returns the CommandManager
+	 */
 	public CommandManager getCommandManager() {
 		return this.commandManager;
 	}
 	
+	/**
+	 * Get a resource from within the jar. If the resource is in the root of the jar, do not provide a path to it, just the name.<br>
+	 * <br>
+	 * Throws a FileNotFoundException if the targeted resource was not found.
+	 * @param name The name of the resource
+	 * @param targetPath The path where the resource should be saved
+	 */
 	public void saveResource(String name, String targetPath) {
 		InputStream in = null;
 		
 		try {
-			//ClassLoader cl = this.getClass().getClassLoader();
 			in = this.getClass().getResourceAsStream("/" + name);
 			
 			if(name == null) {
@@ -109,8 +141,6 @@ public class BetterPlayer {
 				throw new FileNotFoundException("Cannot find file " + name + " in jar!");
 			}
 			
-			logDebug(in);
-
 			Path exportPath = Paths.get(targetPath + File.separator + name);
 			Files.copy(in, exportPath);
 		} catch (FileNotFoundException e) {
@@ -122,16 +152,30 @@ public class BetterPlayer {
 		}
 	}
 	
+	/**
+	 * Log an Object with log level INFO
+	 * @param log The object to log
+	 */
 	public static void logInfo(Object log) {
 		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
 		System.out.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][INFO] " + log);
 	}
 	
+	/**
+	 * Log an Object with log level ERROR
+	 * @param log The object to log
+	 */
 	public static void logError(Object log) {
 		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
 		System.err.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][ERROR] " + log);
 	}
 	
+	/**
+	 * Log an Object with log level DEBUG<br>
+	 * <br>
+	 * Will only log if DEBUG is true.
+	 * @param log The object to log
+	 */
 	public static void logDebug(Object log) {
 		if(!DEBUG) return;
 		
@@ -139,6 +183,10 @@ public class BetterPlayer {
 		System.out.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][DEBUG] " + log);
 	}
 	
+	/**
+	 * Get the BetterPlayer instance
+	 * @return Returns the BetterPlayer instance. Null if isReady is false.
+	 */
 	public static BetterPlayer getBetterPlayer() {
 		if(isReady) {
 			return INSTANCE;

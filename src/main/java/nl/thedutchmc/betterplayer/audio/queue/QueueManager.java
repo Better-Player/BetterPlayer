@@ -34,6 +34,10 @@ public class QueueManager {
 		return queue.get(index);
 	}
 	
+	public void setQueue(long guildId, List<QueueItem> newQueue) {
+		queues.put(guildId, newQueue);
+	}
+	
 	public QueueItem getCurrentQueueItem(long guildId) {
 		List<QueueItem> queue = queues.get(guildId);
 		int queueIndex = queueIndexes.get(guildId);

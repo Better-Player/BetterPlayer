@@ -55,5 +55,6 @@ public class CommandManager {
 		register("nowplaying", new NowPlayingCommandExecutor(), "np");
 		register("clearqueue", new ClearQueueCommandExecutor(), "clear", "c");
 		register("remove", new RemoveCommandExecutor(), "delete", "rm", "del");
+		register("shuffle", new ShuffleCommandExecutor(), "s");
 	}
 }
