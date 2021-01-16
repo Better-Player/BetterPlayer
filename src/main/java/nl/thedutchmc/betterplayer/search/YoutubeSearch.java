@@ -20,6 +20,11 @@ import nl.thedutchmc.httplib.Http.ResponseObject;
 
 public class YoutubeSearch {
 	
+	/**
+	 * Perform a search via the YouTube Music 'front-end'
+	 * @param searchTerms The search terms to search for
+	 * @return Returns a VideoDetails object of the video found. Null if nothing was found
+	 */
 	public VideoDetails searchViaFrontend(String[] searchTerms) {
 		//Join the search terms together with '+' as delimiter.
 		String q = String.join("+", searchTerms);
@@ -120,6 +125,14 @@ public class YoutubeSearch {
 		return null;
 	}
 	
+	/**
+	 * Perform a search for a playlist via the API.
+	 * @param apiKey The api key to use
+	 * @param playlistId The playlist ID to search for
+	 * @param senderChannel The TextChannel to send potential error messages to
+	 * @param nextPageToken Used for recursion. If a playlist has multiple pages, you can specify the page to get with this parameter
+	 * @return Returns a List of VideoDetail objects
+	 */
 	public List<VideoDetails> searchPlaylistViaApi(String apiKey, String playlistId, TextChannel senderChannel, String nextPageToken) {
 		
 		HashMap<String, String> urlParameters = new HashMap<>();
@@ -171,6 +184,15 @@ public class YoutubeSearch {
 		return result;
 	}
 	
+	/**
+	 * Perform a search via the YouTube API<br>
+	 * <br>
+	 * <strong>Performing this search costs 100 quota points! Consider searching via the front-end!</strong>
+	 * @param apiKey The API key to use
+	 * @param searchTerms The search terms to search for
+	 * @param senderChannel The TextChannel to send potential errors to
+	 * @return Returns a VideoDetails object of the video found. Null if nothing was found
+	 */
 	public VideoDetails searchViaApi(String apiKey, String[] searchTerms, TextChannel senderChannel) {
 		String query = String.join(" ", searchTerms);
 		
@@ -224,8 +246,14 @@ public class YoutubeSearch {
 		return getVideoDetails(apiKey, videoId, senderChannel);
 	}
 	
+	/**
+	 * Get the details of a video via the API
+	 * @param apiKey The API key to use
+	 * @param videoId The videoId of the video to get details for
+	 * @param senderChannel The TextChannel to send errors to.+
+	 * @return
+	 */
 	public VideoDetails getVideoDetails(String apiKey, String videoId, TextChannel senderChannel) {
-		//Get details about the video found
 		HashMap<String, String> urlParameters = new HashMap<>();
 		urlParameters.put("key", apiKey);
 		urlParameters.put("part", "snippet,contentDetails");

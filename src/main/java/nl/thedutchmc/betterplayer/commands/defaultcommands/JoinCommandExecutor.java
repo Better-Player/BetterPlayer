@@ -1,56 +1,70 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
-import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
+/**
+ * This command will allow the user to have BetterPlayer to join the channel they are currently in.<br>
+ * This command requires the user to be connected to the same voice channel as BetterPlayer<br>
+ * <br>
+ * This command is also called from PlayCommandExecutor.
+ */
 public class JoinCommandExecutor implements CommandExecutor {
 
 	private boolean fromOtherExecutor = false;
 	
 	public JoinCommandExecutor() {}
 	
+	/**
+	 * If fromOtherExecutor is set to true, this execution will not provide any output to the user.
+	 * @param fromOtherExecutor
+	 */
 	public JoinCommandExecutor(boolean fromOtherExecutor) {
-		this.fromOtherExecutor = true;
+		this.fromOtherExecutor = fromOtherExecutor;
 	}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
-		
 		User sender = jda.getUserById(parameters.getSenderId());
-		
+
+		//Iterate over all voice channels of the guild.
 		VoiceChannel vcConnected = null;
-		
-		Guild g = jda.getGuildById(parameters.getGuildId());
-		for(VoiceChannel vc : g.getVoiceChannels()) {
+		vcLoop: for(VoiceChannel vc : jda.getGuildById(parameters.getGuildId()).getVoiceChannels()) {
+			
+			//Iterate over all members in the voice channel
 			for(Member m : vc.getMembers()) {
+				
+				//If the user in the channel is the same as the command sender, we've found the channel to connect to
 				if(m.getUser().equals(sender)) {
 					vcConnected = vc;					
+					break vcLoop;
 				}
 			}
 		}
 		
-		TextChannel tc = jda.getTextChannelById(parameters.getChannelId());
+		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+		
+		//If vcConnected is not equal to null, that means we found the channel to join
 		if(vcConnected != null) {
 			
+			//If this command is triggered by another command we do not provide output to the user
 			if(!fromOtherExecutor) {
-				tc.sendMessage("Joining channel: " + vcConnected.getName()).queue();
+				senderChannel.sendMessage("Joining channel: " + vcConnected.getName()).queue();
 			}
 			
-			BetterAudioManager bam = betterPlayer.getBetterAudioManager();
-			bam.joinAudioChannel(vcConnected.getIdLong());
+			//Join the voice channel
+			betterPlayer.getBetterAudioManager().joinAudioChannel(vcConnected.getIdLong());
 			
 		} else {
-			tc.sendMessage("You are not connected to a voice channel!").queue();
-			return;
+			//We did not find a voice channel. That means that the user is not in one, or we can't see it
+			senderChannel.sendMessage("You are not connected to a voice channel, or BetterPlayer does not have access to the channel!").queue();
 		}
 	}
 }

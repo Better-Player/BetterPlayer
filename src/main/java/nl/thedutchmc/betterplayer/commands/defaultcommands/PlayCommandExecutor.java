@@ -53,7 +53,9 @@ public class PlayCommandExecutor implements CommandExecutor {
 				String[] urlParamsSplit = urlParams.split(Pattern.quote("&"));
 				
 				for(String param : urlParamsSplit) {
-					if(param.contains("list")) {	
+					if(param.contains("list")) {
+						senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();
+						
 						List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(apiKey, param.split("=")[1], senderChannel, null);
 						
 						if(vds != null && vds.size() >= 1) {	
