@@ -11,4 +11,4 @@ queries:
     uses: security-and-quality
 
 paths:
- - java/src
+ - ./java/src/main/java/
