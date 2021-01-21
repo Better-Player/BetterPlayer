@@ -1,0 +1,14 @@
+name: "BetterPlayer CodeQL Config"
+
+disable-default-queries: true
+
+languages: java
+
+queries:
+  - name: Extended Security
+    uses: security-extended
+  - name: Security and Quality
+    uses: security-and-quality
+
+paths:
+ - java/src
