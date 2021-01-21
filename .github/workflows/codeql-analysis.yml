@@ -79,3 +79,5 @@ jobs:
       uses: github/codeql-action/analyze@v1
       with:
         checkout_path: /home/runner/work/BetterPlayer/BetterPlayer/java
+      env:
+        PWD: /home/runner/work/BetterPlayer/BetterPlayer/java
