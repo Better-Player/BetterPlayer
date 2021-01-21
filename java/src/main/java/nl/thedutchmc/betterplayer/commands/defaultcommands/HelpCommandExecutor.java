@@ -1,11 +1,16 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.math.BigInteger;
+import java.util.List;
+
+import org.apache.commons.lang3.text.WordUtils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.commands.CommandDetails;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
@@ -23,11 +28,101 @@ public class HelpCommandExecutor implements CommandExecutor {
 		//Set all constant fields of the embed
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("BetterPlayer Help Menu")
-				.setColor(Color.BLUE);
+				.setColor(Color.GRAY);
+				
+		//If the user provided no page number, that means they just want the first page
+		int pageIndex = 0;
+		if(parameters.hasArgs()) {
+			
+			//Check if the provided page number is a positive integer
+			if(parameters.getArgs()[0].matches("-?\\d+")) {
+				
+				BigInteger bigInt = new BigInteger(parameters.getArgs()[0]);
+				if(bigInt.compareTo(BigInteger.valueOf((long) Integer.MAX_VALUE)) > 0) {
+					senderChannel.sendMessage("That number is too big! Nice try :)").queue();
+					return;
+				}
+				
+				if(Integer.valueOf(parameters.getArgs()[0]) <= 0) {
+					senderChannel.sendMessage("Only numbers higher than 0 are allowed!").queue();
+					return;
+				}
+				
+				//Set the page number.
+				//We have to subtract one, because users are 1-based, and the queue is 0 based
+				pageIndex = Integer.valueOf(parameters.getArgs()[0]) -1;
+			} else {
+				senderChannel.sendMessage("You must provide a valid number!");
+			}
+		}
+		
+		List<CommandDetails> cmdDetails = betterPlayer.getCommandManager().getCommandDetails();
+		
+		//Calculate the amount of pages needed
+		int maxItemsPerPage = 8;
+		int pageCount = (int) Math.floor(((double) cmdDetails.size() / maxItemsPerPage));
+		
+		//Check if a user has provided a pageIndex thats higher than the amount of pages there are
+		if(pageIndex > pageCount) {
+			senderChannel.sendMessage("The help menu only has " + (pageCount+1) + " pages!").queue();
+			return;
+		}
+		
+		//Loop over items for the page requested
+		int iCondition = pageIndex * maxItemsPerPage + maxItemsPerPage;
+		iCondition = (iCondition >= cmdDetails.size()) ? cmdDetails.size() : iCondition;
+		for(int i = (pageIndex * maxItemsPerPage); i < iCondition; i++) {
+			CommandDetails details = cmdDetails.get(i);
+			
+			//Nicely format the aliases into a single String and add the command prefix to it
+			String aliases = "";
+			for(int j = 0; j < details.getAliases().length; j++) {
+				aliases += "$" + details.getAliases()[j] + "";
+				
+				if(j != details.getAliases().length -1) {
+					aliases += ", ";
+				}
+			}
+			
+			//The description can't fit on a single line, so we have to put in a new line every charsPerLine characters
+			//We can only do this after a word though.
+		    int charsPerLine = 30;
+		    char[] commandDescriptionChars = details.getDescription().toCharArray();
+		    char[] commandDescriptionCharsWrapped = new char[commandDescriptionChars.length + (int) (commandDescriptionChars.length / charsPerLine)];
+		    int indexInWrapped = 0;
+		    boolean spliceOnNextPossible = false;
+		    for(int j = 0; j < commandDescriptionChars.length; j++) {
+		    	commandDescriptionCharsWrapped[indexInWrapped] = commandDescriptionChars[j];
 
-		//Iterate over all commands, and add it
-		for(String command : betterPlayer.getCommandManager().getAllCommands()) {
-			embedBuilder.appendDescription("- " + betterPlayer.getEventManager().getCommandPrefix() + command + "\n");
+		    	if(commandDescriptionChars[j] == ' ') {
+		    		spliceOnNextPossible = true;
+		    	}
+		    	
+		    	if(j % charsPerLine == 0 && spliceOnNextPossible) {
+		    		indexInWrapped++;
+		    		commandDescriptionCharsWrapped[indexInWrapped] = '\n';
+	    		}
+		    	
+		    	indexInWrapped++;
+		    }
+
+		    //Add the command name field, with value = the description
+			embedBuilder.addField(WordUtils.capitalize(details.getName()), new String(commandDescriptionCharsWrapped), true);
+			
+			//If there are aliases, add it
+			if(aliases != "") {
+				embedBuilder.addField("Aliases", aliases, true);
+			} else {
+				embedBuilder.addBlankField(true);
+			}
+			
+			//Blank field for alignment
+			embedBuilder.addBlankField(true);
+		}
+		
+		//If there's more than one page, tell the user
+		if(pageCount > 0) {
+			embedBuilder.addField("Page " + (pageIndex +1) + " / " + (pageCount + 1), "", false);
 		}
 
 		//Send the embed

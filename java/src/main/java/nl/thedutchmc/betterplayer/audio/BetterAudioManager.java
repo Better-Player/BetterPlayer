@@ -79,6 +79,9 @@ public class BetterAudioManager {
 			connectedChannels.remove(indexToRemove);
 		}
 		
+		//Delete this guild from the queue
+		queueManager.clearQueue(voiceChannel.getGuild().getIdLong());
+		
 		audioPlayers.remove(voiceChannel.getGuild().getIdLong());
 	}
 	
@@ -132,7 +135,13 @@ public class BetterAudioManager {
 	
 	public boolean isPlaying(long guildId) {
 		AudioPlayer ap = audioPlayers.get(guildId);		
-		return ap.getPlayingTrack() != null;
+
+		//Could be one lined, this is more readable
+		if(ap.getPlayingTrack() == null) {
+			return false;
+		} else {
+			return true;
+		}		
 	}
 	
 	public List<VoiceChannel> getConnectedVoiceChannels() {

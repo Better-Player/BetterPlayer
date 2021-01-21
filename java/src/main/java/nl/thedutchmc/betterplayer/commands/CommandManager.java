@@ -12,6 +12,7 @@ public class CommandManager {
 
 	private BetterPlayer betterPlayer;
 	private HashMap<String, CommandExecutor> executors = new HashMap<>();
+	private List<CommandDetails> commandDetails = new ArrayList<>();
 	private Config config;
 	
 	/**
@@ -33,12 +34,14 @@ public class CommandManager {
 	 * @param executor The executor of the command
 	 * @param aliases String... of aliases for the command
 	 */
-	public void register(String name, CommandExecutor executor, String... aliases) {
+	public void register(String name, CommandExecutor executor, String description, String... aliases) {
 		executors.put(name, executor);
 		
 		for(String alias : aliases) {
 			executors.put(alias, executor);
 		}
+		
+		commandDetails.add(new CommandDetails(name, aliases, description));
 	}
 	
 	/**
@@ -70,20 +73,28 @@ public class CommandManager {
 	}
 	
 	/**
+	 * Get a List of CommandDetails of all registered commands
+	 * @return Returns a List of CommandDetails
+	 */
+	public List<CommandDetails> getCommandDetails() {
+		return this.commandDetails;
+	}
+	
+	/**
 	 * This function will set up the default CommandExecutors shipped with BetterPlayer
 	 */
 	private void setupDefault() {
-		register("join", new JoinCommandExecutor());
-		register("help", new HelpCommandExecutor());
-		register("leave", new LeaveCommandExecutor());
-		register("play", new PlayCommandExecutor((boolean) config.getConfigValue("useGoogleApi"), (String) config.getConfigValue("googleApikey")), "p");
-		register("pause", new PauseCommandExecutor());
-		register("resume", new ResumeCommandExecutor(), "continue");
-		register("queue", new QueueCommandExecutor(), "q");
-		register("forceskip", new ForceSkipCommandExecutor(), "fs");
-		register("nowplaying", new NowPlayingCommandExecutor(), "np");
-		register("clearqueue", new ClearQueueCommandExecutor(), "clear", "c");
-		register("remove", new RemoveCommandExecutor(), "delete", "rm", "del");
-		register("shuffle", new ShuffleCommandExecutor(), "s");
+		register("join", new JoinCommandExecutor(), "Join a voice channel");
+		register("help", new HelpCommandExecutor(), "Displays the help menu");
+		register("leave", new LeaveCommandExecutor(), "Leave a voice channel");
+		register("play", new PlayCommandExecutor((boolean) config.getConfigValue("useGoogleApi"), (String) config.getConfigValue("googleApikey")), "Play a YouTube video, playlist, or search for a video", "p");
+		register("pause", new PauseCommandExecutor(), "Pause BetterPlayer");
+		register("resume", new ResumeCommandExecutor(), "Resume BetterPlayer", "continue");
+		register("queue", new QueueCommandExecutor(), "Display the current queue", "q");
+		register("forceskip", new ForceSkipCommandExecutor(), "Force skip a track", "fs");
+		register("nowplaying", new NowPlayingCommandExecutor(), "Display details about the track that is playing at the moment", "np");
+		register("clearqueue", new ClearQueueCommandExecutor(), "Clear the queue", "clear", "c");
+		register("remove", new RemoveCommandExecutor(), "Delete an item from the queue, by index shown by $queue", "delete", "rm", "del");
+		register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
 	}
 }

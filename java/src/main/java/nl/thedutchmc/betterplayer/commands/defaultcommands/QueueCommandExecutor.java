@@ -1,6 +1,7 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -62,10 +63,11 @@ public class QueueCommandExecutor implements CommandExecutor {
 		eb.appendDescription(currentlyPlaying.getArtist() + " - " + currentlyPlaying.getName() + "\n\n");
 				
 		List<String> queueStrings = new LinkedList<>();
-		
+				
 		//If the queue size is 1, that means there is no up next category.
 		if(queue.size() != 1) {
 			eb.appendDescription("__Up Next:__\n");
+			
 			
 			//Iterate over the rest of the queue, and add them to the queueStrings list
 			//Format: {position in queue}. {Artist Name} - {Track name}
@@ -80,13 +82,23 @@ public class QueueCommandExecutor implements CommandExecutor {
 		 * so we have to split it over pages.
 		 */
 		
-		
 		//If the user provided no page number, that means they just want the first page
 		int page = 0;
 		if(parameters.hasArgs()) {
 			
 			//Check if the provided page number is a positive integer
-			if(parameters.getArgs()[0].matches("-?\\d+") && Integer.valueOf(parameters.getArgs()[0]) > 0) {
+			if(parameters.getArgs()[0].matches("-?\\d+")) {
+				
+				BigInteger bigInt = new BigInteger(parameters.getArgs()[0]);
+				if(bigInt.compareTo(BigInteger.valueOf((long) Integer.MAX_VALUE)) > 0) {
+					senderChannel.sendMessage("That number is too big! Nice try :)").queue();
+					return;
+				}
+				
+				if(Integer.valueOf(parameters.getArgs()[0]) <= 0) {
+					senderChannel.sendMessage("Only numbers higher than 0 are allowed!").queue();
+					return;
+				}
 				
 				//Set the page number.
 				//We have to subtract one, because users are 1-based, and the queue is 0 based
@@ -98,7 +110,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 		
 		//Set the max amount of items per page (constant) and calculate the amount of pages that are required
 		int maxItemsPerPage = 10;
-		int queuePages = (int) Math.floor((((double) queueStrings.size() / maxItemsPerPage)));
+		int queuePages = (int) Math.floor(((double) queueStrings.size() / maxItemsPerPage));
 		
 		//If the page number provided is larger than the number of queue pages +1 (again, users are 1-based, not 0-based)
 		//then inform the user that the number they provided is more than the amount of pages that exist
@@ -106,9 +118,11 @@ public class QueueCommandExecutor implements CommandExecutor {
 			senderChannel.sendMessage("The queue is only " + (queuePages+1) + " pages long!").queue();
 			return;
 		}
-		
+				
 		//Iterate over the queueStrings list, from the first item on the page to the last item.
-		for(int i = (page * maxItemsPerPage); i < (page * maxItemsPerPage + maxItemsPerPage); i++) {
+		int iCondition = (page * maxItemsPerPage + maxItemsPerPage);
+		iCondition = (iCondition >= queueStrings.size()) ? queueStrings.size() : iCondition;
+		for(int i = (page * maxItemsPerPage); i < iCondition; i++) {
 			eb.appendDescription(queueStrings.get(i));
 		}
 

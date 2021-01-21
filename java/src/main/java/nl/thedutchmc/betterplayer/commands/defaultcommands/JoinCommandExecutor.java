@@ -5,9 +5,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.managers.AudioManager;
 import nl.thedutchmc.betterplayer.BetterPlayer;
-import nl.thedutchmc.betterplayer.audio.receive.EchoHandler;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
 
@@ -62,14 +60,14 @@ public class JoinCommandExecutor implements CommandExecutor {
 			}
 			
 			//Temporary
-			EchoHandler eh = new EchoHandler(betterPlayer, senderChannel.getGuild().getIdLong());
-			AudioManager am = jda.getGuildById(parameters.getGuildId()).getAudioManager();
-			am.setReceivingHandler(eh);
-			am.setSendingHandler(eh);
-			am.openAudioConnection(vcConnected);
+			//EchoHandler eh = new EchoHandler(betterPlayer, senderChannel.getGuild().getIdLong());
+			//AudioManager am = jda.getGuildById(parameters.getGuildId()).getAudioManager();
+			//am.setReceivingHandler(eh);
+			//am.setSendingHandler(eh);
+			//am.openAudioConnection(vcConnected);
 			
 			//Join the voice channel
-			//betterPlayer.getBetterAudioManager().joinAudioChannel(vcConnected.getIdLong());
+			betterPlayer.getBetterAudioManager().joinAudioChannel(vcConnected.getIdLong());
 
 		} else {
 			//We did not find a voice channel. That means that the user is not in one, or we can't see it

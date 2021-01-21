@@ -24,7 +24,8 @@ public class VideoDetails {
      * @return Returns the duration of the video
      */
     public String getDuration() {
-    	return this.duration;
+    	return this.duration
+    			.replace("H", ":");
     }
     
     /**

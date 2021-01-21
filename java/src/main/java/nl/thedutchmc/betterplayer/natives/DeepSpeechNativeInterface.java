@@ -1,11 +1,5 @@
 package nl.thedutchmc.betterplayer.natives;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-
 public class DeepSpeechNativeInterface {
 
 	public void loadNative() {

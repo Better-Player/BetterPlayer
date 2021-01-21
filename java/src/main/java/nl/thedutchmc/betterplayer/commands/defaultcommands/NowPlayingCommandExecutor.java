@@ -30,6 +30,12 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		
 		//Get the track which is currently playing, its total length, and how far we're in
 		AudioObject currentlyPlaying = betterPlayer.getBetterAudioManager().getCurrentlyPlaying(guildId);
+		
+		if(currentlyPlaying == null) {
+			senderChannel.sendMessage("I'm currently not playing anything!").queue();
+			return;
+		}
+		
 		long trackDuration = currentlyPlaying.getAudioTrack().getDuration();
 		long trackPosition = currentlyPlaying.getAudioTrack().getPosition();
 		
@@ -46,21 +52,35 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 			
 			//If i is equal to the percentageComplete, do a dot rather than a hyphen
 			if(i == percentageTrackComplete) {
-				trackProgress += "●";
+				trackProgress += "\u25CF"; //Black dot
 			} else {
 				trackProgress += "-";
 			}
 		}
 		
-		//Calculate the total duration of the track in a format of mm:ss
-		double minDuration = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackDuration) * 100.0) / 100.0;
-		double secDuration = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackDuration) - TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackDuration)) * 100.0) / 100.0;
-		String duration = String.format("%02d:%02d", (long) minDuration, (long) secDuration);
+		//Calculate the total duration of the track in a format of (hh:)mm:ss
+		double hrDuration = Math.round(TimeUnit.MILLISECONDS.toHours(trackDuration) * 100.0) / 100.0;
+		double minDuration = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackDuration) - Math.floor(TimeUnit.MILLISECONDS.toMinutes(TimeUnit.MILLISECONDS.toHours(trackDuration))) * 100.0) / 100.0;
+		double secDuration = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackDuration) - Math.floor(TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackDuration))) * 100.0) / 100.0;
 		
-		//Calculate how far into the track we are in a format of mm:ss
-		double minPosition = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackPosition) * 100.0) / 100.0;
-		double secPosition = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackPosition) - TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackPosition)) * 100.0) / 100.0;
-		String position = String.format("%02d:%02d", (long) minPosition, (long) secPosition);
+		String duration;
+		if(hrDuration >= 1) {
+			duration = String.format("%02d:%02d:%02d", (long) hrDuration, (long) minDuration, (long) secDuration);
+		} else {
+			duration = String.format("%02d:%02d", (long) minDuration, (long) secDuration);
+		}
+		
+		//Calculate how far into the track we are in a format of (mm:)ss
+		double hrPosition = Math.round(TimeUnit.MILLISECONDS.toHours(trackPosition) * 100.0) / 100.0;
+		double minPosition = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackPosition) - Math.floor(TimeUnit.MILLISECONDS.toMinutes(TimeUnit.MILLISECONDS.toHours(trackPosition))) * 100.0) / 100.0;
+		double secPosition = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackPosition) - Math.floor(TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackPosition))) * 100.0) / 100.0;		
+		
+		String position;
+		if(hrPosition >= 1) {
+			position = String.format("%02d:%02d:%02d", (long) hrPosition, (long) minPosition, (long) secPosition);
+		} else {
+			position = String.format("%02d:%02d", (long) minPosition, (long) secPosition);
+		}
 		
 		//Combine the two above calculated values
 		String progressAsTime = position + "/" + duration;

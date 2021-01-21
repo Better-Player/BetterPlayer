@@ -80,6 +80,8 @@ public class PlayCommandExecutor implements CommandExecutor {
 						} else {	
 							senderChannel.sendMessage("Unknown playlist or the playlist contains no videos!").queue();
 						}
+						
+						return;
 					} else if(param.contains("v")) {
 						VideoDetails vd = new YoutubeSearch().getVideoDetails(apiKey, param.split("=")[1], senderChannel);
 						
@@ -88,6 +90,8 @@ public class PlayCommandExecutor implements CommandExecutor {
 						} else {
 							senderChannel.sendMessage("Unknown video!").queue();
 						}
+						
+						return;
 					}
 				}
 			} else {
@@ -95,6 +99,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			}
 		} else if(useApi) {
 			VideoDetails details = new YoutubeSearch().searchViaApi(apiKey, parameters.getArgs(), senderChannel);
+			
 			processVideoDetails(betterPlayer, parameters, details, true);
 		} else {
 			VideoDetails details = new YoutubeSearch().searchViaFrontend(parameters.getArgs());
@@ -116,7 +121,12 @@ public class PlayCommandExecutor implements CommandExecutor {
 			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.getId(), parameters.getGuildId());
 		}
 		
-		int queuePos = qm.getFullQueue(parameters.getGuildId()).size() - qm.getQueueIndex(parameters.getGuildId() -1);
+		int queuePos;
+		if(qm.getFullQueue(parameters.getGuildId()) == null) {
+			queuePos = 0;
+		} else {
+			queuePos = qm.getFullQueue(parameters.getGuildId()).size() - qm.getQueueIndex(parameters.getGuildId());
+		}
 		
 		if(announce) {
 			EmbedBuilder eb = new EmbedBuilder()

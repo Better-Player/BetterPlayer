@@ -1,5 +1,7 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
@@ -31,13 +33,19 @@ public class ClearQueueCommandExecutor implements CommandExecutor {
 		* - It is null when the bot has not yet joined a voice channel for this guild, so it has never created a queue for the guild
 		* - It's size is 0 when a user has already cleared the queue
 		*/
-		if(bam.getQueueManager().getFullQueue(guildId) != null && bam.getQueueManager().getFullQueue(guildId).size() == 0) {
+		if(bam.getQueueManager().getFullQueue(guildId) == null) {
 			senderChannel.sendMessage("The queue is already empty!").queue();
 			return;
 		}
-		
-		//Pause the currently playing track. I suppose when the user clears the queue, they also want to stop the currently playing song
-		bam.setPauseState(guildId, true);
+			
+		if(bam.getQueueManager().getFullQueue(guildId).size() == 0) {
+			senderChannel.sendMessage("The queue is already empty!").queue();
+			return;
+		}
+
+		//Stop the currently playing audio track
+		AudioPlayer ap = bam.getAudioPlayer(guildId);
+		ap.stopTrack();
 		
 		//Clear the queue
 		bam.getQueueManager().clearQueue(guildId);

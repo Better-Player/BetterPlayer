@@ -18,11 +18,16 @@ public class QueueManager {
 	}
 	
 	public List<QueueItem> getFullQueue(long guildId) {
+		if(!queues.containsKey(guildId)) {
+			return null;
+		}
+		
 		return queues.get(guildId);
 	}
 	
 	public void clearQueue(long guildId) {
 		queues.remove(guildId);
+		queueIndexes.remove(guildId);
 	}
 	
 	public QueueItem getQueueItemAtIndex(long guildId, int index) {
@@ -39,6 +44,10 @@ public class QueueManager {
 	}
 	
 	public QueueItem getCurrentQueueItem(long guildId) {
+		if(!queues.containsKey(guildId) || !queueIndexes.containsKey(guildId)) {
+			return null;
+		}
+		
 		List<QueueItem> queue = queues.get(guildId);
 		int queueIndex = queueIndexes.get(guildId);
 				
@@ -69,11 +78,12 @@ public class QueueManager {
 	}
 	
 	public void addToQueue(QueueItem newQueueItem, long guildId) {
-		List<QueueItem> currentQueue = queues.get(guildId);
-		if(currentQueue == null) {
-			currentQueue = new LinkedList<>();
+		if(!queues.containsKey(guildId)) {
+			queues.put(guildId, new LinkedList<QueueItem>());
 			queueIndexes.put(guildId, 0);
 		}
+		
+		List<QueueItem> currentQueue = queues.get(guildId);
 		
 		currentQueue.add(newQueueItem);
 		queues.put(guildId, currentQueue);

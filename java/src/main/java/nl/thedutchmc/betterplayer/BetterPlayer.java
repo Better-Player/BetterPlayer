@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,14 +13,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-import net.dv8tion.jda.api.events.ExceptionEvent;
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
-import nl.thedutchmc.betterplayer.audio.speech.DeepSpeechRecognition;
-import nl.thedutchmc.betterplayer.audio.speech.DeepSpeechUtils;
 import nl.thedutchmc.betterplayer.commands.CommandManager;
 import nl.thedutchmc.betterplayer.config.Config;
 import nl.thedutchmc.betterplayer.events.EventManager;
-import nl.thedutchmc.betterplayer.natives.DeepSpeechNativeInterface;
 
 public class BetterPlayer {
 
@@ -40,7 +35,7 @@ public class BetterPlayer {
 		
 		if(argsList.contains("--debug")) DEBUG = true;
 		
-		DeepSpeechNativeInterface dsni = new DeepSpeechNativeInterface();
+		/*DeepSpeechNativeInterface dsni = new DeepSpeechNativeInterface();
 		dsni.loadNative();
 		
 		String audio = "/mnt/a/LDC93S1.wav";
@@ -59,12 +54,12 @@ public class BetterPlayer {
 			
 		} catch(Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 		//Start up BetterPlayer		
-		//BetterPlayer betterPlayer = new BetterPlayer();
-		//betterPlayer.init();
-		//betterPlayer.setupShutdown();
+		BetterPlayer betterPlayer = new BetterPlayer();
+		betterPlayer.init();
+		betterPlayer.setupShutdown();
 		
 		isReady = true;
 	}
@@ -84,16 +79,12 @@ public class BetterPlayer {
 
 		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
-		
-		DeepSpeechRecognition dsr = new DeepSpeechRecognition();
-		
+				
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-		
-		dsr.doInfer("/mnt/a/LDC93S1.wav");
+		}		
 	}
 	
 	private void setupShutdown() {
