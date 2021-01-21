@@ -24,7 +24,7 @@ jobs:
       run: chmod +x gradlew
     #Build the JAR 
     - name: Build with Gradle
-      run: ./gradlew ghActions
+      run: ./java/gradlew ghActions
     #Create a release
     - name: Create Release
       id: create_release
