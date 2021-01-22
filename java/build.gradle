@@ -33,9 +33,9 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 
 	implementation 'com.github.TheDutchMC:HttpLib:1.1'
-
-	implementation ':libbetterplayer'
-
+	
+	implementation ':libdeepspeech'
+	implementation ':picovoice-1.1.0'
 }
 
 task releaseJar(type: ShadowJar) {
