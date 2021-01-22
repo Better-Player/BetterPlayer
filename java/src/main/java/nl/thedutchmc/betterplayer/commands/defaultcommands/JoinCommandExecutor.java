@@ -56,7 +56,7 @@ public class JoinCommandExecutor implements CommandExecutor {
 			
 			//If this command is triggered by another command we do not provide output to the user
 			if(!fromOtherExecutor) {
-				senderChannel.sendMessage("Joining channel: " + vcConnected.getName()).queue();
+				senderChannel.sendMessage("Joining channel: **" + vcConnected.getName() + "**").queue();
 			}
 			
 			//Temporary
@@ -67,7 +67,7 @@ public class JoinCommandExecutor implements CommandExecutor {
 			//am.openAudioConnection(vcConnected);
 			
 			//Join the voice channel
-			betterPlayer.getBetterAudioManager().joinAudioChannel(vcConnected.getIdLong());
+			betterPlayer.getBetterAudioManager().joinAudioChannel(vcConnected.getIdLong(), senderChannel.getIdLong());
 
 		} else {
 			//We did not find a voice channel. That means that the user is not in one, or we can't see it

@@ -14,9 +14,12 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import nl.thedutchmc.betterplayer.JdaHandler;
+import nl.thedutchmc.betterplayer.Utils;
 import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
 import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
 
@@ -29,6 +32,8 @@ public class BetterAudioManager {
 	
 	private HashMap<Long, AudioPlayer> audioPlayers = new HashMap<>();
 	private List<VoiceChannel> connectedChannels = new ArrayList<>();
+	private HashMap<Long, Boolean> guildsPlaying = new HashMap<>();
+	private HashMap<Long, Long> boundTextChannels = new HashMap<>();
 	
 	public BetterAudioManager(JdaHandler jdaHandler) {
 		playerManager = new DefaultAudioPlayerManager();
@@ -49,17 +54,18 @@ public class BetterAudioManager {
 		}
 	}
 	
-	public void joinAudioChannel(long channelId) {
-		VoiceChannel targetChannel = jdaHandler.getJda().getVoiceChannelById(channelId);
+	public void joinAudioChannel(long voiceChannelId, long senderChannelId) {
+		VoiceChannel targetChannel = jdaHandler.getJda().getVoiceChannelById(voiceChannelId);
 		
-		init(targetChannel.getGuild().getIdLong());
+		this.init(targetChannel.getGuild().getIdLong());
 		
 		AudioManager am = targetChannel.getGuild().getAudioManager();
 		am.openAudioConnection(targetChannel);
 		am.setSelfDeafened(false);
 		am.setSendingHandler(new AudioPlayerSendHandler(audioPlayers.get(targetChannel.getGuild().getIdLong())));
 		
-		connectedChannels.add(targetChannel);		
+		connectedChannels.add(targetChannel);
+		boundTextChannels.put(targetChannel.getGuild().getIdLong(), senderChannelId);
 	}
 	
 	public void leaveAudioChannel(VoiceChannel voiceChannel) {
@@ -79,10 +85,16 @@ public class BetterAudioManager {
 			connectedChannels.remove(indexToRemove);
 		}
 		
-		//Delete this guild from the queue
-		queueManager.clearQueue(voiceChannel.getGuild().getIdLong());
+		long guildId = voiceChannel.getGuild().getIdLong();
 		
-		audioPlayers.remove(voiceChannel.getGuild().getIdLong());
+		//Delete this guild from the queue
+		queueManager.clearQueue(guildId);
+		
+		//Remove the audio player for this guild
+		audioPlayers.remove(guildId);
+		
+		//Remove the boundChannel
+		boundTextChannels.remove(guildId);
 	}
 	
 	public boolean setPauseState(long guildId, boolean pauseState) {
@@ -133,15 +145,17 @@ public class BetterAudioManager {
 		return result;
 	}
 	
+	/**
+	 * Get if BetterPlayer is currently playing something for the specified guild
+	 * @param guildId The ID of the guild to check
+	 * @return Returns true if it is playing, false if it is not
+	 */
 	public boolean isPlaying(long guildId) {
-		AudioPlayer ap = audioPlayers.get(guildId);		
-
-		//Could be one lined, this is more readable
-		if(ap.getPlayingTrack() == null) {
-			return false;
-		} else {
-			return true;
-		}		
+		/*Returns true if:
+		* - guildsPlaying has the guild in it
+		* - the value in guildsPlaying for this guild is true
+		*/
+		return (guildsPlaying.containsKey(guildId) && guildsPlaying.get(guildId));
 	}
 	
 	public List<VoiceChannel> getConnectedVoiceChannels() {
@@ -149,6 +163,7 @@ public class BetterAudioManager {
 	}
 	
 	public void loadTrack(String identifier, long guildId) {
+		guildsPlaying.put(guildId, true);
 		
 		this.playerManager.loadItem(identifier, new AudioLoadResultHandler() {
 			
@@ -165,16 +180,37 @@ public class BetterAudioManager {
 			
 			@Override
 			public void noMatches() {
-				// TODO Auto-generated method stub
-				
+				BetterAudioManager.this.loadFailed("Unable to load track, skipping!", guildId);
 			}
 			
 			@Override
 			public void loadFailed(FriendlyException exception) {
-				// TODO Auto-generated method stub
-				
+				BetterAudioManager.this.loadFailed(Utils.getStackTrace(exception), guildId);
 			}
 		});
+	}
+	
+	private void loadFailed(String message, long guildId) {
+		long senderChannelId = boundTextChannels.get(guildId);
+		TextChannel senderChannel = jdaHandler.getJda().getTextChannelById(senderChannelId);
+		
+		//Skip to the next song
+		queueManager.incrementQueueIndex(guildId);
+		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		
+		if(qi == null) {
+			return;
+		}
+						
+		EmbedBuilder eb = new EmbedBuilder()
+				.setTitle("Unable to load track")
+				.setDescription(message)
+				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+		
+		senderChannel.sendMessage(eb.build()).queue();
+		
+		//Play the next song!
+		loadTrack(qi.getIdentifier(), guildId);
 	}
 	
 	public AudioPlayer getAudioPlayer(long guildId) {

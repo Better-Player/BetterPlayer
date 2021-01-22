@@ -58,8 +58,8 @@ public class PlayCommandExecutor implements CommandExecutor {
 						
 						List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(apiKey, param.split("=")[1], senderChannel, null);
 						
-						if(vds != null && vds.size() >= 1) {	
-							for(VideoDetails details : vds) {
+						if(vds != null && vds.size() >= 1) {					
+							for(VideoDetails details : vds) {								
 								processVideoDetails(betterPlayer, parameters, details, false);
 							}
 							
@@ -106,7 +106,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			processVideoDetails(betterPlayer, parameters, details, true);
 		}
 	}
-	
+		
 	private void processVideoDetails(BetterPlayer betterPlayer, CommandParameters parameters, VideoDetails videoDetails, boolean announce) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
 		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
@@ -116,8 +116,8 @@ public class PlayCommandExecutor implements CommandExecutor {
 		qm.addToQueue(qi, parameters.getGuildId());
 		
 		User author = jda.getUserById(parameters.getSenderId());
-
-		if(!betterPlayer.getBetterAudioManager().isPlaying(parameters.getGuildId())) {
+		
+		if(!betterPlayer.getBetterAudioManager().isPlaying(parameters.getGuildId())) {			
 			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.getId(), parameters.getGuildId());
 		}
 		

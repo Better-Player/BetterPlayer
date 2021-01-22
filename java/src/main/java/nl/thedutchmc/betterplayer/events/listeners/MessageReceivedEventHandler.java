@@ -30,13 +30,13 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 		if(!contentDisplayMessage.startsWith(eventManager.getCommandPrefix())) return;
 				
 		//Remove the commandPrefix, and split on spaces 
-		String commandWithArgs = contentDisplayMessage.replace(eventManager.getCommandPrefix(), "").toLowerCase();
+		String commandWithArgs = contentDisplayMessage.replace(eventManager.getCommandPrefix(), "");
 		String[] parts = commandWithArgs.split(" ");
 
 		//If the user provided any input (because they could just type the prefix), then we want to process
 		if(parts.length >= 1) {			
 			//The command is the first element
-			String command = parts[0];
+			String command = parts[0].toLowerCase();
 			
 			//The arguments are everything after the first element
 			String[] args = Arrays.copyOfRange(parts, 1, parts.length);

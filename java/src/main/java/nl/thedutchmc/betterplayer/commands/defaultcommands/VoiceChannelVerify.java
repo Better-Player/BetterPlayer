@@ -56,7 +56,7 @@ public class VoiceChannelVerify {
 			
 			//if joinIfNotConnected is true, we should join the channel
 			if(joinIfNotConnected) {
-				betterPlayer.getBetterAudioManager().joinAudioChannel(userVc.getIdLong());
+				betterPlayer.getBetterAudioManager().joinAudioChannel(userVc.getIdLong(), senderChannel.getIdLong());
 				return true;
 			} else {
 				//Inform the user that BetterPlayer is not connected to a voice channel

@@ -42,7 +42,7 @@ public class LeaveCommandExecutor implements CommandExecutor {
 		//So leave it, and tell the user that BetterPlayer left
 		if(vcToLeave != null) {
 			betterPlayer.getBetterAudioManager().leaveAudioChannel(vcToLeave);
-			tc.sendMessage("Successfully the channel: " + vcToLeave.getName()).queue();
+			tc.sendMessage("Successfully left channel: **" + vcToLeave.getName() + "**").queue();
 		} else {
 			//BetterPlayer is not connected to a voice channel in the sender's guild, inform them
 			tc.sendMessage("I'm not connected to a voice channel!").queue();
