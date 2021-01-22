@@ -19,6 +19,7 @@ INCLUDE=		-I.								\
 CXXFLAGS := $(shell pkg-config --cflags $(LIBS))
 LDLIBS := $(shell pkg-config --libs $(LIBS))
 
+all: build/libdeepspeech.so
 build:
 	mkdir build
 

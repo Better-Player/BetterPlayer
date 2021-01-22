@@ -55,6 +55,11 @@ public class QueueCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
+		if(!bam.isPlaying(guildId)) {
+			senderChannel.sendMessage("The queue is empty.").queue();
+			return;
+		}
+		
 		//Get the track which is currently playing
 		AudioObject currentlyPlaying = bam.getCurrentlyPlaying(guildId);
 		

@@ -1,8 +1,8 @@
 package nl.thedutchmc.betterplayer.natives;
 
 public class DeepSpeechNativeInterface {
-
-	public void loadNative() {
+	
+	static {
 		/*String resourceName = "libbetterplayer.so";
         URL resourceUrl = DeepSpeechNativeInterface.class.getResource("/jni/x86_64/" + resourceName);
 
