@@ -54,6 +54,10 @@ public class BetterAudioManager {
 		}
 	}
 	
+	public boolean hasAudioPlayer(long guildId) {
+		return audioPlayers.containsKey(guildId);
+	}
+	
 	public void joinAudioChannel(long voiceChannelId, long senderChannelId) {
 		VoiceChannel targetChannel = jdaHandler.getJda().getVoiceChannelById(voiceChannelId);
 		
@@ -156,6 +160,10 @@ public class BetterAudioManager {
 		* - the value in guildsPlaying for this guild is true
 		*/
 		return (guildsPlaying.containsKey(guildId) && guildsPlaying.get(guildId));
+	}
+	
+	public void setPlaying(long guildId, boolean playing) {
+		guildsPlaying.put(guildId, playing);
 	}
 	
 	public List<VoiceChannel> getConnectedVoiceChannels() {

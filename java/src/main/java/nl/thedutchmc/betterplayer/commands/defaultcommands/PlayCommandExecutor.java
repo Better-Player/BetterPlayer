@@ -106,7 +106,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			}
 		} else if(useApi) {
 			VideoDetails details = new YoutubeSearch().searchViaApi(apiKey, parameters.getArgs(), senderChannel);
-			
+			System.out.println("api");
 			processVideoDetails(betterPlayer, parameters, details, true);
 		} else {
 			VideoDetails details = new YoutubeSearch().searchViaFrontend(parameters.getArgs());
@@ -114,27 +114,64 @@ public class PlayCommandExecutor implements CommandExecutor {
 		}
 	}
 		
+	/**
+	 * Process video details and play the video
+	 * @param betterPlayer BetterPlayer instance
+	 * @param parameters CommandParameters object
+	 * @param videoDetails VideoDetails object
+	 * @param announce Should messages be send to the sender's TextChannel
+	 */
 	private void processVideoDetails(BetterPlayer betterPlayer, CommandParameters parameters, VideoDetails videoDetails, boolean announce) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
 		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+		User author = jda.getUserById(parameters.getSenderId());
+		long guildId = parameters.getGuildId();
 		
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
+		
+		//Check if VideoDetails and it's parameters are not null
+		//If any of them are that means no results were found and we can stop
+		if(videoDetails == null || videoDetails.getId() == null || videoDetails.getTitle() == null || videoDetails.getChannel() == null) {
+			senderChannel.sendMessage("No results found! Try another search term").queue();
+			return;
+		}
+		
+		//Create a QueueItem for the video
 		QueueItem qi = new QueueItem(videoDetails.getId(), videoDetails.getTitle(), videoDetails.getChannel());
+		
+		//Add the item to the queue
 		qm.addToQueue(qi, parameters.getGuildId());
 		
-		User author = jda.getUserById(parameters.getSenderId());
-		
-		if(!betterPlayer.getBetterAudioManager().isPlaying(parameters.getGuildId())) {			
-			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.getId(), parameters.getGuildId());
+		//Check if we're already playing something for this guild
+		//If not, we want to play something
+		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {			
+			
+			//Check if the guild has an AudioPlayer, if not, create it
+			if(!betterPlayer.getBetterAudioManager().hasAudioPlayer(guildId)) {				
+				betterPlayer.getBetterAudioManager().init(guildId);
+			}
+			
+			//Load the track
+			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.getId(), guildId);
 		}
 		
+		//Check if the guild currently has a pause state of true--meaning it's paused
+		//if so, unpause
+		if(betterPlayer.getBetterAudioManager().getPauseState(guildId)) {
+			betterPlayer.getBetterAudioManager().setPauseState(guildId, false);
+		}
+		
+		//Calculate the position in the queue
+		//If the queue is null, then the queue position is 0
+		//Otherwhise the queue position is the full queue's size, minus the current queue index.
 		int queuePos;
-		if(qm.getFullQueue(parameters.getGuildId()) == null) {
+		if(qm.getFullQueue(guildId) == null) {
 			queuePos = 0;
 		} else {
-			queuePos = qm.getFullQueue(parameters.getGuildId()).size() - qm.getQueueIndex(parameters.getGuildId());
+			queuePos = qm.getFullQueue(guildId).size() - qm.getQueueIndex(guildId);
 		}
 		
+		//If announce is true, then we want to send a message to the senderChannel
 		if(announce) {
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle(videoDetails.getTitle())

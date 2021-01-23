@@ -11,13 +11,13 @@ import org.yaml.snakeyaml.Yaml;
 import nl.thedutchmc.betterplayer.BetterPlayer;
 import nl.thedutchmc.betterplayer.Utils;
 
-public class Config {
+public class BotConfig {
 
 	private BetterPlayer betterPlayer;
 	private File configDirectory;
 	private HashMap<String, Object> configData = null;
 	
-	public Config(BetterPlayer betterPlayer) {
+	public BotConfig(BetterPlayer betterPlayer) {
 		this.betterPlayer = betterPlayer;
 		
 		//Get the path of the JAR, and thus the directory in which we should put the config file

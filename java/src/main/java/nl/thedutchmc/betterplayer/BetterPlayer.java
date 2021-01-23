@@ -15,7 +15,7 @@ import java.util.List;
 
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.commands.CommandManager;
-import nl.thedutchmc.betterplayer.config.Config;
+import nl.thedutchmc.betterplayer.config.BotConfig;
 import nl.thedutchmc.betterplayer.events.EventManager;
 
 public class BetterPlayer {
@@ -24,7 +24,7 @@ public class BetterPlayer {
 	private JdaHandler jdaHandler;
 	private EventManager eventManager;
 	private CommandManager commandManager;
-	private Config config;
+	private BotConfig config;
 	
 	private static boolean DEBUG = false;
 	private static boolean isReady = false;
@@ -35,12 +35,10 @@ public class BetterPlayer {
 		
 		if(argsList.contains("--debug")) DEBUG = true;
 		
-		/*DeepSpeechNativeInterface dsni = new DeepSpeechNativeInterface();
-		dsni.loadNative();
-		
-		String audio = "/mnt/a/LDC93S1.wav";
+		/*String audio = "/mnt/a/LDC93S1.wav";
 		
 		try {
+			DeepSpeechNativeInterface dsni = new DeepSpeechNativeInterface();		
 			RandomAccessFile raf = new RandomAccessFile(audio, "r");
 			
 			raf.seek(40);
@@ -68,7 +66,7 @@ public class BetterPlayer {
 		INSTANCE = this;
 
 		//Read the config
-		config = new Config(this);
+		config = new BotConfig(this);
 		config.read();
 		
 		//Create all objects required for operation

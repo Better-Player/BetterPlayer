@@ -49,6 +49,9 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		//If that is the case, we don't play. Otherwhise we will play the next track
 		if(qi != null) {
 			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
+		} else {
+			betterAudioManager.getAudioPlayer(guildId).destroy();
+			betterAudioManager.setPlaying(parameters.getGuildId(), false);
 		}
 		
 		//Inform the user what they skipped

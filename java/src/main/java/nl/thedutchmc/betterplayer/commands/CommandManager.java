@@ -6,21 +6,21 @@ import java.util.List;
 
 import nl.thedutchmc.betterplayer.BetterPlayer;
 import nl.thedutchmc.betterplayer.commands.defaultcommands.*;
-import nl.thedutchmc.betterplayer.config.Config;
+import nl.thedutchmc.betterplayer.config.BotConfig;
 
 public class CommandManager {
 
 	private BetterPlayer betterPlayer;
 	private HashMap<String, CommandExecutor> executors = new HashMap<>();
 	private List<CommandDetails> commandDetails = new ArrayList<>();
-	private Config config;
+	private BotConfig config;
 	
 	/**
 	 * Initialize CommandManager. This should be done only once.
 	 * @param betterPlayer BetterPlayer instance
 	 * @param config Config instance
 	 */
-	public CommandManager(BetterPlayer betterPlayer, Config config) {
+	public CommandManager(BetterPlayer betterPlayer, BotConfig config) {
 		this.betterPlayer = betterPlayer;
 		this.config = config;
 		
