@@ -13,7 +13,14 @@ public class SqlManager {
 
 	private Connection connection;
 	
+	private String dbHost, dbName, dbUsername, dbPassword;
+	
 	public SqlManager(String dbHost, String dbName, String dbUsername, String dbPassword) {
+		this.dbHost = dbHost;
+		this.dbName = dbName;
+		this.dbUsername = dbUsername;
+		this.dbPassword = dbPassword;
+		
 		BetterPlayer.logInfo("Initializing database connection...");
 		
 		try {
@@ -21,29 +28,72 @@ public class SqlManager {
 		} catch(ClassNotFoundException e) {
 			BetterPlayer.logError("Unable to initialize the database connection! MySQL driver not found");
 			BetterPlayer.logDebug(Utils.getStackTrace(e));
-			return;
+			System.exit(1);
 		}
 		
 		BetterPlayer.logInfo("Connecting to database...");
+		this.connection = connect();
 		
-		try {
-			connection = DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + dbPassword);
-		} catch(SQLException e) {
-			BetterPlayer.logError("Unable to establish connection to database!");
-			BetterPlayer.logDebug(Utils.getStackTrace(e));
-			return;
+		if(this.connection == null) {
+			BetterPlayer.logError("Unable to establish connection with database!");
+			System.exit(1);
 		}
 	}
 	
+	/**
+	 * Connect to the database
+	 * @return Returns the Connection, null if an error occured
+	 */
+	private Connection connect() {
+		try {
+			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + dbPassword);
+		} catch(SQLException e) {
+			BetterPlayer.logError("Unable to establish connection to database!");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			return null;
+		}
+	}
+	
+	/**
+	 * Execute a fetch query to the database
+	 * @param preparedStatement PreparedStatement to execute
+	 * @return Returns a ResultSet with the results from the database
+	 * @throws SQLException
+	 */
 	public ResultSet executeFetchQuery(PreparedStatement preparedStatement) throws SQLException {
+		if(connection.isClosed()) {
+			BetterPlayer.logInfo("Connection to database lost. Reconnecting!");
+			connection = connect();
+		}
+		
 		return preparedStatement.executeQuery();
 	}
 	
+	/**
+	 * Execute a put statement (Insert/Update etc)
+	 * @param preparedStatement PreparedStatement to execute
+	 * @return Returns the status code returned by the database.
+	 * @throws SQLException
+	 */
 	public int executePutQuery(PreparedStatement preparedStatement) throws SQLException {
+		if(connection.isClosed()) {
+			BetterPlayer.logInfo("Connection to database lost. Reconnecting!");
+			connection = connect();
+		}
 		return preparedStatement.executeUpdate();
 	}
 	
+	/**
+	 * Create a PreparedStatement
+	 * @param sql SQL statement to use for the PreparedStatement
+	 * @return Returns the created PreparedStatement
+	 * @throws SQLException
+	 */
 	public PreparedStatement createPreparedStatement(String sql) throws SQLException {
+		if(connection.isClosed()) {
+			BetterPlayer.logInfo("Connection to database lost. Reconnecting!");
+			connection = connect();
+		}
 		return connection.prepareStatement(sql);
 	}
 }

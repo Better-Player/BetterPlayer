@@ -4,9 +4,6 @@
 # Your bot token
 botToken: ""
 
-# Prefix
-commandPrefix: "!"
-
 # API
 useGoogleApi: false
 googleApikey: ""

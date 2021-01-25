@@ -21,6 +21,8 @@ public class GuildConfigManager {
 	private HashMap<Long, HashMap<String, Object>> guildConfigs = new HashMap<>();
 	
 	private final boolean useDatabase;
+	
+	@SuppressWarnings("unused") //configPath is unused for now
 	private final String dbHost, dbName, dbUsername, dbPassword, configPath;
 	
 	public GuildConfigManager(BotConfig botConfig) {
@@ -33,18 +35,26 @@ public class GuildConfigManager {
 			dbUsername = (String) botConfig.getConfigValue("dbUsername");
 			dbPassword = (String) botConfig.getConfigValue("dbPassword");
 			
+			//Config via json file is not used, an empty path will do
 			configPath = "";
 			
+			//Create a new SQL manager
 			sqlManager = new SqlManager(dbHost, dbName, dbUsername, dbPassword);
 			
+			//Check the database to see if all required tables exist
 			checkDb();
+			
+			//Read the database
 			guildConfigs = readGuildConfigsTable();
 		} else {
+			//All these variables are not needed when using a json file for config.
 			dbHost = dbName = dbUsername = dbPassword = "";
 			
+			//Get the config path as a String
 			configPath = (String) botConfig.getConfigValue("guildConfigPath");
+			
+			//TODO JSON file reading, verifying etc.
 		}
-		
 	}
 	
 	/**
@@ -52,7 +62,7 @@ public class GuildConfigManager {
 	 * If not, create them
 	 */
 	private void checkDb() {
-		String sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS";
+		String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'guildConfigs'";
 		 
 		List<String> requiredTableNames = new ArrayList<>(Arrays.asList(
 			"guildConfigs"
@@ -60,6 +70,7 @@ public class GuildConfigManager {
 		
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
+			//pr.setString(1, this.dbName);
 			ResultSet rs = sqlManager.executeFetchQuery(pr);
 			
 			List<String> allTableNames = new ArrayList<>();
@@ -67,22 +78,23 @@ public class GuildConfigManager {
 				String tableName = rs.getString("TABLE_NAME");
 				allTableNames.add(tableName);
 			}
-			
+						
 			//There are some tables, but not all. The sysadmin must wipe the DB to proceed
 			if(!allTableNames.isEmpty() & !allTableNames.containsAll(requiredTableNames)) {
-				BetterPlayer.logError("Your database is not complete. Please drop it and recreate it!");
-				return;
+				BetterPlayer.logError("Your database is not complete. Please drop it!");
+				System.exit(1);
 			}
 			
 			//The DB is empty, meaning it's unitinialized, so do that
 			if(allTableNames.isEmpty()) {
+				BetterPlayer.logInfo("Database is unitialized, initializing!");
 				initDb();
 			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			//TODO error handling
-		}	
+		}
 	}
 	
 	/**
@@ -92,11 +104,11 @@ public class GuildConfigManager {
 	private void initDb() {
 		/*
 		 * Table: guildConfigs
-		 * - guildId 					Big Integer, primary key
-		 * - commandPrefix				Varchar, length 1
-		 * - useDeepSpeech				boolean
+		 * - guildid 					Big Integer, primary key
+		 * - commandprefix				Varchar, length 1
+		 * - usedeepspeech				boolean
 		 */
-		String sql = "CREATE TABLE `" + this.dbName + "`.`guildConfigs` ( `guildId` BIGINT NOT NULL , `commandPrefix` VARCHAR(1) NOT NULL , `useDeepSpeech` BOOLEAN NOT NULL , PRIMARY KEY (`guildId`)) ENGINE = InnoDB;";
+		String sql = "CREATE TABLE `" + this.dbName + "`.`guildConfigs` ( `guildid` BIGINT NOT NULL , `commandprefix` VARCHAR(1) NOT NULL , `usedeepspeech` BOOLEAN NOT NULL , PRIMARY KEY (`guildid`)) ENGINE = InnoDB;";
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
 			sqlManager.executePutQuery(pr);
@@ -123,7 +135,7 @@ public class GuildConfigManager {
 			
 			while(rs.next()) {
 				HashMap<String, Object> guildConfig = new HashMap<>();
-				long guildId = rs.getLong("guildId");
+				long guildId = rs.getLong("guildid");
 				
 				//SQL Stuff is not 0-based, its 1-based,
 				//we start at 2 because we don't want to read the guildId again
@@ -166,7 +178,7 @@ public class GuildConfigManager {
 	 * @param key
 	 * @param value
 	 */
-	public void setConfigValue(long guildId, String key, Object value) {
+	public void setConfigValue(long guildId, String key, String value, ConfigValueType type) {
 		HashMap<String, Object> config;
 		boolean exists;
 		
@@ -193,7 +205,7 @@ public class GuildConfigManager {
 		}
 		
 		//Update the value in the database, if it is enabled
-		if(useDatabase) updateDbForGuild(guildId, key, value);
+		if(useDatabase) updateDbForGuild(guildId, key, value, type);
 		//TODO write to json config
 	}
 	
@@ -202,7 +214,24 @@ public class GuildConfigManager {
 	 * @param guildId The ID of the guild to initialize
 	 */
 	public void initializeDbForGuild(long guildId) {
-		String sql = "INSERT INTO `guildConfigs` (`guildId`, `commandPrefix`, `useDeepSpeech`) VALUES ('?', '$', '0')";
+		String sql = "INSERT INTO `guildConfigs` (`guildid`, `commandprefix`, `usedeepspeech`) VALUES (?, '$', '0')";
+		try {
+			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
+			pr.setLong(1, guildId);
+			
+			sqlManager.executePutQuery(pr);
+		} catch(SQLException e) {
+			e.printStackTrace();
+			//TODO error handling
+		}
+	}
+	
+	/**
+	 * Remove all values associated with this guild from the database
+	 * @param guildId The ID of the guild to remove
+	 */
+	public void removeGuildFromDb(long guildId) {
+		String sql = "DELETE FROM guildConfigs WHERE guildid = ?";
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
 			pr.setLong(1, guildId);
@@ -220,18 +249,33 @@ public class GuildConfigManager {
 	 * @param key The field name to update
 	 * @param value The value to set
 	 */
-	private void updateDbForGuild(long guildId, String key, Object value) {
-		String sql = "UPDATE `guildConfigs` SET `?` = '?' WHERE `guildId` = ?";
+	private void updateDbForGuild(long guildId, String key, String value, ConfigValueType type) {
+		
+		//Dont need to worry about SQL Injection here. The function calling this should have checked if the given key exists
+		String sql = "UPDATE guildConfigs SET " + key + "= ? WHERE `guildid` = ?";
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			pr.setString(1, key);
-			pr.setObject(2, value);
-			pr.setLong(3, guildId);
+
+			switch(type) {
+			case STRING: pr.setString(1, value.toString()); break;
+			case BOOLEAN: pr.setBoolean(1, Boolean.valueOf(value)); break;
+			case INTEGER: pr.setInt(1, Integer.valueOf(value)); break;
+			}
 			
+			pr.setLong(2, guildId);			
 			sqlManager.executePutQuery(pr);
 		} catch(SQLException e) {
 			e.printStackTrace();
 			//TODO error handling
 		}
+	}
+	
+	/**
+	 * The type of the value that is being set
+	 */
+	public static enum ConfigValueType {
+		STRING,
+		BOOLEAN,
+		INTEGER
 	}
 }

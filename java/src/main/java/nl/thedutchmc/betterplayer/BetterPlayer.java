@@ -16,6 +16,7 @@ import java.util.List;
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.commands.CommandManager;
 import nl.thedutchmc.betterplayer.config.BotConfig;
+import nl.thedutchmc.betterplayer.config.guild.GuildConfigManager;
 import nl.thedutchmc.betterplayer.events.EventManager;
 
 public class BetterPlayer {
@@ -25,6 +26,7 @@ public class BetterPlayer {
 	private EventManager eventManager;
 	private CommandManager commandManager;
 	private BotConfig config;
+	private GuildConfigManager guildConfig;
 	
 	private static boolean DEBUG = false;
 	private static boolean isReady = false;
@@ -69,11 +71,14 @@ public class BetterPlayer {
 		config = new BotConfig(this);
 		config.read();
 		
+		//Fetch the Guild configs
+		guildConfig = new GuildConfigManager(config);
+		
 		//Create all objects required for operation
 		jdaHandler = new JdaHandler(this);
 		betterAudioManager = new BetterAudioManager(jdaHandler);
 		commandManager = new CommandManager(this, config);
-		eventManager = new EventManager((String) config.getConfigValue("commandPrefix"), commandManager);
+		eventManager = new EventManager(commandManager, this);
 
 		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
@@ -143,6 +148,14 @@ public class BetterPlayer {
 	 */
 	public CommandManager getCommandManager() {
 		return this.commandManager;
+	}
+	
+	/**
+	 * Get the GuildConfigManager
+	 * @return Returns the GuildConfigManager
+	 */
+	public GuildConfigManager getGuildConfig() {
+		return this.guildConfig;
 	}
 	
 	/**

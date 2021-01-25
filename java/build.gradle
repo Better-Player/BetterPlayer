@@ -34,6 +34,10 @@ dependencies {
 
 	implementation 'com.github.TheDutchMC:HttpLib:1.1'
 	
+	compile ("mysql:mysql-connector-java:8.0.21") {
+    	exclude module: 'protobuf-java'
+    }
+	
 	implementation ':libdeepspeech'
 	implementation ':picovoice-1.1.0'
 }
