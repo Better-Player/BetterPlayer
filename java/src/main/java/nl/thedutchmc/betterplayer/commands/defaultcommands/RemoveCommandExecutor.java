@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.Utils;
 import nl.thedutchmc.betterplayer.audio.BetterAudioManager;
 import nl.thedutchmc.betterplayer.audio.queue.QueueItem;
 import nl.thedutchmc.betterplayer.audio.queue.QueueManager;
@@ -37,21 +38,11 @@ public class RemoveCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
-		//Check if the provided queue index is a positive integer
-		int queueIndex = 0;
-		if(parameters.getArgs()[0].matches("-?\\d+") && Integer.valueOf(parameters.getArgs()[0]) > 0) {
-			
-			//I can see jokesters providing us with a value larger than an int's max value
-			if(Long.valueOf(parameters.getArgs()[0]) > Integer.MAX_VALUE) {
-				senderChannel.sendMessage("Nice try! The number you provided is more than an Integer's max value. Please use a lower number").queue();
-				return;
-			}
-			
-			//Set the queueIndex
-			queueIndex = Integer.valueOf(parameters.getArgs()[0]);
-		} else {
-			senderChannel.sendMessage("You must provide a positive number!");
+		if(!Utils.verifyPositiveInteger(parameters.getArgs()[0], senderChannel)) {
+			return;
 		}
+		
+		int queueIndex = Integer.valueOf(parameters.getArgs()[0]) -1;
 		
 		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 		QueueManager qm = bam.getQueueManager();
@@ -60,7 +51,7 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		//We have to add the current queue index to the index the user provided,
 		//because we don't remove an item from the queue after it is done playing, but we do show it that way to the user
 		int currentQueueIndex = qm.getQueueIndex(guildId);
-		int queueItemToRemove = queueIndex + currentQueueIndex;
+		int queueItemToRemove = queueIndex + currentQueueIndex +1;
 		
 		//Get the queue item we want to remove, since we want to inform the user what they removed
 		QueueItem itemToRemove = qm.getQueueItemAtIndex(guildId, queueItemToRemove);

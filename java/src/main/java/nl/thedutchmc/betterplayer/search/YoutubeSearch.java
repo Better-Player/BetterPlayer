@@ -86,6 +86,11 @@ public class YoutubeSearch {
 				JSONObject o1Json = (JSONObject) o1;
 
 				JSONObject renderer = o1Json.getJSONObject("musicResponsiveListItemRenderer");
+				
+				if(!renderer.has("overlay")) {
+					return null;
+				}
+				
 				JSONObject playNavEndPt = renderer
 						.getJSONObject("overlay")
 						.getJSONObject("musicItemThumbnailOverlayRenderer")
@@ -93,9 +98,10 @@ public class YoutubeSearch {
 						.getJSONObject("musicPlayButtonRenderer")
 						.getJSONObject("playNavigationEndpoint");
 				
-				if(!playNavEndPt.has("watchEndpoint"))
+				if(!playNavEndPt.has("watchEndpoint")) {
 					return null;
-				
+				}
+					
 				String id = playNavEndPt
 						.getJSONObject("watchEndpoint")
 						.getString("videoId");

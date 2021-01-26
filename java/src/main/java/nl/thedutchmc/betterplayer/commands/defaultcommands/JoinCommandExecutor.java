@@ -54,6 +54,10 @@ public class JoinCommandExecutor implements CommandExecutor {
 		//If vcConnected is not equal to null, that means we found the channel to join
 		if(vcConnected != null) {
 			
+			if(!VoiceChannelVerify.verifyVoiceChannelPermissions(vcConnected, senderChannel)) {
+				return;
+			}
+			
 			//If this command is triggered by another command we do not provide output to the user
 			if(!fromOtherExecutor) {
 				senderChannel.sendMessage("Joining channel: **" + vcConnected.getName() + "**").queue();

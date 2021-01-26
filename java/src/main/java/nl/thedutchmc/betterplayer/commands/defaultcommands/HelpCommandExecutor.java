@@ -1,7 +1,6 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
-import java.math.BigInteger;
 import java.util.List;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -10,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.Utils;
 import nl.thedutchmc.betterplayer.commands.CommandDetails;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
@@ -34,26 +34,11 @@ public class HelpCommandExecutor implements CommandExecutor {
 		int pageIndex = 0;
 		if(parameters.hasArgs()) {
 			
-			//Check if the provided page number is a positive integer
-			if(parameters.getArgs()[0].matches("-?\\d+")) {
-				
-				BigInteger bigInt = new BigInteger(parameters.getArgs()[0]);
-				if(bigInt.compareTo(BigInteger.valueOf((long) Integer.MAX_VALUE)) > 0) {
-					senderChannel.sendMessage("That number is too big! Nice try :)").queue();
-					return;
-				}
-				
-				if(Integer.valueOf(parameters.getArgs()[0]) <= 0) {
-					senderChannel.sendMessage("Only numbers higher than 0 are allowed!").queue();
-					return;
-				}
-				
-				//Set the page number.
-				//We have to subtract one, because users are 1-based, and the queue is 0 based
-				pageIndex = Integer.valueOf(parameters.getArgs()[0]) -1;
-			} else {
-				senderChannel.sendMessage("You must provide a valid number!");
+			if(!Utils.verifyPositiveInteger(parameters.getArgs()[0], senderChannel)) {
+				return;
 			}
+			
+			pageIndex = Integer.valueOf(parameters.getArgs()[0]) -1;
 		}
 		
 		List<CommandDetails> cmdDetails = betterPlayer.getCommandManager().getCommandDetails();

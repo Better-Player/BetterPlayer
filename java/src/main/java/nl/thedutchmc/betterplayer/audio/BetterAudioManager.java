@@ -49,6 +49,8 @@ public class BetterAudioManager {
 		AudioPlayer audioPlayer = playerManager.createPlayer();
 		audioPlayer.addListener(trackScheduler);
 		
+		audioPlayer.setVolume(15);
+		
 		if(!audioPlayers.containsKey(guildId)) {
 			audioPlayers.put(guildId, audioPlayer);
 		}

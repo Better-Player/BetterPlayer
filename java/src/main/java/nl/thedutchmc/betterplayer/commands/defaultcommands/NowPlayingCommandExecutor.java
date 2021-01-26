@@ -1,12 +1,11 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
-import java.util.concurrent.TimeUnit;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.betterplayer.BetterPlayer;
+import nl.thedutchmc.betterplayer.Utils;
 import nl.thedutchmc.betterplayer.audio.AudioObject;
 import nl.thedutchmc.betterplayer.commands.CommandExecutor;
 import nl.thedutchmc.betterplayer.commands.CommandParameters;
@@ -58,39 +57,14 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 			}
 		}
 		
-		//Calculate the total duration of the track in a format of (hh:)mm:ss
-		double hrDuration = Math.round(TimeUnit.MILLISECONDS.toHours(trackDuration) * 100.0) / 100.0;
-		double minDuration = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackDuration) - Math.floor(TimeUnit.MILLISECONDS.toMinutes(TimeUnit.MILLISECONDS.toHours(trackDuration))) * 100.0) / 100.0;
-		double secDuration = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackDuration) - Math.floor(TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackDuration))) * 100.0) / 100.0;
-		
-		String duration;
-		if(hrDuration >= 1) {
-			duration = String.format("%02d:%02d:%02d", (long) hrDuration, (long) minDuration, (long) secDuration);
-		} else {
-			duration = String.format("%02d:%02d", (long) minDuration, (long) secDuration);
-		}
-		
-		//Calculate how far into the track we are in a format of (mm:)ss
-		double hrPosition = Math.round(TimeUnit.MILLISECONDS.toHours(trackPosition) * 100.0) / 100.0;
-		double minPosition = Math.round(TimeUnit.MILLISECONDS.toMinutes(trackPosition) - Math.floor(TimeUnit.MILLISECONDS.toMinutes(TimeUnit.MILLISECONDS.toHours(trackPosition))) * 100.0) / 100.0;
-		double secPosition = Math.round(TimeUnit.MILLISECONDS.toSeconds(trackPosition) - Math.floor(TimeUnit.MILLISECONDS.toSeconds(TimeUnit.MILLISECONDS.toMinutes(trackPosition))) * 100.0) / 100.0;		
-		
-		String position;
-		if(hrPosition >= 1) {
-			position = String.format("%02d:%02d:%02d", (long) hrPosition, (long) minPosition, (long) secPosition);
-		} else {
-			position = String.format("%02d:%02d", (long) minPosition, (long) secPosition);
-		}
-		
-		//Combine the two above calculated values
-		String progressAsTime = position + "/" + duration;
+		String progressTimeStamp = Utils.milisToTimeStamp(trackPosition) + "/" + Utils.milisToTimeStamp(trackDuration);
 		
 		//Construct the embed
 		EmbedBuilder eb = new EmbedBuilder()
 				.setTitle(currentlyPlaying.getArtist() + " - " + currentlyPlaying.getName())
 				.setColor(Color.GRAY)
 				.addField("Progress", trackProgress, true)
-				.appendDescription(progressAsTime)
+				.appendDescription(progressTimeStamp)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 				
 		//Send the embed

@@ -62,15 +62,15 @@ public class GuildConfigManager {
 	 * If not, create them
 	 */
 	private void checkDb() {
-		String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'guildConfigs'";
-		 
+		String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'guildConfigs' AND TABLE_SCHEMA = ?";
+		
 		List<String> requiredTableNames = new ArrayList<>(Arrays.asList(
 			"guildConfigs"
 		));
 		
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			//pr.setString(1, this.dbName);
+			pr.setString(1, this.dbName);
 			ResultSet rs = sqlManager.executeFetchQuery(pr);
 			
 			List<String> allTableNames = new ArrayList<>();
@@ -78,9 +78,13 @@ public class GuildConfigManager {
 				String tableName = rs.getString("TABLE_NAME");
 				allTableNames.add(tableName);
 			}
+			
+			allTableNames.forEach(table -> {
+				System.out.println(table);
+			});
 						
 			//There are some tables, but not all. The sysadmin must wipe the DB to proceed
-			if(!allTableNames.isEmpty() & !allTableNames.containsAll(requiredTableNames)) {
+			if(!allTableNames.isEmpty() && !allTableNames.containsAll(requiredTableNames)) {
 				BetterPlayer.logError("Your database is not complete. Please drop it!");
 				System.exit(1);
 			}
@@ -107,6 +111,7 @@ public class GuildConfigManager {
 		 * - guildid 					Big Integer, primary key
 		 * - commandprefix				Varchar, length 1
 		 * - usedeepspeech				boolean
+		 * - volume						integer
 		 */
 		String sql = "CREATE TABLE `" + this.dbName + "`.`guildConfigs` ( `guildid` BIGINT NOT NULL , `commandprefix` VARCHAR(1) NOT NULL , `usedeepspeech` BOOLEAN NOT NULL , PRIMARY KEY (`guildid`)) ENGINE = InnoDB;";
 		try {

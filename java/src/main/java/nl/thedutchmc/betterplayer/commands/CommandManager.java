@@ -97,5 +97,6 @@ public class CommandManager {
 		register("remove", new RemoveCommandExecutor(), "Delete an item from the queue, by index shown by $queue", "delete", "rm", "del");
 		register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
 		register("config", new ConfigCommandExecutor(), "Configure BetterPlayer", "option", "options");
+		register("move", new MoveCommandExecutor(), "Move a track to a position in queue, or to first place", "mv");
 	}
 }

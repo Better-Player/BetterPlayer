@@ -1,6 +1,7 @@
 package nl.thedutchmc.betterplayer.commands.defaultcommands;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -56,6 +57,9 @@ public class VoiceChannelVerify {
 			
 			//if joinIfNotConnected is true, we should join the channel
 			if(joinIfNotConnected) {
+				
+				if(!verifyVoiceChannelPermissions(userVc, senderChannel)) return false;
+				
 				betterPlayer.getBetterAudioManager().joinAudioChannel(userVc.getIdLong(), senderChannel.getIdLong());
 				return true;
 			} else {
@@ -73,6 +77,16 @@ public class VoiceChannelVerify {
 		}
 		
 		//All checks passed--The user and BetterPlayer are in the same voice channel!
+		return true;
+	}
+	
+	public static boolean verifyVoiceChannelPermissions(VoiceChannel vc, TextChannel tc) {
+		Member m = vc.getGuild().getSelfMember();
+		if(!m.hasPermission(vc, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK)) {
+			tc.sendMessage("I don't have permission to connect to the voice channel you are in!").queue();
+			return false;
+		}
+		
 		return true;
 	}
 }
