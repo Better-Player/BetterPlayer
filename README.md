@@ -47,3 +47,4 @@ and done!
 You may use the source code of this bot for non-profit, private uses. You may not seek to make any profit whatsoever off of this bot without explicit written consent. Any changes you make to the code must be submitted back in the form of a Pull Request.
 
 When using this code in other other non-profit projects, you must include this license and include a link to this repository
+
