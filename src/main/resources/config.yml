@@ -1,0 +1,19 @@
+# BetterPlayer configuration file
+# The open source Discord music bot
+
+# Your bot token
+botToken: ""
+
+# API
+useGoogleApi: false
+googleApikey: ""
+
+#Guild configuration
+#Only database is supported for now
+useDatabase: true
+dbHost: ""
+dbName: ""
+dbUsername: ""
+dbPassword: ""
+#Again, only database is supported for now. Leave as an empty String
+configPath: ""
