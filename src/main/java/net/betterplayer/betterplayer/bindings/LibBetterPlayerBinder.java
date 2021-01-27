@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import net.betterplayer.auth.Utils;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.utils.ReflectionUtils;
 
@@ -17,7 +18,13 @@ public class LibBetterPlayerBinder {
 	private Method transformDiscordAudioToSpecMethod;
 	private Method loadNativeLibrariesMethod;
 	
+	private boolean forceUnavailable = false;
+	
 	public boolean isAvailable() {
+		if(forceUnavailable) {
+			return false;
+		}
+		
 		return ReflectionUtils.getClass("net.betterplayer.libbetterplayer.LibBetterPlayer") != null;
 	}
 	
@@ -82,6 +89,13 @@ public class LibBetterPlayerBinder {
 		//Get the Methods we want from the LibBetterPlayer class
 		this.loadNativeLibrariesMethod = ReflectionUtils.getMethod(libBetterPlayerClazz, "loadNativeLibraries");
 		
+		//Load native libraries
+		loadNativeLibraries();
+
+		if(this.forceUnavailable) {
+			return;
+		}
+		
 		//Get the Audio class nat its constructor
 		Class<?> audioClazz = ReflectionUtils.getClass("net.betterplayer.libbetterplayer.Audio");
 		Constructor<?> audioConstructor = ReflectionUtils.getConstructor(audioClazz, this.libBetterPlayerInstance.getClass());
@@ -90,15 +104,23 @@ public class LibBetterPlayerBinder {
 		this.audioInstance = ReflectionUtils.createInstance(audioConstructor, this.libBetterPlayerInstance);
 		
 		//Get the Methods we want from the Audio class
-		this.transformDiscordAudioToSpecMethod = ReflectionUtils.getMethod(audioClazz, "transformDiscordAudioToSpec", short.class);
+		this.transformDiscordAudioToSpecMethod = ReflectionUtils.getMethod(audioClazz, "transformDiscordAudioToSpec", short[].class);
 		
-		loadNativeLibraries();
+
 	}
 	
 	/**
 	 * Load the native C++ Libraries
 	 */
 	private void loadNativeLibraries() {
-		ReflectionUtils.invokeMethod(this.libBetterPlayerInstance, this.loadNativeLibrariesMethod);
+		try {
+			ReflectionUtils.invokeMethodWithExceptions(this.libBetterPlayerInstance, this.loadNativeLibrariesMethod);
+		} catch(Exception e) {
+			BetterPlayer.logError("Exception when trying to load native libraries. Run with debug mode for more details.");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+		
+			forceUnavailable = true;
+			return;
+		}
 	}
 }

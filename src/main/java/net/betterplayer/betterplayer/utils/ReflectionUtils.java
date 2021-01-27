@@ -29,7 +29,7 @@ public class ReflectionUtils {
 	
 	public static Object invokeMethod(Object o, Method m, Object... params) {
 		try {
-			m.invoke(o, params);
+			return m.invoke(o, params);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -39,6 +39,10 @@ public class ReflectionUtils {
 		}
 		
 		return null;
+	}
+	
+	public static Object invokeMethodWithExceptions(Object o, Method m, Object... params) throws InvocationTargetException, IllegalAccessException, IllegalArgumentException {
+		return m.invoke(o, params);
 	}
 	
 	public static Object createInstance(Constructor<?> constructor, Object... params) {

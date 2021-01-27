@@ -13,7 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
-import net.betterplayer.betterplayer.auth.AuthBinder;
+import net.betterplayer.betterplayer.bindings.AuthBinder;
+import net.betterplayer.betterplayer.bindings.LibBetterPlayerBinder;
 import net.betterplayer.betterplayer.commands.CommandManager;
 import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.config.guild.GuildConfigManager;
@@ -29,6 +30,7 @@ public class BetterPlayer {
 	private BotConfig config;
 	private GuildConfigManager guildConfig;
 	private AuthBinder authBinder;
+	private LibBetterPlayerBinder libBetterPlayerBinder;
 	
 	private static boolean DEBUG = false;
 	private static boolean isReady = false;
@@ -65,10 +67,18 @@ public class BetterPlayer {
 
 		authBinder = new AuthBinder(guildConfig.getSqlManager(), (String) config.getConfigValue("dbName"));
 		if(authBinder.isAvailabe()) {
-			BetterPlayer.logInfo("Authentication is available. Setting up...");
+			BetterPlayer.logInfo("Authentication is available. Using it.");
 			authBinder.setup();
 		} else {
-			BetterPlayer.logInfo("Authentication is not available. Not using!");
+			BetterPlayer.logInfo("Authentication is not available. Not using it.");
+		}
+		
+		libBetterPlayerBinder = new LibBetterPlayerBinder();
+		if(libBetterPlayerBinder.isAvailable()) {
+			BetterPlayer.logInfo("LibBetterPlayer is available. Using it.");
+			libBetterPlayerBinder.setup();
+		} else {
+			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
 		}
 		
 		//Initialize JDA and connect to Discord

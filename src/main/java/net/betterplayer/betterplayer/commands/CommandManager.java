@@ -98,5 +98,6 @@ public class CommandManager {
 		register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
 		register("config", new ConfigCommandExecutor(), "Configure BetterPlayer", "option", "options");
 		register("move", new MoveCommandExecutor(), "Move a track to a position in queue, or to first place", "mv");
+		register("activate", new ActivateCommandExecutor(), "Activate BetterPlayer with your licence key.");
 	}
 }
