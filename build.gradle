@@ -46,7 +46,7 @@ dependencies {
 	compile 'org.yaml:snakeyaml:1.27'
 	
 	//JSON, for communicating with external APIs
-	implementation 'org.json:json:20201115'
+	compile 'org.json:json:20201115'
 
 	//Apache Commons
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
