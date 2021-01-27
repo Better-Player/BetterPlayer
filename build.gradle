@@ -2,11 +2,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id 'java'
-    id 'eclipse'
-	id 'com.github.johnrengelman.shadow' version '5.0.0'
+	id 'java'
 	id 'application'
+	id 'eclipse'
+	id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
+
+mainClassName = 'net.betterplayer.betterplayer.BetterPlayer'
 
 configurations {
 	proprietary
@@ -57,23 +59,31 @@ dependencies {
     	exclude module: 'protobuf-java'
     }
 	
+	//Common classes to use with proprietary
     implementation 'net.betterplayer:BetterPlayerCommon:1.0.1'
 	
-	
+	//Proprietary code
 	proprietary 'net.betterplayer:auth:1.0.3'
 }
 
+//Without this Eclipse wont pick up on the proprietary dependencies
 eclipse {
 	classpath {
 		plusConfigurations += [configurations.proprietary]
 	}
 }
 
-task releaseProprietaryJar(type: ShadowJar) {
+task proprietaryJar(type: ShadowJar) {
+   	mainClassName = 'net.betterplayer.betterplayer.BetterPlayer'
+
 	description 'Build a proprietary jar'
 	
 	archiveClassifier = 'PROPRIETARY'
-		
+ 	
+ 	manifest {
+    	attributes('Main-Class': mainClassName)
+  	}
+	
 	from sourceSets.main.output
 	configurations = [project.configurations.runtime, project.configurations.proprietary]
 	
@@ -84,6 +94,9 @@ task releaseJar(type: ShadowJar) {
 	description 'Build a release Jar'
 	
 	archiveClassifier = 'RELEASE'
+  	manifest {
+    	attributes('Main-Class': mainClassName)
+  	}
 	
 	from sourceSets.main.output
 	configurations = [project.configurations.runtime]
@@ -93,18 +106,20 @@ task releaseJar(type: ShadowJar) {
 
 //This task is for GitHub Actions only
 task ghActions(type: ShadowJar) {	
+    manifest.inheritFrom project.tasks.jar.manifest
+	
 	description 'GitHub Actions Task. Do not use in regular development!'
 	
 	version = ''
 	archiveClassifier = ''
 	archiveBaseName = 'output'
 
+ 	manifest {
+    	attributes('Main-Class': mainClassName)
+  	}
+
 	from sourceSets.main.output
 	configurations = [project.configurations.runtime]
 	
 	destinationDirectory = file("$rootDir/actions")
-}
-
-application {
-	mainClassName = 'net.betterplayer.betterplayer.BetterPlayer'	
 }
