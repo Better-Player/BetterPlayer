@@ -43,6 +43,9 @@ and done!
 - Java JNI Headers
 - libsamplerate
 
+## Proprietary dependencies
+BetterPlayer uses two proprietary dependencies: BetterPlayerAuth and LibBetterPlayer. You don't need these dependencies to work on the code, to compile it or to run it.
+
 ## Licence
 You may use the source code of this bot for non-profit, private uses. You may not seek to make any profit whatsoever off of this bot without explicit written consent. Any changes you make to the code must be submitted back in the form of a Pull Request.
 
