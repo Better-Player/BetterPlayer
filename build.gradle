@@ -61,5 +61,5 @@ task ghActions(type: ShadowJar) {
 }
 
 application {
-	mainClassName = 'nl.thedutchmc.betterplayer.BetterPlayer'	
+	mainClassName = 'net.betterplayer.betterplayer.BetterPlayer'	
 }

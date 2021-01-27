@@ -106,7 +106,6 @@ public class PlayCommandExecutor implements CommandExecutor {
 			}
 		} else if(useApi) {
 			VideoDetails details = new YoutubeSearch().searchViaApi(apiKey, parameters.getArgs(), senderChannel);
-			System.out.println("api");
 			processVideoDetails(betterPlayer, parameters, details, true);
 		} else {
 			VideoDetails details = new YoutubeSearch().searchViaFrontend(parameters.getArgs());
