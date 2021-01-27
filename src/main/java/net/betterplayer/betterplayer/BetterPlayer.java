@@ -12,12 +12,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
+import net.betterplayer.betterplayer.auth.AuthBinder;
 import net.betterplayer.betterplayer.commands.CommandManager;
 import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.config.guild.GuildConfigManager;
 import net.betterplayer.betterplayer.events.EventManager;
+import net.betterplayer.betterplayer.utils.Utils;
 
 public class BetterPlayer {
 
@@ -27,6 +28,7 @@ public class BetterPlayer {
 	private CommandManager commandManager;
 	private BotConfig config;
 	private GuildConfigManager guildConfig;
+	private AuthBinder authBinder;
 	
 	private static boolean DEBUG = false;
 	private static boolean isReady = false;
@@ -37,30 +39,11 @@ public class BetterPlayer {
 		
 		if(argsList.contains("--debug")) DEBUG = true;
 		
-		/*String audio = "/mnt/a/LDC93S1.wav";
-		
-		try {
-			DeepSpeechNativeInterface dsni = new DeepSpeechNativeInterface();		
-			RandomAccessFile raf = new RandomAccessFile(audio, "r");
-			
-			raf.seek(40);
-			int bufferSize = DeepSpeechUtils.readLEInt(raf);
-			
-			raf.seek(44);
-			byte[] bytes = new byte[bufferSize];
-			raf.readFully(bytes);
-			
-			dsni.callNativeMethod(bytes);
-			
-		} catch(Exception e) {
-			e.printStackTrace();
-		}*/
-		
 		//Start up BetterPlayer		
 		BetterPlayer betterPlayer = new BetterPlayer();
 		betterPlayer.init();
 		betterPlayer.setupShutdown();
-		
+				
 		isReady = true;
 	}
 	
@@ -80,6 +63,14 @@ public class BetterPlayer {
 		commandManager = new CommandManager(this, config);
 		eventManager = new EventManager(commandManager, this);
 
+		authBinder = new AuthBinder(guildConfig.getSqlManager(), (String) config.getConfigValue("dbName"));
+		if(authBinder.isAvailabe()) {
+			BetterPlayer.logInfo("Authentication is available. Setting up...");
+			authBinder.setup();
+		} else {
+			BetterPlayer.logInfo("Authentication is not available. Not using!");
+		}
+		
 		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
 				
@@ -116,6 +107,15 @@ public class BetterPlayer {
 	 */
 	public static boolean isDebug() {
 		return DEBUG;
+	}
+	
+	/**
+	 * Get the AuthBinder<br>
+	 * <strong> Before using AuthBinder, check {@link AuthBinder#isAvailabe()}</strong>
+	 * @return Returns the AuthBinder
+	 */
+	public AuthBinder getAuthBinder() {
+		return this.authBinder;
 	}
 	
 	/**

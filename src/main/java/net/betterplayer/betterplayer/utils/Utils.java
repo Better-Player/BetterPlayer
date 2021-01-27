@@ -1,4 +1,4 @@
-package net.betterplayer.betterplayer;
+package net.betterplayer.betterplayer.utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -32,6 +32,12 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 		String guildCommandPrefix = (String) betterPlayer.getGuildConfig().getConfigValue(event.getGuild().getIdLong(), "commandprefix");
 		
 		//If the message does not start with the command prefix, return
+		if(guildCommandPrefix == null) {
+			BetterPlayer.logError("GuildCommandPrefix is null, this should not happen! For guild: " + event.getGuild().getIdLong());
+			event.getTextChannel().sendMessage("An unknown error occured! Please try again later!").queue();
+			return;
+		}
+		
 		if(!contentDisplayMessage.startsWith(guildCommandPrefix)) return;
 				
 		//Remove the commandPrefix, and split on spaces 

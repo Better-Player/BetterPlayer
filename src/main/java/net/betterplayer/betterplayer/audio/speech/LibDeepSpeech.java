@@ -1,5 +1,5 @@
 package net.betterplayer.betterplayer.audio.speech;
-
+/*
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,3 +52,4 @@ public class LibDeepSpeech extends DeepSpeechModel {
         System.load(libTmpFile.getAbsolutePath());
 	}
 }
+*/

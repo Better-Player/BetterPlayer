@@ -1,5 +1,5 @@
 package net.betterplayer.betterplayer.audio.receive;
-
+/*
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.audio.CombinedAudio;
 import net.betterplayer.betterplayer.audio.speech.DeepSpeechRecognition;
 import net.betterplayer.betterplayer.audio.utils.AudioUtils;
-
+/*
 
 public class EchoHandler implements AudioSendHandler, AudioReceiveHandler {
 
@@ -168,8 +168,8 @@ public class EchoHandler implements AudioSendHandler, AudioReceiveHandler {
     	
     	//speechDetection.detect(dataShort);
     	//queue.add(formattedBytes);
-    }
-    
+    //}
+    /*
 	@Override
 	public boolean canProvide() {
 		return !queue.isEmpty();
@@ -229,4 +229,4 @@ public class EchoHandler implements AudioSendHandler, AudioReceiveHandler {
     	ByteBuffer.wrap(newBuf).order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(dataShort);
 	 * 
 	 */
-}
+//}

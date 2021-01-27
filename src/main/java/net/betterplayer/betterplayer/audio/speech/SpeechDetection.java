@@ -1,5 +1,5 @@
 package net.betterplayer.betterplayer.audio.speech;
-
+/*
 import java.io.File;
 import java.net.URISyntaxException;
 
@@ -70,3 +70,4 @@ public class SpeechDetection {
 		}
 	}
 }
+*/

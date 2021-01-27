@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -19,6 +18,7 @@ import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.search.VideoDetails;
 import net.betterplayer.betterplayer.search.YoutubeSearch;
+import net.betterplayer.betterplayer.utils.Utils;
 
 public class PlayCommandExecutor implements CommandExecutor {
 

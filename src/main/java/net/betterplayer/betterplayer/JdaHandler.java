@@ -2,6 +2,7 @@ package net.betterplayer.betterplayer;
 
 import javax.security.auth.login.LoginException;
 
+import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;

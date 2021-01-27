@@ -12,7 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.Utils;
+import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;
 import nl.thedutchmc.httplib.Http;
 import nl.thedutchmc.httplib.Http.RequestMethod;

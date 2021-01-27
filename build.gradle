@@ -8,7 +8,16 @@ plugins {
 	id 'application'
 }
 
+configurations {
+	proprietary
+	proprietary.extendsFrom compile
+}
+
 allprojects {
+
+	group = 'net.betterplayer.betterplayer'
+	version = '1.0'
+	
 	sourceCompatibility = 1.11
 	targetCompatibility = 1.11
 
@@ -16,6 +25,7 @@ allprojects {
 		maven { url 'https://jitpack.io' }
 		jcenter()
 		mavenCentral()
+		mavenLocal()
 		
 		flatDir {
 			dirs 'libs'
@@ -24,39 +34,74 @@ allprojects {
 }
 
 dependencies {
+	//JDA, discord API library
 	compile 'net.dv8tion:JDA:4.2.0_227'
+	
+	//LavaPlayer, Discord sound library
 	compile 'com.sedmelluq:lavaplayer:1.3.66'
 
+	//SnakeYAML, for the config.yml file
 	compile 'org.yaml:snakeyaml:1.27'
+	
+	//JSON, for communicating with external APIs
 	implementation 'org.json:json:20201115'
 
+	//Apache Commons
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 
+	//HttpLib, for communicating with external APIs
 	implementation 'com.github.TheDutchMC:HttpLib:1.1'
 	
+	//MySQL connector
 	compile ("mysql:mysql-connector-java:8.0.21") {
     	exclude module: 'protobuf-java'
     }
 	
-	implementation ':libdeepspeech'
-	implementation ':picovoice-1.1.0'
+    implementation 'net.betterplayer:BetterPlayerCommon:1.0.1'
+	
+	
+	proprietary 'net.betterplayer:auth:1.0.3'
+}
+
+eclipse {
+	classpath {
+		plusConfigurations += [configurations.proprietary]
+	}
+}
+
+task releaseProprietaryJar(type: ShadowJar) {
+	description 'Build a proprietary jar'
+	
+	archiveClassifier = 'PROPRIETARY'
+		
+	from sourceSets.main.output
+	configurations = [project.configurations.runtime, project.configurations.proprietary]
+	
+	destinationDirectory = file("$rootDir/releases")	
 }
 
 task releaseJar(type: ShadowJar) {
 	description 'Build a release Jar'
+	
 	archiveClassifier = 'RELEASE'
+	
 	from sourceSets.main.output
+	configurations = [project.configurations.runtime]
+	
 	destinationDirectory = file("$rootDir/releases")
 }
 
 //This task is for GitHub Actions only
 task ghActions(type: ShadowJar) {	
 	description 'GitHub Actions Task. Do not use in regular development!'
+	
 	version = ''
 	archiveClassifier = ''
 	archiveBaseName = 'output'
 
 	from sourceSets.main.output
+	configurations = [project.configurations.runtime]
+	
 	destinationDirectory = file("$rootDir/actions")
 }
 

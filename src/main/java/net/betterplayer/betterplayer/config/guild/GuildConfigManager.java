@@ -57,6 +57,10 @@ public class GuildConfigManager {
 		}
 	}
 	
+	public SqlManager getSqlManager() {
+		return this.sqlManager;
+	}
+	
 	/**
 	 * Check if all required tables in the database are present (if it's initialized or not)
 	 * If not, create them
@@ -78,10 +82,6 @@ public class GuildConfigManager {
 				String tableName = rs.getString("TABLE_NAME");
 				allTableNames.add(tableName);
 			}
-			
-			allTableNames.forEach(table -> {
-				System.out.println(table);
-			});
 						
 			//There are some tables, but not all. The sysadmin must wipe the DB to proceed
 			if(!allTableNames.isEmpty() && !allTableNames.containsAll(requiredTableNames)) {

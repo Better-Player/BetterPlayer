@@ -9,7 +9,7 @@ import java.util.HashMap;
 import org.yaml.snakeyaml.Yaml;
 
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.Utils;
+import net.betterplayer.betterplayer.utils.Utils;
 
 public class BotConfig {
 
