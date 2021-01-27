@@ -52,7 +52,7 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 
 	//HttpLib, for communicating with external APIs
-	implementation 'com.github.TheDutchMC:HttpLib:1.1'
+	compile 'com.github.TheDutchMC:HttpLib:1.1'
 	
 	//MySQL connector
 	compile ("mysql:mysql-connector-java:8.0.21") {
@@ -60,7 +60,7 @@ dependencies {
     }
 	
 	//Common classes to use with proprietary
-    implementation 'net.betterplayer:BetterPlayerCommon:1.0.1'
+    compile 'net.betterplayer:BetterPlayerCommon:1.0.1'
 	
 	//Proprietary code
 	proprietary 'net.betterplayer:auth:1.0.3'
