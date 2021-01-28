@@ -81,6 +81,8 @@ public class BetterPlayer {
 			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
 		}
 		
+		libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
+		
 		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
 				
@@ -100,7 +102,7 @@ public class BetterPlayer {
 				
 				//Disconnect from all connected voice channels
 				betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
-					betterAudioManager.leaveAudioChannel(vc);
+					betterAudioManager.leaveAudioChannel(vc, false);
 				});
 				
 				//Shutdown the JDA. This is guaranteed to throw errors, but we do not care for them.

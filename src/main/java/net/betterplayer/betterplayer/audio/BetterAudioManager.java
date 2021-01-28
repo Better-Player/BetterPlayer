@@ -74,7 +74,7 @@ public class BetterAudioManager {
 		boundTextChannels.put(targetChannel.getGuild().getIdLong(), senderChannelId);
 	}
 	
-	public void leaveAudioChannel(VoiceChannel voiceChannel) {
+	public void leaveAudioChannel(VoiceChannel voiceChannel, boolean removeFromList) {
 		voiceChannel.getGuild().getAudioManager().closeAudioConnection();
 		
 		int indexToRemove = 0;
@@ -87,7 +87,7 @@ public class BetterAudioManager {
 			}
 		}
 		
-		if(found) {
+		if(found && removeFromList) {
 			connectedChannels.remove(indexToRemove);
 		}
 		

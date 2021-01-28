@@ -220,6 +220,13 @@ public class GuildConfigManager {
 	 */
 	public void initializeDbForGuild(long guildId) {
 		String sql = "INSERT INTO `guildConfigs` (`guildid`, `commandprefix`, `usedeepspeech`) VALUES (?, '$', '0')";
+		
+		HashMap<String, Object> defaultConfig = new HashMap<>();
+		defaultConfig.put("commandprefix", "$");
+		defaultConfig.put("usedeepspeech", false);
+		
+		this.guildConfigs.put(guildId, defaultConfig);
+		
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
 			pr.setLong(1, guildId);

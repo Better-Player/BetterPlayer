@@ -64,7 +64,7 @@ dependencies {
 	
 	//Proprietary code
 	proprietary 'net.betterplayer:auth:1.0.8'
-	proprietary 'net.betterplayer:libbetterplayer:1.0.1'
+	proprietary 'net.betterplayer:libbetterplayer:1.0.3'
 }
 
 //Without this Eclipse wont pick up on the proprietary dependencies
