@@ -60,10 +60,10 @@ dependencies {
     }
 	
 	//Common classes to use with proprietary
-    compile 'net.betterplayer:BetterPlayerCommon:1.0.1'
+    compile 'net.betterplayer:BetterPlayerCommon:1.0.2'
 	
 	//Proprietary code
-	proprietary 'net.betterplayer:auth:1.0.8'
+	proprietary 'net.betterplayer:auth:1.0.9'
 	proprietary 'net.betterplayer:libbetterplayer:1.0.21'
 }
 

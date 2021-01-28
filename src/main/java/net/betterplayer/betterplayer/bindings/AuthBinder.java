@@ -7,10 +7,10 @@ import java.sql.ResultSet;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import net.betterplayer.auth.ThrowingFunction;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.config.guild.database.SqlManager;
 import net.betterplayer.betterplayer.utils.ReflectionUtils;
+import net.betterplayer.common.ThrowingFunction;
 
 public class AuthBinder {
 
