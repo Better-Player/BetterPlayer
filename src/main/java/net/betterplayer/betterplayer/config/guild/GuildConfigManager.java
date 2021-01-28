@@ -227,6 +227,8 @@ public class GuildConfigManager {
 		
 		this.guildConfigs.put(guildId, defaultConfig);
 		
+		System.out.println("Guild config");
+		
 		try {
 			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
 			pr.setLong(1, guildId);

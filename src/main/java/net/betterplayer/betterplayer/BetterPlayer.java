@@ -76,12 +76,12 @@ public class BetterPlayer {
 		libBetterPlayerBinder = new LibBetterPlayerBinder();
 		if(libBetterPlayerBinder.isAvailable()) {
 			BetterPlayer.logInfo("LibBetterPlayer is available. Using it.");
-			libBetterPlayerBinder.setup();
+			//libBetterPlayerBinder.setup();
 		} else {
 			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
 		}
 		
-		libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
+		//libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
 		
 		//Initialize JDA and connect to Discord
 		jdaHandler.initJda((String) config.getConfigValue("botToken"));
