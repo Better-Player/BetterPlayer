@@ -61,14 +61,22 @@ public class LibBetterPlayerBinder {
 	 * @return Returns the transformed audio, will match the output specification
 	 */
 	public short[] transformDiscordAudioToSpec(short[] input) {
-		Short[] audioAtSpec = (Short[]) ReflectionUtils.invokeMethod(this.audioInstance, this.transformDiscordAudioToSpecMethod, input);
+		Object o =  ReflectionUtils.invokeMethod(this.audioInstance, this.transformDiscordAudioToSpecMethod, input);
+		
+		if(o == null) {
+			BetterPlayer.logError("Result from transformDiscordAudioToSpec (Native) is null. This shouldn't happen!");
+			return null;
+		}
+		
+		return (short[]) o;
 		
 		//If audioAtSpec is null, that means an error occured, probably at the native level
-		if(audioAtSpec== null) {
+		/*if(audioAtSpec == null) {
 			throw new RuntimeException("AudioAtSpec is null. It should not be");
 		}
 		
-		return ArrayUtils.toPrimitive(audioAtSpec);
+		return null;
+		//return audioAtSpec;*/
 	}
 	
 	/**

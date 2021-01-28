@@ -76,7 +76,7 @@ public class BetterPlayer {
 		libBetterPlayerBinder = new LibBetterPlayerBinder();
 		if(libBetterPlayerBinder.isAvailable()) {
 			BetterPlayer.logInfo("LibBetterPlayer is available. Using it.");
-			//libBetterPlayerBinder.setup();
+			libBetterPlayerBinder.setup();
 		} else {
 			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
 		}
