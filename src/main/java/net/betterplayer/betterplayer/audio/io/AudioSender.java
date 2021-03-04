@@ -1,4 +1,4 @@
-package net.betterplayer.betterplayer.audio;
+package net.betterplayer.betterplayer.audio.io;
 
 import java.nio.ByteBuffer;
 
@@ -7,12 +7,12 @@ import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 
-public class AudioPlayerSendHandler implements AudioSendHandler {
+public class AudioSender implements AudioSendHandler {
 
 	private final AudioPlayer audioPlayer;
 	private AudioFrame lastFrame;
 	
-	public AudioPlayerSendHandler(AudioPlayer audioPlayer) {
+	public AudioSender(AudioPlayer audioPlayer) {
 		this.audioPlayer = audioPlayer;
 	}
 	

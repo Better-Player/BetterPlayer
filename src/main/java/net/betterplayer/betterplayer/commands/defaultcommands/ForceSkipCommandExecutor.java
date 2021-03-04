@@ -54,6 +54,11 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 			betterAudioManager.setPlaying(parameters.getGuildId(), false);
 		}
 		
+		if(currentlyPlaying == null) {
+			senderChannel.sendMessage("Nothing is currently playing!").queue();
+			return;
+		}
+		
 		//Inform the user what they skipped
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Force skipped " + currentlyPlaying.getName(), "https://google.com", sender.getEffectiveAvatarUrl())

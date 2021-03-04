@@ -63,6 +63,11 @@ public class QueueCommandExecutor implements CommandExecutor {
 		//Get the track which is currently playing
 		AudioObject currentlyPlaying = bam.getCurrentlyPlaying(guildId);
 		
+		if(currentlyPlaying == null) {
+			senderChannel.sendMessage("The queue is empty!").queue();
+			return;
+		}
+		
 		//Add the name and artist of the track which is currently playing to the embed
 		eb.appendDescription("__Now Playing:__\n");
 		eb.appendDescription(currentlyPlaying.getArtist() + " - " + currentlyPlaying.getName() + "\n\n");

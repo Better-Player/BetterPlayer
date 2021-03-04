@@ -58,12 +58,6 @@ public class BetterPlayer {
 		
 		//Fetch the Guild configs
 		guildConfig = new GuildConfigManager(config);
-		
-		//Create all objects required for operation
-		jdaHandler = new JdaHandler(this);
-		betterAudioManager = new BetterAudioManager(jdaHandler);
-		commandManager = new CommandManager(this, config);
-		eventManager = new EventManager(commandManager, this);
 
 		authBinder = new AuthBinder(guildConfig.getSqlManager(), (String) config.getConfigValue("dbName"));
 		if(authBinder.isAvailabe()) {
@@ -80,6 +74,12 @@ public class BetterPlayer {
 		} else {
 			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
 		}
+		
+		//Create all objects required for operation
+		jdaHandler = new JdaHandler(this);
+		betterAudioManager = new BetterAudioManager(this);
+		commandManager = new CommandManager(this, config);
+		eventManager = new EventManager(commandManager, this);
 		
 		//libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
 		
@@ -128,6 +128,10 @@ public class BetterPlayer {
 	 */
 	public AuthBinder getAuthBinder() {
 		return this.authBinder;
+	}
+	
+	public LibBetterPlayerBinder getLibBetterPlayerBinder() {
+		return this.libBetterPlayerBinder;
 	}
 	
 	/**

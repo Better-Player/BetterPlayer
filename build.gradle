@@ -64,15 +64,15 @@ dependencies {
 	
 	//Proprietary code
 	proprietary 'net.betterplayer:auth:1.0.9'
-	proprietary 'net.betterplayer:libbetterplayer:1.0.21'
+	proprietary 'net.betterplayer:libbetterplayer:1.0.37'
 }
 
 //Without this Eclipse wont pick up on the proprietary dependencies
-eclipse {
+/*eclipse {
 	classpath {
 		plusConfigurations += [configurations.proprietary]
 	}
-}
+}*/
 
 task proprietaryJar(type: ShadowJar) {
    	mainClassName = 'net.betterplayer.betterplayer.BetterPlayer'

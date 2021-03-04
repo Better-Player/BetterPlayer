@@ -84,7 +84,7 @@ public class LibBetterPlayerBinder {
 		//Get the LibBetterPlayer class and its constructor
 		Class<?> libBetterPlayerClazz = ReflectionUtils.getClass("net.betterplayer.libbetterplayer.LibBetterPlayer");
 		Constructor<?> libBetterPlayerConstructor = ReflectionUtils.getConstructor(libBetterPlayerClazz, Consumer.class, Consumer.class, Consumer.class);
-		
+			
 		Consumer<Object> logInfoFunction = BetterPlayer::logInfo;
 		Consumer<Object> logErrorFunction = BetterPlayer::logError;
 		Consumer<Object> logDebugFunction = BetterPlayer::logDebug;

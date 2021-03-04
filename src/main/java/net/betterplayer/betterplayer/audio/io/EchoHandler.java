@@ -1,4 +1,4 @@
-package net.betterplayer.betterplayer.audio.receive;
+package net.betterplayer.betterplayer.audio.io;
 /*
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
