@@ -45,7 +45,7 @@ public class BetterAudioManager {
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);
 		
-		queueManager = new QueueManager(this);
+		queueManager = new QueueManager();
 		trackScheduler = new TrackScheduler(this);
 		
 		this.jdaHandler = betterPlayer.getJdaHandler();

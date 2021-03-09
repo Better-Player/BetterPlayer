@@ -36,6 +36,11 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
+		if(currentlyPlaying.getAudioTrack() == null) {
+			senderChannel.sendMessage("I'm currently not playing anything!").queue();
+			return;
+		}
+		
 		long trackDuration = currentlyPlaying.getAudioTrack().getDuration();
 		long trackPosition = currentlyPlaying.getAudioTrack().getPosition();
 		
