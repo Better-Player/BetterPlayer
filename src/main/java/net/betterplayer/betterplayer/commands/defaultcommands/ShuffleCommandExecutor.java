@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,5 +46,4 @@ public class ShuffleCommandExecutor implements CommandExecutor {
 		//Inform the user
 		senderChannel.sendMessage("The queue has been shuffled!").queue();
 	}
-
 }
