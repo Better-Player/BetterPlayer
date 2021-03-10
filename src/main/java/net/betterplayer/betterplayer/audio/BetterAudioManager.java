@@ -137,7 +137,8 @@ public class BetterAudioManager {
 	}
 	
 	public AudioObject getCurrentlyPlaying(long guildId) {
-		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		QueueItem qi = queueManager.peekQueue(guildId);
+		//QueueItem qi = queueManager.getCurrentQueueItem(guildId);
 		if(qi == null) return null;
 		
 		AudioPlayer ap = audioPlayers.get(guildId);
@@ -215,8 +216,8 @@ public class BetterAudioManager {
 		TextChannel senderChannel = jdaHandler.getJda().getTextChannelById(senderChannelId);
 		
 		//Skip to the next song
-		queueManager.incrementQueueIndex(guildId);
-		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		//queueManager.incrementQueueIndex(guildId);
+		QueueItem qi = queueManager.pollQueue(guildId);
 		
 		if(qi == null) {
 			return;

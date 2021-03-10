@@ -95,7 +95,7 @@ public class CommandManager {
 		register("nowplaying", new NowPlayingCommandExecutor(), "Display details about the track that is playing at the moment", "np");
 		register("clearqueue", new ClearQueueCommandExecutor(), "Clear the queue", "clear", "c");
 		register("remove", new RemoveCommandExecutor(), "Delete an item from the queue, by index shown by $queue", "delete", "rm", "del");
-		register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
+		//register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
 		register("config", new ConfigCommandExecutor(), "Configure BetterPlayer", "option", "options");
 		register("move", new MoveCommandExecutor(), "Move a track to a position in queue, or to first place", "mv");
 		register("activate", new ActivateCommandExecutor(), "Activate BetterPlayer with your licence key.");

@@ -1,5 +1,7 @@
 package net.betterplayer.betterplayer.config.guild.database;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -46,7 +48,8 @@ public class SqlManager {
 	 */
 	private Connection connect() {
 		try {
-			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + dbPassword);
+			String passwordEncoded = URLEncoder.encode(dbPassword, StandardCharsets.UTF_8);
+			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + passwordEncoded);
 		} catch(SQLException e) {
 			BetterPlayer.logError("Unable to establish connection to database!");
 			BetterPlayer.logDebug(Utils.getStackTrace(e));

@@ -32,8 +32,8 @@ public class BetterPlayer {
 	private AuthBinder authBinder;
 	private LibBetterPlayerBinder libBetterPlayerBinder;
 	
-	private static boolean DEBUG = false;
-	private static boolean isReady = false;
+	private static volatile boolean DEBUG = true;
+	private static volatile boolean isReady = false;
 	private static BetterPlayer INSTANCE;
 	
 	public static void main(String[] args) {		

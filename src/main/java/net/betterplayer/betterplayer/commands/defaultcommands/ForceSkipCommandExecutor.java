@@ -38,12 +38,9 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		
 		//Get the track which is currently playing, we want to tell the user what they skipped
 		AudioObject currentlyPlaying = betterAudioManager.getCurrentlyPlaying(guildId);
-		
-		//Increment the queue index
-		qm.incrementQueueIndex(guildId);
-		
+				
 		//Get the new current queue item
-		QueueItem qi = qm.getCurrentQueueItem(guildId);
+		QueueItem qi = qm.pollQueue(guildId);
 		
 		//If the new queue item (qi) is null, that means there is no next track.
 		//If that is the case, we don't play. Otherwhise we will play the next track
