@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.guild.GuildConfigManager.ConfigValueType;
 import net.betterplayer.betterplayer.events.EventManager;
 
 public class MessageReceivedEventHandler extends ListenerAdapter {
@@ -33,8 +34,10 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 		
 		//If the message does not start with the command prefix, return
 		if(guildCommandPrefix == null) {
-			BetterPlayer.logError("GuildCommandPrefix is null, this should not happen! For guild: " + event.getGuild().getIdLong());
+			BetterPlayer.logDebug(String.format("GuildCommandPrefix is null. Assuming that guild has no entry in database, adding it now. For guild: %d", event.getGuild().getIdLong()));
 			guildCommandPrefix = "$";
+			
+			betterPlayer.getGuildConfig().setConfigValue(event.getGuild().getIdLong(), "commandPrefix", "$", ConfigValueType.STRING);
 		}
 		
 		if(!contentDisplayMessage.startsWith(guildCommandPrefix)) return;

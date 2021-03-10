@@ -39,6 +39,9 @@ dependencies {
 	//JDA, discord API library
 	compile 'net.dv8tion:JDA:4.2.0_227'
 	
+	//SLF4J, logging
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+	
 	//LavaPlayer, Discord sound library
 	compile 'com.sedmelluq:lavaplayer:1.3.66'
 

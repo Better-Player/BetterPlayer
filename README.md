@@ -1,35 +1,26 @@
 # BetterPlayer
 An open-source music bot for Discord written in Java.
 
-## Features
-- Play music from multiple multiple sources
-- Customizable, and expandable by providing an easy to use API to add new commands.
+## Running BetterPlayer
+Requirments:
+- Runtime which can run Docker containers
+- MySQL Database
+- API Key for the YouTube Data API
+- Discord Bot
+
+For now you'll have to build the Docker images yourself, using e.g ``docker build -t betterplayer:latest .`` while being in the root of this repository.
+
+### Required environmental variables
+`BOT_TOKEN` (String): Your Discord bot token  
+`USE_GOOGLE_API` (Boolean): Whether to use the Google APIs for search or use the YouTube Music frontend  
+`GOOGLE_API_KEY` (String): Google API key, required regardless of the value of `USE_GOOGLE_API`  
+`DB_HOST`: Your database host  
+`DB_NAME`: The name of the database  
+`DB_USERNAME`: Username for logging into the database  
+`DB_PASSWORD`: Password for logging into the database  
 
 ## Progress
 You can find what is being worked on [here](https://trello.com/b/2n8vzaSp/betterplayer)
-
-## Developer documentation
-Some help for those developers out there
-
-### Adding a new command
-Adding a new command is easy, all you need is a Class which implements CommandExecutor, and then register your executor!
-```java
-public class FunCommandExecutor implements CommandExecutor {
-  @Override
-  public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
-    //Do magic!
-  }
-}
-```
-and register it:
-```java
-BetterPlayer betterPlayer = BetterPlayer.getBetterPlayer();
-CommandManager commandManager = betterPlayer.getCommandManager();
-commandManager.register("funcommand", new FunCommandExecutor(), "This is a fun command!");
-```
->Note: I have not yet written an easy way to add your own extensions by means of 'plugins'. For now you're best of compiling your extension into BetterPlayer.
-
-and done!
 
 ## Java dependencies
 - [JDA by DV8FromTheWorld](https://github.com/DV8FromTheWorld/JDA)
@@ -38,10 +29,6 @@ and done!
 - [JSON by Apache Foundation](https://mvnrepository.com/artifact/org.json/json)
 - [Apache Commons Lang 3 by Apache Foundation](https://commons.apache.org/proper/commons-lang/)
 - [HttpLib by me](https://github.com/TheDutchMC/HttpLib)
-
-## C++ Dependencies
-- Java JNI Headers
-- libsamplerate
 
 ## Proprietary dependencies
 BetterPlayer uses two proprietary dependencies: BetterPlayerAuth and LibBetterPlayer. You don't need these dependencies to work on the code, to compile it or to run it.

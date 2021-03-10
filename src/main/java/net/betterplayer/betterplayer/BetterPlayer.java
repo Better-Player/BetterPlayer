@@ -7,11 +7,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.bindings.AuthBinder;
 import net.betterplayer.betterplayer.bindings.LibBetterPlayerBinder;
@@ -22,7 +24,13 @@ import net.betterplayer.betterplayer.events.EventManager;
 import net.betterplayer.betterplayer.utils.Utils;
 
 public class BetterPlayer {
-
+	public static volatile boolean DEBUG = false;
+	public static volatile boolean IS_READY = false;
+	public static volatile boolean IS_DOCKER = false;
+	
+	private static BetterPlayer INSTANCE;
+	private static final Logger LOGGER = LogManager.getLogger(BetterPlayer.class);
+	
 	private BetterAudioManager betterAudioManager;
 	private JdaHandler jdaHandler;
 	private EventManager eventManager;
@@ -31,22 +39,32 @@ public class BetterPlayer {
 	private GuildConfigManager guildConfig;
 	private AuthBinder authBinder;
 	private LibBetterPlayerBinder libBetterPlayerBinder;
-	
-	private static volatile boolean DEBUG = true;
-	private static volatile boolean isReady = false;
-	private static BetterPlayer INSTANCE;
-	
+
 	public static void main(String[] args) {		
 		List<String> argsList = Arrays.asList(args);
 		
+		//Check if we're running in Docker
+		if(System.getenv("IS_DOCKER") != null && System.getenv("IS_DOCKER").equalsIgnoreCase("true")) {
+			IS_DOCKER = true;
+			
+			//Check the DEBUG env variable
+			if(System.getenv("DEBUG") != null && System.getenv("DEBUG").equalsIgnoreCase("true")) {
+				DEBUG = true;
+			}
+		}
+		
 		if(argsList.contains("--debug")) DEBUG = true;
+		
+		if(DEBUG) {
+			LOGGER.setLevel(Level.DEBUG);
+		}
 		
 		//Start up BetterPlayer		
 		BetterPlayer betterPlayer = new BetterPlayer();
 		betterPlayer.init();
 		betterPlayer.setupShutdown();
 				
-		isReady = true;
+		IS_READY = true;
 	}
 	
 	private void init() {
@@ -111,14 +129,6 @@ public class BetterPlayer {
 				} catch(Exception e) {}
 			}
 		}, "shutdown-thread"));
-	}
-	
-	/**
-	 * Get the DEBUG flag. True if debug is enabled, false if it is not
-	 * @return Returns the debug status
-	 */
-	public static boolean isDebug() {
-		return DEBUG;
 	}
 	
 	/**
@@ -211,8 +221,7 @@ public class BetterPlayer {
 	 * @param log The object to log
 	 */
 	public static void logInfo(Object log) {
-		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
-		System.out.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][INFO] " + log);
+		LOGGER.info(log);
 	}
 	
 	/**
@@ -220,8 +229,7 @@ public class BetterPlayer {
 	 * @param log The object to log
 	 */
 	public static void logError(Object log) {
-		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
-		System.err.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][ERROR] " + log);
+		LOGGER.error(log);
 	}
 	
 	/**
@@ -233,8 +241,7 @@ public class BetterPlayer {
 	public static void logDebug(Object log) {
 		if(!DEBUG) return;
 		
-		final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
-		System.out.println("[" + LocalTime.now(ZoneId.systemDefault()).format(f) + "][DEBUG] " + log);
+		LOGGER.debug(log);
 	}
 	
 	/**
@@ -242,7 +249,7 @@ public class BetterPlayer {
 	 * @return Returns the BetterPlayer instance. Null if isReady is false.
 	 */
 	public static BetterPlayer getBetterPlayer() {
-		if(isReady) {
+		if(IS_READY) {
 			return INSTANCE;
 		} else {
 			return null;

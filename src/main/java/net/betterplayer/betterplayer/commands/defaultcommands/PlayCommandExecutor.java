@@ -156,13 +156,9 @@ public class PlayCommandExecutor implements CommandExecutor {
 		}
 		
 		//Check if we're already playing something for this guild
-		//If not, we want to play something
-		System.err.println("IsPlaying " + betterPlayer.getBetterAudioManager().isPlaying(guildId));
-		
+		//If not, we want to play something		
 		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {			
-			
-			System.err.println("hasAudioPlayer " + betterPlayer.getBetterAudioManager().hasAudioPlayer(guildId));
-			
+						
 			//Check if the guild has an AudioPlayer, if not, create it
 			if(!betterPlayer.getBetterAudioManager().hasAudioPlayer(guildId)) {				
 				betterPlayer.getBetterAudioManager().init(guildId);
