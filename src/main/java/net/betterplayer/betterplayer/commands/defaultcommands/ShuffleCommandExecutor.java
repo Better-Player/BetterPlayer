@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,33 +34,16 @@ public class ShuffleCommandExecutor implements CommandExecutor {
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
 		
 		//Get the current queue index and the full queue
-		int currentIndex = qm.getQueueIndex(guildId);
 		List<QueueItem> queue = qm.getFullQueue(guildId);
-		
-		List<QueueItem> newQueue = new LinkedList<>();
-		List<QueueItem> queueToShuffle = new ArrayList<>();
-		
-		//Iterate over everything we've already played in the queue + the item that is currently playing
-		for(int i = 0; i < currentIndex+1; i++) {
-			newQueue.add(queue.get(i));
-		}
-		
-		//Iterate over the part of the queue that has not yet been player
-		for(int i = currentIndex +1; i < queue.size(); i++) {
-			queueToShuffle.add(queue.get(i));
-		}
-		
+			
 		//Shuffle the part of the queue that is yet to be played
-		Collections.shuffle(queueToShuffle, new Random());
-		
-		//Merge the two lists back together
-		newQueue.addAll(queueToShuffle);
-		
+		Collections.shuffle(queue, new Random());
+
 		//Set the new queue
+		java.util.Queue<QueueItem> newQueue = new LinkedList<QueueItem>(queue); 
 		qm.setQueue(guildId, newQueue);
 		
 		//Inform the user
 		senderChannel.sendMessage("The queue has been shuffled!").queue();
 	}
-
 }

@@ -1,5 +1,7 @@
 package net.betterplayer.betterplayer.config.guild.database;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,9 +22,7 @@ public class SqlManager {
 		this.dbName = dbName;
 		this.dbUsername = dbUsername;
 		this.dbPassword = dbPassword;
-		
-		BetterPlayer.logInfo("Initializing database connection...");
-		
+				
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch(ClassNotFoundException e) {
@@ -35,9 +35,10 @@ public class SqlManager {
 		this.connection = connect();
 		
 		if(this.connection == null) {
-			BetterPlayer.logError("Unable to establish connection with database!");
 			System.exit(1);
 		}
+		
+		BetterPlayer.logInfo("Connection with database established");
 	}
 	
 	/**
@@ -46,9 +47,10 @@ public class SqlManager {
 	 */
 	private Connection connect() {
 		try {
-			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + dbPassword);
+			String passwordEncoded = URLEncoder.encode(dbPassword, StandardCharsets.UTF_8);
+			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + passwordEncoded);
 		} catch(SQLException e) {
-			BetterPlayer.logError("Unable to establish connection to database!");
+			BetterPlayer.logError("Unable to establish connection to database: " + e.getMessage());
 			BetterPlayer.logDebug(Utils.getStackTrace(e));
 			return null;
 		}

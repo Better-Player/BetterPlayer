@@ -9,3 +9,6 @@ actions/
 bin/
 .classpath
 .project
+
+#Test
+docker-compose.yml

@@ -45,7 +45,7 @@ public class BetterAudioManager {
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);
 		
-		queueManager = new QueueManager(this);
+		queueManager = new QueueManager();
 		trackScheduler = new TrackScheduler(this);
 		
 		this.jdaHandler = betterPlayer.getJdaHandler();
@@ -76,7 +76,7 @@ public class BetterAudioManager {
 		am.setSelfDeafened(false);
 		am.setSendingHandler(new AudioSender(audioPlayers.get(targetChannel.getGuild().getIdLong())));
 		
-		if(betterPlayer.getLibBetterPlayerBinder().isAvailable() && betterPlayer.getAuthBinder().isActivated(targetChannel.getGuild().getIdLong())) {
+		if(betterPlayer.getLibBetterPlayerBinder().isAvailable() /*&& betterPlayer.getAuthBinder().isActivated(targetChannel.getGuild().getIdLong())*/) {
 			am.setReceivingHandler(new AudioReceiver(betterPlayer));
 		}
 		
@@ -137,7 +137,8 @@ public class BetterAudioManager {
 	}
 	
 	public AudioObject getCurrentlyPlaying(long guildId) {
-		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		QueueItem qi = queueManager.peekQueue(guildId);
+		//QueueItem qi = queueManager.getCurrentQueueItem(guildId);
 		if(qi == null) return null;
 		
 		AudioPlayer ap = audioPlayers.get(guildId);
@@ -215,8 +216,8 @@ public class BetterAudioManager {
 		TextChannel senderChannel = jdaHandler.getJda().getTextChannelById(senderChannelId);
 		
 		//Skip to the next song
-		queueManager.incrementQueueIndex(guildId);
-		QueueItem qi = queueManager.getCurrentQueueItem(guildId);
+		//queueManager.incrementQueueIndex(guildId);
+		QueueItem qi = queueManager.pollQueue(guildId);
 		
 		if(qi == null) {
 			return;

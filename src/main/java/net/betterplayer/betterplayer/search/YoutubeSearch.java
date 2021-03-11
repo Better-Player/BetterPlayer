@@ -41,7 +41,7 @@ public class YoutubeSearch {
 		//Make a request to YouTube Music
 		ResponseObject ro = null;
 		try {
-			ro = new Http(BetterPlayer.isDebug()).makeRequest(RequestMethod.GET, "https://music.youtube.com/search", params, null, null, headers);
+			ro = new Http(BetterPlayer.DEBUG).makeRequest(RequestMethod.GET, "https://music.youtube.com/search", params, null, null, headers);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			//TODO error handling
@@ -158,7 +158,7 @@ public class YoutubeSearch {
 		
 		ResponseObject ro = null;
 		try {
-			ro = new Http(BetterPlayer.isDebug()).makeRequest(RequestMethod.GET, "https://www.googleapis.com/youtube/v3/playlistItems", urlParameters, null, null, new HashMap<>());
+			ro = new Http(BetterPlayer.DEBUG).makeRequest(RequestMethod.GET, "https://www.googleapis.com/youtube/v3/playlistItems", urlParameters, null, null, new HashMap<>());
 		} catch(MalformedURLException e) {
 			e.printStackTrace();
 			//TODO error handling
@@ -217,7 +217,7 @@ public class YoutubeSearch {
 		
 		ResponseObject ro = null;
 		try {
-			ro = new Http(BetterPlayer.isDebug()).makeRequest(
+			ro = new Http(BetterPlayer.DEBUG).makeRequest(
 					RequestMethod.GET, 
 					"https://www.googleapis.com/youtube/v3/search", 
 					urlParameters,
@@ -272,7 +272,7 @@ public class YoutubeSearch {
 		
 		ResponseObject ro = null;
 		try {
-			ro = new Http(BetterPlayer.isDebug()).makeRequest(
+			ro = new Http(BetterPlayer.DEBUG).makeRequest(
 					RequestMethod.GET,
 					"https://www.googleapis.com/youtube/v3/videos", 
 					urlParameters,

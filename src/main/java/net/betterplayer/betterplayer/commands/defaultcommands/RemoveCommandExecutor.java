@@ -46,15 +46,9 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		
 		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 		QueueManager qm = bam.getQueueManager();
-		
-		//Get the current queue Index, and calculate the queueIndex to remove
-		//We have to add the current queue index to the index the user provided,
-		//because we don't remove an item from the queue after it is done playing, but we do show it that way to the user
-		int currentQueueIndex = qm.getQueueIndex(guildId);
-		int queueItemToRemove = queueIndex + currentQueueIndex +1;
-		
+				
 		//Get the queue item we want to remove, since we want to inform the user what they removed
-		QueueItem itemToRemove = qm.getQueueItemAtIndex(guildId, queueItemToRemove);
+		QueueItem itemToRemove = qm.peekQueueAtIndex(guildId, queueIndex);
 		
 		//If the itemToRemove is null, that means the index the user provided is more than the length of the queue
 		if(itemToRemove == null) {
@@ -62,14 +56,13 @@ public class RemoveCommandExecutor implements CommandExecutor {
 			return;
 		}
 		
-		//Attempt to delete the item from the queue
-		boolean success = qm.deleteItemFromQueue(guildId, queueItemToRemove);
-		
-		//If the deletion did not succeed, inform the user and return
-		if(!success) {
+		if(queueIndex >= qm.getQueueSize(guildId)) {
 			senderChannel.sendMessage("Invalid queue index!").queue();
 			return;
 		}
+		
+		//Attempt to delete the item from the queue
+		qm.removeFromQueue(guildId, queueIndex);
 		
 		//Inform the user what they removed
 		EmbedBuilder eb = new EmbedBuilder()

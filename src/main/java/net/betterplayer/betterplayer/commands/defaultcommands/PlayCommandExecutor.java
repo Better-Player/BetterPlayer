@@ -74,7 +74,11 @@ public class PlayCommandExecutor implements CommandExecutor {
 					
 					User author = jda.getUserById(parameters.getSenderId());
 					QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
-					int queuePos = qm.getFullQueue(parameters.getGuildId()).size() - qm.getQueueIndex(parameters.getGuildId() -1);
+					if(!qm.hasQueue(parameters.getGuildId())) {
+						qm.createQueue(parameters.getGuildId());
+					}
+					
+					int posInQueue = qm.getQueueSize(parameters.getGuildId());
 
 					VideoDetails videoDetails = vds.get(0);
 					EmbedBuilder eb = new EmbedBuilder()
@@ -82,7 +86,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 							.setThumbnail(videoDetails.getThumbnailUrl())
 							.setColor(Color.GRAY)
 							.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
-							.addField("Position in queue", String.valueOf(queuePos), true)
+							.addField("Position in queue", String.valueOf(posInQueue +1), true)
 							.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 					
 					senderChannel.sendMessage(eb.build()).queue();
@@ -127,6 +131,9 @@ public class PlayCommandExecutor implements CommandExecutor {
 		long guildId = parameters.getGuildId();
 		
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
+		if(!qm.hasQueue(parameters.getGuildId())) {
+			qm.createQueue(parameters.getGuildId());
+		}
 		
 		//Check if VideoDetails and it's parameters are not null
 		//If any of them are that means no results were found and we can stop
@@ -139,12 +146,19 @@ public class PlayCommandExecutor implements CommandExecutor {
 		QueueItem qi = new QueueItem(videoDetails.getId(), videoDetails.getTitle(), videoDetails.getChannel());
 		
 		//Add the item to the queue
-		qm.addToQueue(qi, parameters.getGuildId());
+		//qm.addToQueue(guildId, qi);
+		//qm.addToQueue(qi, parameters.getGuildId());
+		
+		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {
+			qm.setNowPlaying(guildId, qi);
+		} else {
+			qm.addToQueue(guildId, qi);
+		}
 		
 		//Check if we're already playing something for this guild
-		//If not, we want to play something
+		//If not, we want to play something		
 		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {			
-			
+						
 			//Check if the guild has an AudioPlayer, if not, create it
 			if(!betterPlayer.getBetterAudioManager().hasAudioPlayer(guildId)) {				
 				betterPlayer.getBetterAudioManager().init(guildId);
@@ -160,15 +174,9 @@ public class PlayCommandExecutor implements CommandExecutor {
 			betterPlayer.getBetterAudioManager().setPauseState(guildId, false);
 		}
 		
-		//Calculate the position in the queue
-		//If the queue is null, then the queue position is 0
-		//Otherwhise the queue position is the full queue's size, minus the current queue index.
-		int queuePos;
-		if(qm.getFullQueue(guildId) == null) {
-			queuePos = 0;
-		} else {
-			queuePos = qm.getFullQueue(guildId).size() - qm.getQueueIndex(guildId);
-		}
+		//Get the size of the queue, we display this as position in queue to the user.
+		//we don't have to do +1 here, because the length is not 0-based.
+		int posInQueue = qm.getQueueSize(parameters.getGuildId());
 		
 		//If announce is true, then we want to send a message to the senderChannel
 		if(announce) {
@@ -179,7 +187,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
 					.addField("Channel", videoDetails.getChannel(), true)
 					.addField("Duration", videoDetails.getDuration(), true)
-					.addField("Position in queue", String.valueOf(queuePos), true)
+					.addField("Position in queue", String.valueOf(posInQueue), true)
 					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
 			senderChannel.sendMessage(eb.build()).queue();

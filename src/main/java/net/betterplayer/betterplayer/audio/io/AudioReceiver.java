@@ -46,7 +46,6 @@ public class AudioReceiver implements AudioReceiveHandler {
 		buffer.put(audio);
 		
 		
-		
 		if(!awaitingEndOfTalking) {
 			System.out.println("End of talking!");
 			System.out.println("buffer size:" + buffer.remaining());

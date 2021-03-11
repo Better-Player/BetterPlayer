@@ -19,42 +19,24 @@ public class GuildConfigManager {
 	
 	private SqlManager sqlManager;
 	private HashMap<Long, HashMap<String, Object>> guildConfigs = new HashMap<>();
-	
-	private final boolean useDatabase;
-	
-	@SuppressWarnings("unused") //configPath is unused for now
-	private final String dbHost, dbName, dbUsername, dbPassword, configPath;
+		
+	private final String dbHost, dbName, dbUsername, dbPassword;
 	
 	public GuildConfigManager(BotConfig botConfig) {
+				
+		dbHost = (String) botConfig.getConfigValue("dbHost");
+		dbName = (String) botConfig.getConfigValue("dbName");
+		dbUsername = (String) botConfig.getConfigValue("dbUsername");
+		dbPassword = (String) botConfig.getConfigValue("dbPassword");
 		
-		useDatabase = (boolean) botConfig.getConfigValue("useDatabase");
+		//Create a new SQL manager
+		sqlManager = new SqlManager(dbHost, dbName, dbUsername, dbPassword);
 		
-		if(useDatabase) {
-			dbHost = (String) botConfig.getConfigValue("dbHost");
-			dbName = (String) botConfig.getConfigValue("dbName");
-			dbUsername = (String) botConfig.getConfigValue("dbUsername");
-			dbPassword = (String) botConfig.getConfigValue("dbPassword");
-			
-			//Config via json file is not used, an empty path will do
-			configPath = "";
-			
-			//Create a new SQL manager
-			sqlManager = new SqlManager(dbHost, dbName, dbUsername, dbPassword);
-			
-			//Check the database to see if all required tables exist
-			checkDb();
-			
-			//Read the database
-			guildConfigs = readGuildConfigsTable();
-		} else {
-			//All these variables are not needed when using a json file for config.
-			dbHost = dbName = dbUsername = dbPassword = "";
-			
-			//Get the config path as a String
-			configPath = (String) botConfig.getConfigValue("guildConfigPath");
-			
-			//TODO JSON file reading, verifying etc.
-		}
+		//Check the database to see if all required tables exist
+		checkDb();
+		
+		//Read the database
+		guildConfigs = readGuildConfigsTable();
 	}
 	
 	public SqlManager getSqlManager() {
@@ -204,13 +186,13 @@ public class GuildConfigManager {
 		//If no config existed yet, that means the DB doesn't have an entry yet for this guild
 		//Create one
 		//Only do so if we use a database
-		if(!exists && useDatabase) {
+		if(!exists) {
 			initializeDbForGuild(guildId);
 			//TODO create initial JSON config
 		}
 		
 		//Update the value in the database, if it is enabled
-		if(useDatabase) updateDbForGuild(guildId, key, value, type);
+		updateDbForGuild(guildId, key, value, type);
 		//TODO write to json config
 	}
 	

@@ -39,6 +39,9 @@ dependencies {
 	//JDA, discord API library
 	compile 'net.dv8tion:JDA:4.2.0_227'
 	
+	//SLF4J, logging
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+	
 	//LavaPlayer, Discord sound library
 	compile 'com.sedmelluq:lavaplayer:1.3.66'
 
@@ -63,8 +66,8 @@ dependencies {
     compile 'net.betterplayer:BetterPlayerCommon:1.0.2'
 	
 	//Proprietary code
-	proprietary 'net.betterplayer:auth:1.0.9'
-	proprietary 'net.betterplayer:libbetterplayer:1.0.37'
+	//proprietary 'net.betterplayer:auth:1.0.9'
+	proprietary 'net.betterplayer:libbetterplayer:1.0.40'
 }
 
 //Without this Eclipse wont pick up on the proprietary dependencies
