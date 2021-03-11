@@ -116,7 +116,7 @@ public class LibBetterPlayerBinder {
 	}
 	
 	/**
-	 * Load the native C++ Libraries
+	 * Load the native Rust Libraries
 	 */
 	private void loadNativeLibraries() {
 		try {

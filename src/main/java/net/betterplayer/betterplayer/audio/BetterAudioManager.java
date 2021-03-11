@@ -76,7 +76,7 @@ public class BetterAudioManager {
 		am.setSelfDeafened(false);
 		am.setSendingHandler(new AudioSender(audioPlayers.get(targetChannel.getGuild().getIdLong())));
 		
-		if(betterPlayer.getLibBetterPlayerBinder().isAvailable() && betterPlayer.getAuthBinder().isActivated(targetChannel.getGuild().getIdLong())) {
+		if(betterPlayer.getLibBetterPlayerBinder().isAvailable() /*&& betterPlayer.getAuthBinder().isActivated(targetChannel.getGuild().getIdLong())*/) {
 			am.setReceivingHandler(new AudioReceiver(betterPlayer));
 		}
 		
