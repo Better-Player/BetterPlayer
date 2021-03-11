@@ -31,7 +31,7 @@ public class SqlManager {
 			System.exit(1);
 		}
 		
-		BetterPlayer.logInfo("Connecting to database...");
+		BetterPlayer.logInfo("Connecting to database... (" + dbHost + ")");
 		this.connection = connect();
 		
 		if(this.connection == null) {
@@ -47,8 +47,8 @@ public class SqlManager {
 	 */
 	private Connection connect() {
 		try {
-			String passwordEncoded = URLEncoder.encode(dbPassword, StandardCharsets.UTF_8);
-			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName + "?user=" + dbUsername + "&password=" + passwordEncoded);
+			//String passwordEncoded = URLEncoder.encode(dbPassword, StandardCharsets.UTF_8);
+			return DriverManager.getConnection("jdbc:mysql://" + dbHost + "/" + dbName, dbUsername, dbPassword);
 		} catch(SQLException e) {
 			BetterPlayer.logError("Unable to establish connection to database: " + e.getMessage());
 			BetterPlayer.logDebug(Utils.getStackTrace(e));

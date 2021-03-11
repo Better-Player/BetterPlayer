@@ -6,7 +6,7 @@ COPY . /usr/src/betterplayer
 WORKDIR /usr/src/betterplayer
 RUN chmod +x gradlew
 
-RUN ./gradlew ghActions
+RUN ./gradlew shadowjar
 
 
 #Runtime Docker container
@@ -15,7 +15,7 @@ ENV IS_DOCKER=true
 
 RUN mkdir -p /app/
 
-COPY --from=builder /usr/src/betterplayer/actions/output.jar /app/betterplayer.jar
+COPY --from=builder /usr/src/betterplayer/build/libs/*.jar /app/betterplayer.jar
 COPY ./entrypoint.sh /app/entrypoint.sh
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
