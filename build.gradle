@@ -50,6 +50,7 @@ dependencies {
 	
 	//JSON, for communicating with external APIs
 	compile 'org.json:json:20201115'
+	compile 'com.google.code.gson:gson:2.8.6'
 
 	//Apache Commons
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'

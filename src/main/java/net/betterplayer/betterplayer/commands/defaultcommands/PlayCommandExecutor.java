@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -16,18 +17,20 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.search.VideoDetails;
 import net.betterplayer.betterplayer.search.YoutubeSearch;
 import net.betterplayer.betterplayer.utils.Utils;
 
+@BotCommand(name = "play", description = "Play a YouTube video, playlist, or search for a video", aliases = {"p"})
 public class PlayCommandExecutor implements CommandExecutor {
 
 	private boolean useApi;
 	private String apiKey;
 	
-	public PlayCommandExecutor(boolean useApi, String apiKey) {
-		this.useApi = useApi;
-		this.apiKey = apiKey;
+	public PlayCommandExecutor(BotConfig botConfig) {
+		this.useApi = (boolean) botConfig.getConfigValue("useGoogleApi");
+		this.apiKey = (String) botConfig.getConfigValue("googleApikey");
 	}
 	
 	@Override
@@ -187,7 +190,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
 					.addField("Channel", videoDetails.getChannel(), true)
 					.addField("Duration", videoDetails.getDuration(), true)
-					.addField("Position in queue", String.valueOf(posInQueue), true)
+					.addField("Position in queue", String.valueOf(posInQueue +1), true)
 					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
 			senderChannel.sendMessage(eb.build()).queue();

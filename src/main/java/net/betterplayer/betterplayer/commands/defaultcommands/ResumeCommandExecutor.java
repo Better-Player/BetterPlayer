@@ -1,17 +1,22 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 
 /**
  * This command provides the user with a way to resume a paused player<br>
  * This command requires the user to be connected to the same voice channel as BetterPlayer
  */
+@BotCommand(name = "resume", description = "Resume BetterPlayer", aliases = {"continue"})
 public class ResumeCommandExecutor implements CommandExecutor {
 
+	public ResumeCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		

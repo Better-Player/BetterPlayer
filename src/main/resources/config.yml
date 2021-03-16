@@ -13,3 +13,8 @@ dbHost: ""
 dbName: ""
 dbUsername: ""
 dbPassword: ""
+
+#KSoft API
+#Leave as "" if you do not have a KSoft API token
+#This is only required if you want to use the lyrics command
+ksoftApi: ""

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -13,14 +14,18 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.config.guild.GuildConfigManager.ConfigValueType;
 
 /**
  * This command provides a way for server administrators to change config options for BetterPlayer on Discord<br>
  * This command requires the sender to have the 'manage server' permission
  */
+@BotCommand(name = "config", description = "Configure BetterPlayer", aliases = {"option", "options"})
 public class ConfigCommandExecutor implements CommandExecutor {
 
+	public ConfigCommandExecutor(BotConfig botConfig) {}
+	
 	//These config options are booleans
 	final List<String> optionsOfTypeBool = new ArrayList<>(Arrays.asList(
 			"usedeepspeech"

@@ -3,23 +3,27 @@ package net.betterplayer.betterplayer.commands.defaultcommands;
 import java.awt.Color;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.betterplayer.betterplayer.audio.AudioObject;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 
 /**
  * This command will allow the user to force-skip the currently playing item<br>
  * This command requires the user to be connected to the same voice channel as BetterPlayer
  */
+@BotCommand(name = "forceskip", description = "Force skip a track", aliases = {"fs"})
 public class ForceSkipCommandExecutor implements CommandExecutor {
 
+	public ForceSkipCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 
@@ -37,7 +41,7 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		QueueManager qm = betterAudioManager.getQueueManager();
 		
 		//Get the track which is currently playing, we want to tell the user what they skipped
-		AudioObject currentlyPlaying = betterAudioManager.getCurrentlyPlaying(guildId);
+		QueueItem currentlyPlaying = qm.getNowPlaying(guildId);
 				
 		//Get the new current queue item
 		QueueItem qi = qm.pollQueue(guildId);
@@ -46,6 +50,7 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		//If that is the case, we don't play. Otherwhise we will play the next track
 		if(qi != null) {
 			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
+			qm.setNowPlaying(guildId, qi);
 		} else {
 			betterAudioManager.getAudioPlayer(guildId).destroy();
 			betterAudioManager.setPlaying(parameters.getGuildId(), false);
@@ -58,7 +63,7 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		
 		//Inform the user what they skipped
 		EmbedBuilder eb = new EmbedBuilder()
-				.setAuthor("Force skipped " + currentlyPlaying.getName(), "https://google.com", sender.getEffectiveAvatarUrl())
+				.setAuthor("Force skipped " + currentlyPlaying.getTrackName(), "https://google.com", sender.getEffectiveAvatarUrl())
 				.setColor(Color.GRAY)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		

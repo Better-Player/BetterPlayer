@@ -1,7 +1,5 @@
 package net.betterplayer.betterplayer.config.guild.database;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

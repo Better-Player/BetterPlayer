@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,10 +13,14 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.utils.Utils;
 
+@BotCommand(name = "move", description = "Move a track to a position in queue, or to first place", aliases = {"mv"})
 public class MoveCommandExecutor implements CommandExecutor {
 
+	public MoveCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 	

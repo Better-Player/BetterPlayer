@@ -3,6 +3,7 @@ package net.betterplayer.betterplayer.commands.defaultcommands;
 import java.awt.Color;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -11,14 +12,18 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.utils.Utils;
 
 /**
  * This command provides the user with a way to remove an item from the queue.<br>
  * This command requires the user to be connected to the same voice channel as BetterPlayer
  */
+@BotCommand(name = "remove", description = "Delete an item from the queue, by index shown by $queue", aliases = {"rm", "delete", "del"})
 public class RemoveCommandExecutor implements CommandExecutor {
 
+	public RemoveCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 

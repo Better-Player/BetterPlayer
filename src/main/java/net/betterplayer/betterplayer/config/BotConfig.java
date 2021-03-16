@@ -42,6 +42,10 @@ public class BotConfig {
 			this.configData.put("dbName", 		System.getenv("DB_NAME"));
 			this.configData.put("dbUsername", 	System.getenv("DB_USERNAME"));
 			this.configData.put("dbPassword", 	System.getenv("DB_PASSWORD"));
+			
+			if(System.getenv("KSOFT_API_TOKEN") != null) {
+				this.configData.put("ksoftApiToken", System.getenv("KSOFT_API_TOKEN"));
+			}
 		} else {
 			Yaml yaml = new Yaml();
 			File configFile = new File(configDirectory, "config.yml");

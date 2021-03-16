@@ -1,18 +1,23 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 
 /**
  * This command allows the user to have the bot leave a voice channel.<br>
  * This command requires the user to be connected to the same voice channel as BetterPlayer
  */
+@BotCommand(name = "leave", description = "Leave a voice channel")
 public class LeaveCommandExecutor implements CommandExecutor {
 
+	public LeaveCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 

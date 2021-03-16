@@ -1,6 +1,7 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 
 /**
  * This command will allow the user to have BetterPlayer to join the channel they are currently in.<br>
@@ -15,10 +17,12 @@ import net.betterplayer.betterplayer.commands.CommandParameters;
  * <br>
  * This command is also called from PlayCommandExecutor.
  */
+@BotCommand(name = "join", description = "Join a voice channel")
 public class JoinCommandExecutor implements CommandExecutor {
 
 	private boolean fromOtherExecutor = false;
 	
+	public JoinCommandExecutor(BotConfig botConfig) {}
 	public JoinCommandExecutor() {}
 	
 	/**

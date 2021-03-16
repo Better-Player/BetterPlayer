@@ -6,19 +6,24 @@ import java.util.List;
 import org.apache.commons.lang3.text.WordUtils;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.commands.CommandDetails;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.utils.Utils;
 
 /**
  * This command will provide the user with a help page
  */
+@BotCommand(name = "help", description = "Displays the help menu.")
 public class HelpCommandExecutor implements CommandExecutor {
 
+	public HelpCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		

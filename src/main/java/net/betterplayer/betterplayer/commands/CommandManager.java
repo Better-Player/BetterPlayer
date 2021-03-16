@@ -1,12 +1,24 @@
 package net.betterplayer.betterplayer.commands;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.commands.defaultcommands.*;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.utils.Pair;
+import net.betterplayer.betterplayer.utils.Utils;
 
 public class CommandManager {
 
@@ -84,20 +96,121 @@ public class CommandManager {
 	 * This function will set up the default CommandExecutors shipped with BetterPlayer
 	 */
 	private void setupDefault() {
-		register("join", new JoinCommandExecutor(), "Join a voice channel");
-		register("help", new HelpCommandExecutor(), "Displays the help menu");
-		register("leave", new LeaveCommandExecutor(), "Leave a voice channel");
-		register("play", new PlayCommandExecutor((boolean) config.getConfigValue("useGoogleApi"), (String) config.getConfigValue("googleApikey")), "Play a YouTube video, playlist, or search for a video", "p");
-		register("pause", new PauseCommandExecutor(), "Pause BetterPlayer");
-		register("resume", new ResumeCommandExecutor(), "Resume BetterPlayer", "continue");
-		register("queue", new QueueCommandExecutor(), "Display the current queue", "q");
-		register("forceskip", new ForceSkipCommandExecutor(), "Force skip a track", "fs");
-		register("nowplaying", new NowPlayingCommandExecutor(), "Display details about the track that is playing at the moment", "np");
-		register("clearqueue", new ClearQueueCommandExecutor(), "Clear the queue", "clear", "c");
-		register("remove", new RemoveCommandExecutor(), "Delete an item from the queue, by index shown by $queue", "delete", "rm", "del");
-		//register("shuffle", new ShuffleCommandExecutor(), "Shuffle the queue", "s");
-		register("config", new ConfigCommandExecutor(), "Configure BetterPlayer", "option", "options");
-		register("move", new MoveCommandExecutor(), "Move a track to a position in queue, or to first place", "mv");
-		register("activate", new ActivateCommandExecutor(), "Activate BetterPlayer with your licence key.");
+		BetterPlayer.logInfo("Loading commands...");
+		try {
+			registerAnnotatedCommands();
+		} catch(IOException e) {
+			BetterPlayer.logError("Unable to load BetterPlayer commands!");
+			BetterPlayer.logInfo(Utils.getStackTrace(e));
+		}
+		
+		BetterPlayer.logInfo(String.format("Successfully loaded %d commands.", this.commandDetails.size()));
+	}
+	
+	private void registerAnnotatedCommands() throws IOException {
+		//Get the path to the JAR we're running from.
+		File jarPath;
+		try {
+			jarPath = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+		} catch (URISyntaxException e) {
+			BetterPlayer.logError("Unable to determine the path to the JAR which is currently used.");
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+
+			System.exit(1);
+			return;
+		}
+		
+		JarFile jarFile = new JarFile(jarPath);
+		
+		//Get all files ending in class
+		// - Replace .class with nothing
+		// - Replace '/' with '.'
+		//
+		// So e.g net/betterplayer/betterplayer/commands/defaultcommands/PlayCommandExecutor.class
+		// becomes: net.betterplayer.betterplayer.commands.defaultcommands.PlayCommandExecutor
+		List<String> classNamesInJar = jarFile.stream()
+				.map(ZipEntry::getName)
+				.filter(name -> name.endsWith(".class"))
+				.map(name -> name
+						.replace(".class", "")
+						.replace('/', '.'))
+				.distinct()
+				.collect(Collectors.toList());
+		
+		jarFile.close();
+				
+		for(String className : classNamesInJar) {
+			
+			//We only want to load classes in within our domain
+			//Since we wont encounter any BotCommands outside of it
+			if(!className.startsWith("net.betterplayer")) {
+				continue;
+			}
+			
+			//Check if the Class is annotated with the @BotCommand annotation
+			Pair<Boolean, Class<?>> annotatedChecked;
+			try {
+				annotatedChecked = isAnnotatedWith(className, BotCommand.class);
+			} catch(ClassNotFoundException e) {
+				BetterPlayer.logError(String.format("Unable to determine if '%s' is annotated with the @BotCommand annotation", className));
+				BetterPlayer.logDebug(Utils.getStackTrace(e));
+
+				continue;
+			}
+			
+			if(annotatedChecked.getFirst()) {
+				//Class is annotated with the @BotCommand annotation
+				
+				//Get the Class' constructor
+				Constructor<?> constructor;
+				try {
+					constructor = annotatedChecked.getSecond().getConstructor(BotConfig.class);
+				} catch (NoSuchMethodException | SecurityException e) {
+					BetterPlayer.logError(String.format("Class annotated with @BotCommand does not have Constructor taking BotConfig as only argument!", className));
+					BetterPlayer.logDebug(Utils.getStackTrace(e));
+					continue;
+				}
+				
+				//Create an instance of the Class
+				Object executorObject;
+				try {
+					executorObject = constructor.newInstance(this.config);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					BetterPlayer.logError("Unable to create instance of class " + className);
+					BetterPlayer.logDebug(Utils.getStackTrace(e));
+					continue;
+				}
+
+				//Check if the class implements CommandExecutor
+				List<Class<?>> annotations = Arrays.asList(annotatedChecked.getSecond().getInterfaces());
+				if(!annotations.contains(CommandExecutor.class)) {
+					BetterPlayer.logError(String.format("Class '%s' annotated with @BotCommand does not implement CommandExecutor!", className));
+					continue;
+				}
+				
+				//Cast the object to CommandExecutor
+				CommandExecutor executorImpl = (CommandExecutor) executorObject;
+				
+				//Get the annotation details
+				BotCommand botCommandAnnotation = annotatedChecked.getSecond().getAnnotation(BotCommand.class);
+				
+				//Finally, register the class
+				register(botCommandAnnotation.name(), executorImpl, botCommandAnnotation.description(), botCommandAnnotation.aliases());
+				
+				BetterPlayer.logDebug(String.format("Loaded BotCommand: '%s' (%s)", botCommandAnnotation.name(), className));
+			}
+		}
+	}
+	
+	/**
+	 * Check if a Class is annotated with an annotation
+	 * @param className The name of the Class
+	 * @param annotation The annotation Class
+	 * @return Returns a Pair, where A is a Boolean indicating whether the Class is annotated with the provided annotation. B is a Class<?> object for the className
+	 * @throws ClassNotFoundException Thrown when the provided className does not exist
+	 */
+	private Pair<Boolean, Class<?>>isAnnotatedWith(String className, Class<? extends Annotation> annotation) throws ClassNotFoundException {
+		Class<?> clazz = Class.forName(className, false, this.getClass().getClassLoader());
+		return new Pair<Boolean, Class<?>>(clazz.isAnnotationPresent(annotation), clazz);
 	}
 }

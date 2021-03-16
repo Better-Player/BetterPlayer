@@ -7,16 +7,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.BotConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+@BotCommand(name = "activate", description = "Activate BetterPlayer with your licence key.")
 public class ActivateCommandExecutor implements CommandExecutor {
 
+	public ActivateCommandExecutor(BotConfig botConfig) {}
+	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {
 		JDA jda = betterPlayer.getJdaHandler().getJda();
