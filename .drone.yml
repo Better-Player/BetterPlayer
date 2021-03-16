@@ -1,0 +1,44 @@
+kind: pipeline
+type: kubernetes
+name: betterplayer
+service_account: drone-runner
+
+triggers:
+  event:
+  - tag
+
+steps:
+- name: Build with Gradle
+  image: openjdk:11
+  commands:
+  - chmod +x gradlew
+  - ./gradlew shadowjar
+
+- name: Build Docker container
+  image: plugins/docker
+  settings:
+    repo: registry.thedutchmc.nl/betterplayer
+    tags:
+    - latest
+    registry: registry.thedutchmc.nl
+
+- name: deploy
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server:
+      from_secret: k8s_server
+    kubernetes_cert:
+      from_secret: k8s_cert
+    kubernetes_token:
+      from_secret: k8s_token
+  commands:
+    - kubectl set image deployment/betterplayer-deployment betterplayer=registry.thedutchmc.nl/betterplayer:latest
+
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: discord_webhook
+    username: Drone CI/CD - EspoGmailSync
+  when:
+    status: [ success, failure ]
