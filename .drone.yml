@@ -12,7 +12,7 @@ steps:
   image: openjdk:11
   commands:
   - chmod +x gradlew
-  - ./gradlew shadowjar
+  - ./gradlew releasejar
 
 - name: Build Docker container
   image: plugins/docker

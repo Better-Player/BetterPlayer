@@ -15,7 +15,8 @@ ENV IS_DOCKER=true
 
 RUN mkdir -p /app/
 
-COPY --from=builder /usr/src/betterplayer/build/libs/*.jar /app/betterplayer.jar
+COPY --from=builder /usr/src/betterplayer/releases/*.jar /app/betterplayer.jar
 COPY ./entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
