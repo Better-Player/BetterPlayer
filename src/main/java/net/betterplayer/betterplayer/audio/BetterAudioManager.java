@@ -138,7 +138,6 @@ public class BetterAudioManager {
 	
 	public AudioObject getCurrentlyPlaying(long guildId) {
 		QueueItem qi = queueManager.peekQueue(guildId);
-		//QueueItem qi = queueManager.getCurrentQueueItem(guildId);
 		if(qi == null) return null;
 		
 		AudioPlayer ap = audioPlayers.get(guildId);

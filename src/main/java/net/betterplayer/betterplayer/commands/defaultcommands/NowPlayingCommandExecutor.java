@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.audio.AudioObject;
+import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.BotConfig;
@@ -70,9 +71,11 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		
 		String progressTimeStamp = Utils.milisToTimeStamp(trackPosition) + "/" + Utils.milisToTimeStamp(trackDuration);
 		
+		QueueItem currentItem = betterPlayer.getBetterAudioManager().getQueueManager().getNowPlaying(guildId);
+		
 		//Construct the embed
 		EmbedBuilder eb = new EmbedBuilder()
-				.setTitle(currentlyPlaying.getArtist() + " - " + currentlyPlaying.getName())
+				.setTitle(currentItem.getTrackArtist() + " - " + currentItem.getTrackName())
 				.setColor(Color.GRAY)
 				.addField("Progress", trackProgress, true)
 				.appendDescription(progressTimeStamp)
