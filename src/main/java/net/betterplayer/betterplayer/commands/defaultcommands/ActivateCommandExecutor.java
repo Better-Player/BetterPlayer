@@ -17,6 +17,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+/**
+ * This command gives the user a way to activate their Guild for premium BetterPlayer features<br>
+ * Users need the 'MANAGER_SERVER' Permission to use this
+ */
 @BotCommand(name = "activate", description = "Activate BetterPlayer with your licence key.")
 public class ActivateCommandExecutor implements CommandExecutor {
 

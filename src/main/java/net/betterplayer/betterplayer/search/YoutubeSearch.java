@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;

@@ -16,6 +16,10 @@ import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.utils.Utils;
 
+/**
+ * This command allows users to move a track at index 'n' to the first place, or to index 'k'
+ * This command requires the user to be connected to the same voice channel as BetterPlayer
+ */
 @BotCommand(name = "move", description = "Move a track to a position in queue, or to first place", aliases = {"mv"})
 public class MoveCommandExecutor implements CommandExecutor {
 

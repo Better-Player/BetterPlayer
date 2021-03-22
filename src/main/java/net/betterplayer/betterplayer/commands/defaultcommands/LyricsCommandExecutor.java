@@ -30,6 +30,10 @@ import nl.thedutchmc.httplib.Http;
 import nl.thedutchmc.httplib.Http.RequestMethod;
 import nl.thedutchmc.httplib.Http.ResponseObject;
 
+/**
+ * This command will provide lyrics for the currently playing song, if any are available<br>
+ * This command requires the user to be connected to the same voice channel as BetterPlayer
+ */
 @BotCommand(name = "lyrics", description = "Get the lyrics for the song which is currently playing", aliases = {"l"})
 public class LyricsCommandExecutor implements CommandExecutor {
 
@@ -70,7 +74,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		
 		//Request headers
 		HashMap<String, String> headers = new HashMap<>();
-		headers.put("Authorization", "Bearer " + ksoftApiToken);
+		headers.put("Authorization", "Bearer " + ksoftApiToken.replaceAll("\n", ""));
 		
 		//Request parameters
 		HashMap<String, String> urlParams = new HashMap<>();
