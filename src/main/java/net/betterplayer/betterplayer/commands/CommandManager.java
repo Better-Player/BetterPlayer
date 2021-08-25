@@ -102,9 +102,7 @@ public class CommandManager {
 		BetterPlayer.logInfo(String.format("Loaded %d commands.", this.commandDetails.size()));
 	}
 	
-	private void registerAnnotatedCommands() throws IOException {
-		//Get the path to the JAR we're running from.
-		
+	private void registerAnnotatedCommands() throws IOException {		
 		ClassPath.from(this.getClass().getClassLoader()).getTopLevelClasses("net.betterplayer.betterplayer.commands.defaultcommands").forEach(c -> {
 			Class<?> clazz;
 			try {
