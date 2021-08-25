@@ -13,6 +13,9 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
+import dev.array21.httplib.Http;
+import dev.array21.httplib.Http.RequestMethod;
+import dev.array21.httplib.Http.ResponseObject;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
@@ -26,9 +29,6 @@ import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
-import dev.array21.httplib.Http;
-import dev.array21.httplib.Http.RequestMethod;
-import dev.array21.httplib.Http.ResponseObject;
 
 /**
  * This command will provide lyrics for the currently playing song, if any are available<br>

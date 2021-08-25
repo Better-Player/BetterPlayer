@@ -1,11 +1,11 @@
 package net.betterplayer.betterplayer.events;
 
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.dv8tion.jda.api.JDA;
 import net.betterplayer.betterplayer.commands.CommandManager;
 import net.betterplayer.betterplayer.events.listeners.GuildJoinEventHandler;
 import net.betterplayer.betterplayer.events.listeners.GuildLeaveEventHandler;
 import net.betterplayer.betterplayer.events.listeners.MessageReceivedEventHandler;
+import net.dv8tion.jda.api.JDA;
 
 public class EventManager {
 	

@@ -2,6 +2,7 @@ package net.betterplayer.betterplayer.config.guild;
 
 import java.io.IOException;
 import java.util.HashMap;
+
 import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.datatypes.SqlRow;
 import dev.array21.jdbd.drivers.MysqlDriver;

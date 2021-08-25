@@ -16,14 +16,14 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.JdaHandler;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.managers.AudioManager;
 import net.betterplayer.betterplayer.audio.io.AudioSender;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.utils.Utils;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.managers.AudioManager;
 
 public class BetterAudioManager {
 

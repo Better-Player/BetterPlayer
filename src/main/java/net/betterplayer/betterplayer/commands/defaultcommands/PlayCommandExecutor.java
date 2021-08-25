@@ -9,10 +9,6 @@ import java.util.Map;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
@@ -21,6 +17,10 @@ import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.search.VideoDetails;
 import net.betterplayer.betterplayer.search.YoutubeSearch;
 import net.betterplayer.betterplayer.utils.Utils;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 /**
  * Play command. This will allow the user to play a song via a search query, a YouTube video URL or a YouTube playlist URL

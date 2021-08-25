@@ -3,13 +3,13 @@ package net.betterplayer.betterplayer.events.listeners;
 import java.util.Arrays;
 
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
+import net.betterplayer.betterplayer.events.EventManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
-import net.betterplayer.betterplayer.events.EventManager;
 
 public class MessageReceivedEventHandler extends ListenerAdapter {
 

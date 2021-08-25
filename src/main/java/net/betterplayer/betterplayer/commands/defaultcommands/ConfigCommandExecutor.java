@@ -8,15 +8,15 @@ import java.util.List;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
+import net.betterplayer.betterplayer.commands.CommandExecutor;
+import net.betterplayer.betterplayer.commands.CommandParameters;
+import net.betterplayer.betterplayer.config.ConfigManifest;
+import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.betterplayer.betterplayer.commands.CommandExecutor;
-import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.ConfigManifest;
-import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
 
 /**
  * This command provides a way for server administrators to change config options for BetterPlayer on Discord<br>
