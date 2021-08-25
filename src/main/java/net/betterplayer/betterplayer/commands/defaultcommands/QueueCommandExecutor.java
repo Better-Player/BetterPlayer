@@ -51,7 +51,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 		
 		//First we get the currently playing item
 		QueueItem currentlyPlaying = qm.getNowPlaying(guildId);
-		if(currentlyPlaying == null) {
+		if(currentlyPlaying == null || !bam.isPlaying(guildId)) {
 			senderChannel.sendMessage("I'm currently not playing anything, so the queue is empty!").queue();
 			return;
 		}
