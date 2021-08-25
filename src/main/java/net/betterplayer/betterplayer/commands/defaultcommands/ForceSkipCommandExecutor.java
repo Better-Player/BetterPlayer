@@ -13,7 +13,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command will allow the user to force-skip the currently playing item<br>
@@ -22,7 +22,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "forceskip", description = "Force skip a track", aliases = {"fs"})
 public class ForceSkipCommandExecutor implements CommandExecutor {
 
-	public ForceSkipCommandExecutor(BotConfig botConfig) {}
+	public ForceSkipCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

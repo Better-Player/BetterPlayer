@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command will allow the user to have BetterPlayer to join the channel they are currently in.<br>
@@ -22,7 +22,7 @@ public class JoinCommandExecutor implements CommandExecutor {
 
 	private boolean fromOtherExecutor = false;
 	
-	public JoinCommandExecutor(BotConfig botConfig) {}
+	public JoinCommandExecutor(ConfigManifest botConfig) {}
 	public JoinCommandExecutor() {}
 	
 	/**

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command provides the user with a way to resume a paused player<br>
@@ -15,7 +15,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "resume", description = "Resume BetterPlayer", aliases = {"continue"})
 public class ResumeCommandExecutor implements CommandExecutor {
 
-	public ResumeCommandExecutor(BotConfig botConfig) {}
+	public ResumeCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

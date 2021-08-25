@@ -12,7 +12,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.utils.Utils;
 
 /**
@@ -22,7 +22,7 @@ import net.betterplayer.betterplayer.utils.Utils;
 @BotCommand(name = "remove", description = "Delete an item from the queue, by index shown by $queue", aliases = {"rm", "delete", "del"})
 public class RemoveCommandExecutor implements CommandExecutor {
 
-	public RemoveCommandExecutor(BotConfig botConfig) {}
+	public RemoveCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

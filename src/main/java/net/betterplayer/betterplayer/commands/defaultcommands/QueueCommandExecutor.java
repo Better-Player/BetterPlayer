@@ -15,7 +15,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command will provide the user with the queue for the guild they sent it from.<br>
@@ -24,7 +24,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "queue", description = "Display the current queue", aliases = {"q"})
 public class QueueCommandExecutor implements CommandExecutor {
 	
-	public QueueCommandExecutor(BotConfig botConfig) {}
+	public QueueCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

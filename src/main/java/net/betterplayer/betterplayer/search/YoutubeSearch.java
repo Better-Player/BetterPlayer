@@ -10,7 +10,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.google.gson.Gson;
+
 import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.gson.in.YTMFrontendSearch;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;
 import dev.array21.httplib.Http;
@@ -24,7 +28,7 @@ public class YoutubeSearch {
 	 * @param searchTerms The search terms to search for
 	 * @return Returns a VideoDetails object of the video found. Null if nothing was found
 	 */
-	public VideoDetails searchViaFrontend(String[] searchTerms) {
+	public VideoDetails searchViaFrontend(String apiKey, String[] searchTerms, TextChannel senderChannel) {
 		//Join the search terms together with '+' as delimiter.
 		String q = String.join("+", searchTerms);
 		
@@ -53,7 +57,6 @@ public class YoutubeSearch {
 		String webpageFull = ro.getMessage();
 		
 		//Replace \x (ASCII hex) encoding for \\u00 (Unicode hex), and unescape it
-		//TODO implement StringEscapeUtils.unescapeJava in Utils class, so I don't have to include the commons3 lib
 		String decoded = StringEscapeUtils.unescapeJava(webpageFull.replaceAll(Pattern.quote("\\x"), "\\\\u00"));
 				
 		//Split up the document. We only want the JSON Data		
@@ -63,76 +66,9 @@ public class YoutubeSearch {
 				.split(Pattern.quote("), data: '"))[1]
 				.split(Pattern.quote("'});ytcfg.set({'YTMUSIC_INITIAL_DATA'"))[0];
 		
-		//Time to parse the JSON.
-		//Code is pretty self-explanatory, and I'm too lazy to write comments for something that is pretty obvious
-		//This code needs to be updated if YouTube changes up their stuff
-		JSONObject resultJson = new JSONObject(data);
-		JSONArray contentsChild = resultJson
-				.getJSONObject("contents")
-				.getJSONObject("sectionListRenderer")
-				.getJSONArray("contents");
-				
-		for(Object o : contentsChild) {
-			JSONObject oJson = (JSONObject) o;
-			
-			if(!oJson.has("musicShelfRenderer")) return null;
-			
-			JSONArray musicShelfRendererContents = oJson
-					.getJSONObject("musicShelfRenderer")
-					.getJSONArray("contents");
-			
-			for(Object o1 : musicShelfRendererContents) {
-				JSONObject o1Json = (JSONObject) o1;
-
-				JSONObject renderer = o1Json.getJSONObject("musicResponsiveListItemRenderer");
-				
-				if(!renderer.has("overlay")) {
-					return null;
-				}
-				
-				JSONObject playNavEndPt = renderer
-						.getJSONObject("overlay")
-						.getJSONObject("musicItemThumbnailOverlayRenderer")
-						.getJSONObject("content")
-						.getJSONObject("musicPlayButtonRenderer")
-						.getJSONObject("playNavigationEndpoint");
-				
-				if(!playNavEndPt.has("watchEndpoint")) {
-					return null;
-				}
-					
-				String id = playNavEndPt
-						.getJSONObject("watchEndpoint")
-						.getString("videoId");
-
-				JSONArray textParts = renderer
-						.getJSONArray("flexColumns")
-						.getJSONObject(0)
-						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
-						.getJSONObject("text")
-						.getJSONArray("runs");
-				String title = textParts.getJSONObject(0).getString("text");
-
-				textParts = renderer
-						.getJSONArray("flexColumns")
-						.getJSONObject(1)
-						.getJSONObject("musicResponsiveListItemFlexColumnRenderer")
-						.getJSONObject("text")
-						.getJSONArray("runs");
-				String channel = Utils.fixArtistName(textParts.getJSONObject(2).getString("text"));
-				String duration = textParts.getJSONObject(6).getString("text");
-
-				JSONArray thumbnails = renderer
-						.getJSONObject("thumbnail")
-						.getJSONObject("musicThumbnailRenderer")
-						.getJSONObject("thumbnail")
-						.getJSONArray("thumbnails");
-				String thumbnailUrl = thumbnails.getJSONObject(0).getString("url");
-				
-				return new VideoDetails(id, duration, thumbnailUrl, title, channel);		
-			}
-		}
-		return null;
+		YTMFrontendSearch searchResults = new Gson().fromJson(data, YTMFrontendSearch.class);
+		String id = searchResults.getVideoId();
+		return this.getVideoDetails(apiKey, id, senderChannel);
 	}
 	
 	/**

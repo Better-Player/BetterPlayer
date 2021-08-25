@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.guild.GuildConfigManager.ConfigValueType;
+import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
 import net.betterplayer.betterplayer.events.EventManager;
 
 public class MessageReceivedEventHandler extends ListenerAdapter {
@@ -30,20 +30,23 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 		//Get the message that was sent
 		final String contentDisplayMessage = event.getMessage().getContentDisplay();
 		
-		String guildCommandPrefix = (String) betterPlayer.getGuildConfig().getConfigValue(event.getGuild().getIdLong(), "commandprefix");
-		
-		//If the message does not start with the command prefix, return
-		if(guildCommandPrefix == null) {
-			BetterPlayer.logDebug(String.format("GuildCommandPrefix is null. Assuming that guild has no entry in database, adding it now. For guild: %d", event.getGuild().getIdLong()));
-			guildCommandPrefix = "$";
-			
-			betterPlayer.getGuildConfig().setConfigValue(event.getGuild().getIdLong(), "commandPrefix", "$", ConfigValueType.STRING);
+		GuildConfigManifest manifest = this.betterPlayer.getGuildConfig().getManifest(event.getGuild().getIdLong());
+		if(manifest == null) {
+			manifest = GuildConfigManifest.defaultManifest();
+			this.betterPlayer.getGuildConfig().setManifest(event.getGuild().getIdLong(), manifest);
 		}
 		
-		if(!contentDisplayMessage.startsWith(guildCommandPrefix)) return;
+		//If the message does not start with the command prefix, return
+		if(manifest.getCommandPrefix() == null) {
+			BetterPlayer.logDebug(String.format("GuildCommandPrefix is null. Assuming that guild has no entry in database, adding it now. For guild: %d", event.getGuild().getIdLong()));
+			manifest.setCommandPrefix("$");
+			this.betterPlayer.getGuildConfig().setManifest(event.getGuild().getIdLong(), manifest);
+		}
+		
+		if(!contentDisplayMessage.startsWith(manifest.getCommandPrefix())) return;
 				
 		//Remove the commandPrefix, and split on spaces 
-		String commandWithArgs = contentDisplayMessage.replace(guildCommandPrefix, "");
+		String commandWithArgs = contentDisplayMessage.replace(manifest.getCommandPrefix(), "");
 		String[] parts = commandWithArgs.split(" ");
 
 		//If the user provided any input (because they could just type the prefix), then we want to process
@@ -74,7 +77,7 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 				//Construct an embed informing the user the command did not succeed
 				EmbedBuilder builder = new EmbedBuilder()
 						.setTitle("Unknown command")
-						.setDescription("Use ``" + guildCommandPrefix + "help`` for a list of supported commands");
+						.setDescription("Use ''" + manifest.getCommandPrefix() + "help'' for a list of supported commands");
 				
 				//Send the embed
 				senderChannel.sendMessageEmbeds(builder.build()).queue();

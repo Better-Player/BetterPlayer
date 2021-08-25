@@ -14,6 +14,6 @@ public class GuildLeaveEventHandler extends ListenerAdapter {
 	
 	@Override
 	public void onGuildLeave(GuildLeaveEvent event) {
-		betterPlayer.getGuildConfig().removeGuildFromDb(event.getGuild().getIdLong());
+		betterPlayer.getGuildConfig().removeGuild(event.getGuild().getIdLong());
 	}
 }

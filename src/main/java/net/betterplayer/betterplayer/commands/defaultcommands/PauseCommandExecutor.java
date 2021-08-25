@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command provides the user with a way to pause BetterPlayer<br>
@@ -15,7 +15,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "pause", description = "Pause BetterPlayer")
 public class PauseCommandExecutor implements CommandExecutor {
 
-	public PauseCommandExecutor(BotConfig botConfig) {}
+	public PauseCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

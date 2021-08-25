@@ -13,7 +13,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command provides the user with a way to shuffle the queue<br>
@@ -22,7 +22,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "shuffle", description = "Shuffle the queue", aliases = {"s"})
 public class ShuffleCommandExecutor implements CommandExecutor {
 
-	public ShuffleCommandExecutor(BotConfig botConfig) {}
+	public ShuffleCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

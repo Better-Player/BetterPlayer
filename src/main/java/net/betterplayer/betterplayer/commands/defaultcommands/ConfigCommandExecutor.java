@@ -1,6 +1,7 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,8 +15,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
-import net.betterplayer.betterplayer.config.guild.GuildConfigManager.ConfigValueType;
+import net.betterplayer.betterplayer.config.ConfigManifest;
+import net.betterplayer.betterplayer.config.guild.GuildConfigManifest;
 
 /**
  * This command provides a way for server administrators to change config options for BetterPlayer on Discord<br>
@@ -24,7 +25,7 @@ import net.betterplayer.betterplayer.config.guild.GuildConfigManager.ConfigValue
 @BotCommand(name = "config", description = "Configure BetterPlayer", aliases = {"option", "options"})
 public class ConfigCommandExecutor implements CommandExecutor {
 
-	public ConfigCommandExecutor(BotConfig botConfig) {}
+	public ConfigCommandExecutor(ConfigManifest botConfig) {}
 	
 	//These config options are booleans
 	final List<String> optionsOfTypeBool = new ArrayList<>(Arrays.asList(
@@ -53,8 +54,27 @@ public class ConfigCommandExecutor implements CommandExecutor {
 		if(args.length == 2 && args[0].equalsIgnoreCase("get")){
 			//Get operation
 			String option = args[1].toLowerCase();
-			Object value = betterPlayer.getGuildConfig().getConfigValue(parameters.getGuildId(), option);
+			
+			GuildConfigManifest manifest = betterPlayer.getGuildConfig().getManifest(guild.getIdLong());
+			if(manifest == null) {
+				manifest = betterPlayer.getGuildConfig().getDefaultManifest(guild.getIdLong());
+			}
+			
+			String value = null;
+			for(Field f : manifest.getClass().getDeclaredFields()) {
+				if(f.getName().toLowerCase().equals(option)) {
+					f.setAccessible(true);
 
+					try {
+						value = f.get(manifest).toString();
+					} catch(Exception e) {
+						e.printStackTrace();
+						senderChannel.sendMessage("Something went wrong, please try again later!").queue();
+						return;
+					}
+				}
+			}
+			
 			//Check if the value is null, meaning the config option does not exist
 			if(value == null) {
 				senderChannel.sendMessage("Unknown config option!").queue();
@@ -64,7 +84,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Configuration for " + guild.getName())
 					.setColor(Color.GRAY)
-					.addField(option, value.toString(), false)
+					.addField(option, value, false)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 
 			senderChannel.sendMessageEmbeds(eb.build()).queue();
@@ -73,8 +93,25 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			String option = args[1].toLowerCase();
 			String value = args[2].toLowerCase();
 			
-			//Get the original config value
-			Object originalValue = betterPlayer.getGuildConfig().getConfigValue(parameters.getGuildId(), option);
+			GuildConfigManifest manifest = betterPlayer.getGuildConfig().getManifest(guild.getIdLong());
+			if(manifest == null) {
+				manifest = betterPlayer.getGuildConfig().getDefaultManifest(guild.getIdLong());
+			}
+			
+			String originalValue = null;
+			for(Field f : manifest.getClass().getDeclaredFields()) {
+				if(f.getName().toLowerCase().equals(option)) {
+					f.setAccessible(true);
+
+					try {
+						originalValue = f.get(manifest).toString();
+					} catch(Exception e) {
+						e.printStackTrace();
+						senderChannel.sendMessage("Something went wrong, please try again later!").queue();
+						return;
+					}
+				}
+			}
 			
 			//Check if the original value is null, meaning the config option does not exist
 			if(originalValue == null) {
@@ -82,21 +119,21 @@ public class ConfigCommandExecutor implements CommandExecutor {
 				return;
 			}
 			
-			//Determine the type of the value
-			ConfigValueType cvt;
-			if(optionsOfTypeBool.contains(option)) {
-				cvt = ConfigValueType.BOOLEAN;
-				
-				//Check if the value is 'true' or 'false', the only two acceptable answers for a Boolean
-				if(!(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
-					senderChannel.sendMessage("Value must be either ``true`` or ``false``!").queue();
-					return;
+			for(Field f : manifest.getClass().getDeclaredFields()) {
+				if(f.getName().toLowerCase().equals(option)) {
+					f.setAccessible(true);
+					
+					try {
+						f.set(manifest, value);
+					} catch(Exception e) {
+						e.printStackTrace();
+						senderChannel.sendMessage("Something went wrong, please try again later!").queue();
+						return;
+					}
 				}
-			} else {
-				cvt = ConfigValueType.STRING;
 			}
 			
-			betterPlayer.getGuildConfig().setConfigValue(parameters.getGuildId(), option, value, cvt);
+			betterPlayer.getGuildConfig().setManifest(guild.getIdLong(), manifest);
 			
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Configuration for " + guild.getName())
@@ -107,7 +144,8 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		} else {
 			//Sender idd not provide the correct number of arguments
-			senderChannel.sendMessage("Invalid number of arguments provided. See ``" + betterPlayer.getGuildConfig().getConfigValue(parameters.getGuildId(), "commandprefix") + "help`` for more info!").queue();
+			GuildConfigManifest manifest = betterPlayer.getGuildConfig().getManifest(guild.getIdLong());
+			senderChannel.sendMessage("Invalid number of arguments provided. See ''" + manifest.getCommandPrefix() + "help'' for more info!").queue();
 		}
 	}
 }

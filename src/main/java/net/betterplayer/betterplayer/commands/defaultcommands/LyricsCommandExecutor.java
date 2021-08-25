@@ -20,8 +20,8 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
-import net.betterplayer.betterplayer.gson.in.ksoft.GetLyricsResponse;
+import net.betterplayer.betterplayer.config.ConfigManifest;
+import net.betterplayer.betterplayer.gson.in.KsoftGetLyricsResponse;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -37,10 +37,10 @@ import dev.array21.httplib.Http.ResponseObject;
 @BotCommand(name = "lyrics", description = "Get the lyrics for the song which is currently playing", aliases = {"l"})
 public class LyricsCommandExecutor implements CommandExecutor {
 
-	private BotConfig botConfig;
+	private ConfigManifest botConfig;
 	private final String KSOFT_LYRICS_SEARCH = "https://api.ksoft.si/lyrics/search";
 	
-	public LyricsCommandExecutor(BotConfig botConfig) {
+	public LyricsCommandExecutor(ConfigManifest botConfig) {
 		this.botConfig = botConfig;
 	}
 	
@@ -63,18 +63,16 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
 		QueueItem currentlyPlaying = qm.getNowPlaying(parameters.getGuildId());
 		String searchQuery = currentlyPlaying.getTrackArtist() + currentlyPlaying.getTrackName();
-		
-		String ksoftApiToken = (String) this.botConfig.getConfigValue("ksoftApiToken");
-		
+				
 		//Verify that the administrator provided a KSoft API token
-		if(ksoftApiToken == null) {
+		if(this.botConfig.getKsoftApiToken() == null) {
 			senderChannel.sendMessage("Unable to get the lyrics: This instance of BetterPlayer does not have a KSoft API Token configured. Please contact the administrator of this BetterPlayer instance!").queue();
 			return;
 		}
 		
 		//Request headers
 		HashMap<String, String> headers = new HashMap<>();
-		headers.put("Authorization", "Bearer " + ksoftApiToken.replaceAll("\n", ""));
+		headers.put("Authorization", "Bearer " + this.botConfig.getKsoftApiToken().replaceAll("\n", ""));
 		
 		//Request parameters
 		HashMap<String, String> urlParams = new HashMap<>();
@@ -105,10 +103,10 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		
 		//Deserialize
 		final Gson gson = new Gson();
-		GetLyricsResponse lyricsResponse = gson.fromJson(apiResponse.getMessage(), GetLyricsResponse.class);
+		KsoftGetLyricsResponse lyricsResponse = gson.fromJson(apiResponse.getMessage(), KsoftGetLyricsResponse.class);
 		
 		//Get the lyrics data
-		GetLyricsResponse.Data[] lyricsData = lyricsResponse.getData();
+		KsoftGetLyricsResponse.Data[] lyricsData = lyricsResponse.getData();
 		
 		//If there length is 0, the API returned no results
 		if(lyricsData.length == 0) {
@@ -117,7 +115,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		}
 		
 		//We're only really interested in the first of the provided results
-		GetLyricsResponse.Data firstData = lyricsData[0];
+		KsoftGetLyricsResponse.Data firstData = lyricsData[0];
 		String lyrics = firstData.getLyrics();
 		
 		//Discord only allows a description to have 2048 characters.

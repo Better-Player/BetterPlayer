@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 /**
  * This command will provide the user with a way to clear the entire queue for the guild<br>
@@ -18,7 +18,7 @@ import net.betterplayer.betterplayer.config.BotConfig;
 @BotCommand(name = "clearqueue", description = "Clear the queue.", aliases = {"clear", "c"})
 public class ClearQueueCommandExecutor implements CommandExecutor {
 
-	public ClearQueueCommandExecutor(BotConfig botConfig) {}
+	public ClearQueueCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {		

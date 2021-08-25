@@ -14,6 +14,6 @@ public class GuildJoinEventHandler extends ListenerAdapter {
 	
 	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
-		betterPlayer.getGuildConfig().initializeDbForGuild(event.getGuild().getIdLong());
+		betterPlayer.getGuildConfig().getDefaultManifest(event.getGuild().getIdLong());
 	}		
 }

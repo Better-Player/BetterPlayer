@@ -8,16 +8,16 @@ Requirments:
 - API Key for the YouTube Data API
 - Discord Bot
 
-For now you'll have to build the Docker images yourself, using e.g ``docker build -t betterplayer:latest .`` while being in the root of this repository.
+For now you'll have to build the Docker images yourself, using e.g ''docker build -t betterplayer:latest .'' while being in the root of this repository.
 
 ### Required environmental variables
-`BOT_TOKEN` (String): Your Discord bot token  
-`USE_GOOGLE_API` (Boolean): Whether to use the Google APIs for search or use the YouTube Music frontend  
-`GOOGLE_API_KEY` (String): Google API key, required regardless of the value of `USE_GOOGLE_API`  
-`DB_HOST`: Your database host  
-`DB_NAME`: The name of the database  
-`DB_USERNAME`: Username for logging into the database  
-`DB_PASSWORD`: Password for logging into the database  
+'BOT_TOKEN' (String): Your Discord bot token  
+'USE_GOOGLE_API' (Boolean): Whether to use the Google APIs for search or use the YouTube Music frontend  
+'GOOGLE_API_KEY' (String): Google API key, required regardless of the value of 'USE_GOOGLE_API'  
+'DB_HOST': Your database host  
+'DB_NAME': The name of the database  
+'DB_USERNAME': Username for logging into the database  
+'DB_PASSWORD': Password for logging into the database  
 
 ## Progress
 You can find what is being worked on [here](https://trello.com/b/2n8vzaSp/betterplayer)

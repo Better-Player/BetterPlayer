@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.commands.CommandManager;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.config.guild.GuildConfigManager;
 import net.betterplayer.betterplayer.events.EventManager;
 import net.betterplayer.betterplayer.utils.Utils;
@@ -33,7 +33,7 @@ public class BetterPlayer {
 	private JdaHandler jdaHandler;
 	private EventManager eventManager;
 	private CommandManager commandManager;
-	private BotConfig config;
+	private ConfigManifest config;
 	private GuildConfigManager guildConfig;
 	public static void main(String[] args) {		
 		List<String> argsList = Arrays.asList(args);
@@ -65,9 +65,7 @@ public class BetterPlayer {
 	private void init() {
 		INSTANCE = this;
 
-		//Read the config
-		config = new BotConfig(this);
-		config.read();
+		this.config = ConfigManifest.fromEnv();
 		
 		//Fetch the Guild configs
 		guildConfig = new GuildConfigManager(config);
@@ -81,7 +79,7 @@ public class BetterPlayer {
 		//libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
 		
 		//Initialize JDA and connect to Discord
-		jdaHandler.initJda((String) config.getConfigValue("botToken"));
+		jdaHandler.initJda(this.config.getBotToken());
 				
 		try {
 			Thread.sleep(1000);

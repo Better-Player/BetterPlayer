@@ -1,23 +1,17 @@
 package net.betterplayer.betterplayer.commands;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.jar.JarFile;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
+import com.google.common.reflect.ClassPath;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
-import net.betterplayer.betterplayer.config.BotConfig;
-import net.betterplayer.betterplayer.utils.Pair;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.utils.Utils;
 
 public class CommandManager {
@@ -25,14 +19,14 @@ public class CommandManager {
 	private BetterPlayer betterPlayer;
 	private HashMap<String, CommandExecutor> executors = new HashMap<>();
 	private List<CommandDetails> commandDetails = new ArrayList<>();
-	private BotConfig config;
+	private ConfigManifest config;
 	
 	/**
 	 * Initialize CommandManager. This should be done only once.
 	 * @param betterPlayer BetterPlayer instance
 	 * @param config Config instance
 	 */
-	public CommandManager(BetterPlayer betterPlayer, BotConfig config) {
+	public CommandManager(BetterPlayer betterPlayer, ConfigManifest config) {
 		this.betterPlayer = betterPlayer;
 		this.config = config;
 		
@@ -109,6 +103,61 @@ public class CommandManager {
 	
 	private void registerAnnotatedCommands() throws IOException {
 		//Get the path to the JAR we're running from.
+		
+		ClassPath.from(this.getClass().getClassLoader()).getTopLevelClasses("net.betterplayer.betterplayer.commands.defaultcommands").forEach(c -> {
+			Class<?> clazz;
+			try {
+				clazz = Class.forName(c.getName());
+			} catch (ClassNotFoundException e) {
+				// Not possible
+				e.printStackTrace();
+				System.exit(1);
+				return;
+			}
+			
+			if(clazz.isAnnotationPresent(BotCommand.class)) {
+				//Get the Class' constructor
+				Constructor<?> constructor;
+				try {
+					constructor = clazz.getConstructor(ConfigManifest.class);
+				} catch (NoSuchMethodException | SecurityException e) {
+					BetterPlayer.logError(String.format("Class annotated with @BotCommand does not have Constructor taking BotConfig as only argument!", clazz.getName()));
+					BetterPlayer.logDebug(Utils.getStackTrace(e));
+					return;
+				}
+				
+				//Create an instance of the Class
+				Object executorObject;
+				try {
+					executorObject = constructor.newInstance(this.config);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					BetterPlayer.logError("Unable to create instance of class " + clazz.getName());
+					BetterPlayer.logDebug(Utils.getStackTrace(e));
+					return;
+				}
+
+				//Check if the class implements CommandExecutor
+				List<Class<?>> annotations = Arrays.asList(clazz.getInterfaces());
+				if(!annotations.contains(CommandExecutor.class)) {
+					BetterPlayer.logError(String.format("Class '%s' annotated with @BotCommand does not implement CommandExecutor!", clazz.getName()));
+					return;
+				}
+				
+				//Cast the object to CommandExecutor
+				CommandExecutor executorImpl = (CommandExecutor) executorObject;
+				
+				//Get the annotation details
+				BotCommand botCommandAnnotation = clazz.getAnnotation(BotCommand.class);
+				
+				//Finally, register the class
+				register(botCommandAnnotation.name(), executorImpl, botCommandAnnotation.description(), botCommandAnnotation.aliases());
+				
+				BetterPlayer.logDebug(String.format("Loaded BotCommand: '%s' (%s)", botCommandAnnotation.name(), clazz.getName()));
+			}
+			
+		});
+		
+		/*
 		File jarPath;
 		try {
 			jarPath = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -161,45 +210,9 @@ public class CommandManager {
 			if(annotatedChecked.getFirst()) {
 				//Class is annotated with the @BotCommand annotation
 				
-				//Get the Class' constructor
-				Constructor<?> constructor;
-				try {
-					constructor = annotatedChecked.getSecond().getConstructor(BotConfig.class);
-				} catch (NoSuchMethodException | SecurityException e) {
-					BetterPlayer.logError(String.format("Class annotated with @BotCommand does not have Constructor taking BotConfig as only argument!", className));
-					BetterPlayer.logDebug(Utils.getStackTrace(e));
-					continue;
-				}
-				
-				//Create an instance of the Class
-				Object executorObject;
-				try {
-					executorObject = constructor.newInstance(this.config);
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					BetterPlayer.logError("Unable to create instance of class " + className);
-					BetterPlayer.logDebug(Utils.getStackTrace(e));
-					continue;
-				}
 
-				//Check if the class implements CommandExecutor
-				List<Class<?>> annotations = Arrays.asList(annotatedChecked.getSecond().getInterfaces());
-				if(!annotations.contains(CommandExecutor.class)) {
-					BetterPlayer.logError(String.format("Class '%s' annotated with @BotCommand does not implement CommandExecutor!", className));
-					continue;
-				}
-				
-				//Cast the object to CommandExecutor
-				CommandExecutor executorImpl = (CommandExecutor) executorObject;
-				
-				//Get the annotation details
-				BotCommand botCommandAnnotation = annotatedChecked.getSecond().getAnnotation(BotCommand.class);
-				
-				//Finally, register the class
-				register(botCommandAnnotation.name(), executorImpl, botCommandAnnotation.description(), botCommandAnnotation.aliases());
-				
-				BetterPlayer.logDebug(String.format("Loaded BotCommand: '%s' (%s)", botCommandAnnotation.name(), className));
 			}
-		}
+		}*/
 	}
 	
 	/**
@@ -209,8 +222,10 @@ public class CommandManager {
 	 * @return Returns a Pair, where A is a Boolean indicating whether the Class is annotated with the provided annotation. B is a Class<?> object for the className
 	 * @throws ClassNotFoundException Thrown when the provided className does not exist
 	 */
+	/*
 	private Pair<Boolean, Class<?>>isAnnotatedWith(String className, Class<? extends Annotation> annotation) throws ClassNotFoundException {
 		Class<?> clazz = Class.forName(className, false, this.getClass().getClassLoader());
 		return new Pair<Boolean, Class<?>>(clazz.isAnnotationPresent(annotation), clazz);
 	}
+	*/
 }

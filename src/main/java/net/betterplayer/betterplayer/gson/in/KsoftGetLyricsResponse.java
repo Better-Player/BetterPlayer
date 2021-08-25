@@ -1,8 +1,8 @@
-package net.betterplayer.betterplayer.gson.in.ksoft;
+package net.betterplayer.betterplayer.gson.in;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GetLyricsResponse {
+public class KsoftGetLyricsResponse {
 
 	private long total;
 	private int took;

@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.betterplayer.betterplayer.commands.CommandDetails;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.utils.Utils;
 
 /**
@@ -22,7 +22,7 @@ import net.betterplayer.betterplayer.utils.Utils;
 @BotCommand(name = "help", description = "Displays the help menu.")
 public class HelpCommandExecutor implements CommandExecutor {
 
-	public HelpCommandExecutor(BotConfig botConfig) {}
+	public HelpCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

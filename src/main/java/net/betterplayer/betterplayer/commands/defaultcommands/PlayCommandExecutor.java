@@ -17,7 +17,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.search.VideoDetails;
 import net.betterplayer.betterplayer.search.YoutubeSearch;
 import net.betterplayer.betterplayer.utils.Utils;
@@ -29,12 +29,10 @@ import net.betterplayer.betterplayer.utils.Utils;
 @BotCommand(name = "play", description = "Play a YouTube video, playlist, or search for a video", aliases = {"p"})
 public class PlayCommandExecutor implements CommandExecutor {
 
-	private boolean useApi;
-	private String apiKey;
+	private ConfigManifest config;
 	
-	public PlayCommandExecutor(BotConfig botConfig) {
-		this.useApi = (boolean) botConfig.getConfigValue("useGoogleApi");
-		this.apiKey = (String) botConfig.getConfigValue("googleApikey");
+	public PlayCommandExecutor(ConfigManifest config) {
+		this.config = config;
 	}
 	
 	@Override
@@ -78,7 +76,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 				
 				senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();						
 				
-				List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(apiKey, listId, senderChannel, null);
+				List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(this.config.getGoogleApiKey(), listId, senderChannel, null);
 				
 				if(vds != null && vds.size() >= 1) {					
 					for(VideoDetails details : vds) {								
@@ -111,7 +109,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			} else if(urlQueryParameters.containsKey("v")) {
 				String videoId = urlQueryParameters.get("v");
 				
-				VideoDetails vd = new YoutubeSearch().getVideoDetails(apiKey, videoId, senderChannel);
+				VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
 				
 				if(vd != null) {
 					processVideoDetails(betterPlayer, parameters, vd, true);
@@ -121,11 +119,12 @@ public class PlayCommandExecutor implements CommandExecutor {
 				
 				return;
 			}
-		} else if(useApi) {
-			VideoDetails details = new YoutubeSearch().searchViaApi(apiKey, parameters.getArgs(), senderChannel);
+			
+		} else if(this.config.isUseGoogleApiForSearch()) {
+			VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
 			processVideoDetails(betterPlayer, parameters, details, true);
 		} else {
-			VideoDetails details = new YoutubeSearch().searchViaFrontend(parameters.getArgs());
+			VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
 			processVideoDetails(betterPlayer, parameters, details, true);
 		}
 	}

@@ -11,7 +11,7 @@ import net.betterplayer.betterplayer.audio.AudioObject;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
-import net.betterplayer.betterplayer.config.BotConfig;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.utils.Utils;
 
 /**
@@ -20,7 +20,7 @@ import net.betterplayer.betterplayer.utils.Utils;
 @BotCommand(name = "nowplaying", description = "Display details about the track that is playing at the moment", aliases = {"np"})
 public class NowPlayingCommandExecutor implements CommandExecutor {
 
-	public NowPlayingCommandExecutor(BotConfig botConfig) {}
+	public NowPlayingCommandExecutor(ConfigManifest botConfig) {}
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

@@ -1,107 +1,52 @@
 package net.betterplayer.betterplayer.config.guild;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-
-import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.config.BotConfig;
-import net.betterplayer.betterplayer.config.guild.database.SqlManager;
+import dev.array21.jdbd.datatypes.PreparedStatement;
+import dev.array21.jdbd.datatypes.SqlRow;
+import dev.array21.jdbd.drivers.MysqlDriver;
+import dev.array21.jdbd.drivers.MysqlDriverFactory;
+import dev.array21.jdbd.exceptions.SqlException;
+import net.betterplayer.betterplayer.annotations.Nullable;
+import net.betterplayer.betterplayer.config.ConfigManifest;
 
 public class GuildConfigManager {
-	
-	//TODO JSON config
-	
-	private SqlManager sqlManager;
-	private HashMap<Long, HashMap<String, Object>> guildConfigs = new HashMap<>();
 		
-	private final String dbHost, dbName, dbUsername, dbPassword;
-	
-	public GuildConfigManager(BotConfig botConfig) {
-				
-		dbHost = (String) botConfig.getConfigValue("dbHost");
-		dbName = (String) botConfig.getConfigValue("dbName");
-		dbUsername = (String) botConfig.getConfigValue("dbUsername");
-		dbPassword = (String) botConfig.getConfigValue("dbPassword");
-		
-		//Create a new SQL manager
-		sqlManager = new SqlManager(dbHost, dbName, dbUsername, dbPassword);
-		
-		//Check the database to see if all required tables exist
-		checkDb();
-		
-		//Read the database
-		guildConfigs = readGuildConfigsTable();
-	}
-	
-	public SqlManager getSqlManager() {
-		return this.sqlManager;
-	}
-	
-	/**
-	 * Check if all required tables in the database are present (if it's initialized or not)
-	 * If not, create them
-	 */
-	private void checkDb() {
-		String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'guildConfigs' AND TABLE_SCHEMA = ?";
-		
-		List<String> requiredTableNames = new ArrayList<>(Arrays.asList(
-			"guildConfigs"
-		));
+	private MysqlDriver database;
+			
+	public GuildConfigManager(ConfigManifest config) {
 		
 		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			pr.setString(1, this.dbName);
-			ResultSet rs = sqlManager.executeFetchQuery(pr);
-			
-			List<String> allTableNames = new ArrayList<>();
-			while(rs.next()) {
-				String tableName = rs.getString("TABLE_NAME");
-				allTableNames.add(tableName);
-			}
-						
-			//There are some tables, but not all. The sysadmin must wipe the DB to proceed
-			if(!allTableNames.isEmpty() && !allTableNames.containsAll(requiredTableNames)) {
-				BetterPlayer.logError("Your database is not complete. Please drop it!");
-				System.exit(1);
-			}
-			
-			//The DB is empty, meaning it's unitinialized, so do that
-			if(allTableNames.isEmpty()) {
-				BetterPlayer.logInfo("Database is unitialized, initializing!");
-				initDb();
-			}
-			
-		} catch (SQLException e) {
+			this.database = new MysqlDriverFactory()
+					.setHost(config.getDbHost())
+					.setDatabase(config.getDbDatabase())
+					.setUsername(config.getDbUsername())
+					.setPassword(config.getDbPassword())
+					.build();
+		} catch (IOException e) {
 			e.printStackTrace();
-			//TODO error handling
+			System.exit(1);
 		}
+		
+		this.migrate();
 	}
+	
+	public MysqlDriver getDatabaseDriver() {
+		return this.database;
+	}
+	
 	
 	/**
 	 * Initialize the database with the default required tables for BetterPlayer
 	 * @param existingTables W
 	 */
-	private void initDb() {
-		/*
-		 * Table: guildConfigs
-		 * - guildid 					Big Integer, primary key
-		 * - commandprefix				Varchar, length 1
-		 * - usedeepspeech				boolean
-		 * - volume						integer
-		 */
-		String sql = "CREATE TABLE `" + this.dbName + "`.`guildConfigs` ( `guildid` BIGINT NOT NULL , `commandprefix` VARCHAR(1) NOT NULL , `usedeepspeech` BOOLEAN NOT NULL , PRIMARY KEY (`guildid`)) ENGINE = InnoDB;";
+	private void migrate() {
 		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			sqlManager.executePutQuery(pr);
-		} catch(SQLException e) {
+			PreparedStatement pr = new PreparedStatement("CREATE TABLE IF NOT EXISTS guildConfigs (`guildid` BIGINT NOT NULL PRIMARY KEY, `commandprefix` VARCHAR(1) NOT NULL)");
+			this.database.execute(pr);
+		} catch(SqlException e) {
 			e.printStackTrace();
-			//TODO error handling
+			System.exit(1);
 		}
 	}
 	
@@ -110,53 +55,35 @@ public class GuildConfigManager {
 	 * Key of the outer hashmap is the field guildId in the table<br>
 	 * Value is a HashMap of all other fields in the table for that guildId<br>
 	 */
-	private HashMap<Long, HashMap<String, Object>> readGuildConfigsTable() {
-		HashMap<Long, HashMap<String, Object>> result = new HashMap<>();
-		
-		String sql = "SELECT * FROM guildConfigs";
+	private HashMap<Long, GuildConfigManifest> getGuildConfigs() {
+		HashMap<Long, GuildConfigManifest> configs = new HashMap<>();
+		SqlRow[] rs;
 		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			ResultSet rs = sqlManager.executeFetchQuery(pr);
-			ResultSetMetaData md = rs.getMetaData();
-			int columnCount = md.getColumnCount();
-			
-			while(rs.next()) {
-				HashMap<String, Object> guildConfig = new HashMap<>();
-				long guildId = rs.getLong("guildid");
-				
-				//SQL Stuff is not 0-based, its 1-based,
-				//we start at 2 because we don't want to read the guildId again
-				for(int i = 2; i <= columnCount; i++) {
-					guildConfig.put(md.getColumnName(i), rs.getObject(i));
-				}
-				
-				result.put(guildId, guildConfig);
-			}
-		} catch(SQLException e) {
+			rs = this.database.query(new PreparedStatement("SELECT guildid,commandprefix FROM guildConfigs"));
+		} catch(SqlException e) {
 			e.printStackTrace();
-			//TODO error handling
+			return null;
 		}
 		
-		return result;
+		for(SqlRow row : rs) {
+			long guildId = row.getLong("guildid");
+			GuildConfigManifest manifest = GuildConfigManifest.fromRow(row);
+			
+			configs.put(guildId, manifest);
+		}
+		
+		return configs;
 	}
 	
 	/**
 	 * Get a config value for a guild
 	 * @param guildId The ID of the guild
-	 * @param key The key of the value to fetch
-	 * @return Returns the found value, null if the config didn't exist or if the key did not have a value
+	 * @return Returns the Manifest for the provided guild, or null if it does not exist
 	 */
-	public Object getConfigValue(long guildId, String key) {
-		//Check if a config exists for the guild
-		if(!guildConfigs.containsKey(guildId))
-			return null;
-		
-		//Check if the config for the guild contains the option requested
-		if(!guildConfigs.get(guildId).containsKey(key))
-			return null;
-		
-		//Return the requested option
-		return guildConfigs.get(guildId).get(key);
+	@Nullable
+	public GuildConfigManifest getManifest(long guildId) {
+		HashMap<Long, GuildConfigManifest> configs = this.getGuildConfigs();
+		return configs.get(guildId);
 	}
 	
 	/**
@@ -165,113 +92,63 @@ public class GuildConfigManager {
 	 * @param key
 	 * @param value
 	 */
-	public void setConfigValue(long guildId, String key, String value, ConfigValueType type) {
-		HashMap<String, Object> config;
-		boolean exists;
-		
-		//Check if the guildConfigs map contains the config for this guild, if so get it<br>
-		//if not create a new hashmap and use that, and add an initial entry for the guild
-		if(guildConfigs.containsKey(guildId)) {
-			config = guildConfigs.get(guildId);
-			exists = true;
+	public void setManifest(long guildId, GuildConfigManifest manifest) {
+		HashMap<Long, GuildConfigManifest> configs = this.getGuildConfigs();
+		if(configs.containsKey(guildId)) {
+			PreparedStatement pr = new PreparedStatement("UPDATE guildConfigs SET commandprefix = '?' WHERE guildid = '?'");
+			pr.bind(0, manifest.getCommandPrefix());
+			pr.bind(1, guildId);
+			
+			try {
+				this.database.execute(pr);
+			} catch(SqlException e) {
+				e.printStackTrace();
+			}
 		} else {
-			config = new HashMap<>();
-			exists = false;
+			PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES ('?', '?')");
+			pr.bind(0, guildId);
+			pr.bind(1, manifest.getCommandPrefix());
+			
+			try {
+				this.database.execute(pr);
+			} catch(SqlException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		//Insert the key-value pair into the config, and put the config into the guildConfigs map
-		config.put(key, value);
-		guildConfigs.put(guildId, config);
-		
-		//If no config existed yet, that means the DB doesn't have an entry yet for this guild
-		//Create one
-		//Only do so if we use a database
-		if(!exists) {
-			initializeDbForGuild(guildId);
-			//TODO create initial JSON config
-		}
-		
-		//Update the value in the database, if it is enabled
-		updateDbForGuild(guildId, key, value, type);
-		//TODO write to json config
 	}
 	
 	/**
-	 * Create a default value row for a guild
+	 * Create a default manifest for a Guild and insert it into the database
 	 * @param guildId The ID of the guild to initialize
 	 */
-	public void initializeDbForGuild(long guildId) {
-		String sql = "INSERT INTO `guildConfigs` (`guildid`, `commandprefix`, `usedeepspeech`) VALUES (?, '$', '0')";
+	public GuildConfigManifest getDefaultManifest(long guildId) {
+		GuildConfigManifest manifest = GuildConfigManifest.defaultManifest();
 		
-		HashMap<String, Object> defaultConfig = new HashMap<>();
-		defaultConfig.put("commandprefix", "$");
-		defaultConfig.put("usedeepspeech", false);
-		
-		this.guildConfigs.put(guildId, defaultConfig);
-		
-		System.out.println("Guild config");
+		PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES ('?', '?')");
+		pr.bind(0, guildId);
+		pr.bind(1, manifest.getCommandPrefix());
 		
 		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			pr.setLong(1, guildId);
-			
-			sqlManager.executePutQuery(pr);
-		} catch(SQLException e) {
+			this.database.execute(pr);
+		} catch(SqlException e) {
 			e.printStackTrace();
-			//TODO error handling
 		}
+		
+		return manifest;
 	}
 	
 	/**
 	 * Remove all values associated with this guild from the database
 	 * @param guildId The ID of the guild to remove
 	 */
-	public void removeGuildFromDb(long guildId) {
-		String sql = "DELETE FROM guildConfigs WHERE guildid = ?";
-		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-			pr.setLong(1, guildId);
-			
-			sqlManager.executePutQuery(pr);
-		} catch(SQLException e) {
-			e.printStackTrace();
-			//TODO error handling
-		}
-	}
-	
-	/**
-	 * Update a field in the database
-	 * @param guildId The ID of the guild to update
-	 * @param key The field name to update
-	 * @param value The value to set
-	 */
-	private void updateDbForGuild(long guildId, String key, String value, ConfigValueType type) {
+	public void removeGuild(long guildId) {
+		PreparedStatement pr = new PreparedStatement("DELETE FROM guildConfigs WHERE guildid = '?'");
+		pr.bind(0, guildId);
 		
-		//Dont need to worry about SQL Injection here. The function calling this should have checked if the given key exists
-		String sql = "UPDATE guildConfigs SET " + key + "= ? WHERE `guildid` = ?";
 		try {
-			PreparedStatement pr = sqlManager.createPreparedStatement(sql);
-
-			switch(type) {
-			case STRING: pr.setString(1, value.toString()); break;
-			case BOOLEAN: pr.setBoolean(1, Boolean.valueOf(value)); break;
-			case INTEGER: pr.setInt(1, Integer.valueOf(value)); break;
-			}
-			
-			pr.setLong(2, guildId);			
-			sqlManager.executePutQuery(pr);
-		} catch(SQLException e) {
+			this.database.execute(pr);
+		} catch(SqlException e) {
 			e.printStackTrace();
-			//TODO error handling
 		}
-	}
-	
-	/**
-	 * The type of the value that is being set
-	 */
-	public static enum ConfigValueType {
-		STRING,
-		BOOLEAN,
-		INTEGER
 	}
 }
