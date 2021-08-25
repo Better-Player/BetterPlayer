@@ -126,6 +126,6 @@ public class QueueCommandExecutor implements CommandExecutor {
 		eb.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 
 		//Finally, send the embed!
-		senderChannel.sendMessage(eb.build()).queue();
+		senderChannel.sendMessageEmbeds(eb.build()).queue();
 	}
 }

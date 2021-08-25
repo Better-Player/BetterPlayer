@@ -20,7 +20,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
-import net.betterplayer.betterplayer.audio.io.AudioReceiver;
 import net.betterplayer.betterplayer.audio.io.AudioSender;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
@@ -32,7 +31,6 @@ public class BetterAudioManager {
 	private final TrackScheduler trackScheduler;
 	private final QueueManager queueManager;
 	private final JdaHandler jdaHandler;
-	private final BetterPlayer betterPlayer;
 	
 	private HashMap<Long, AudioPlayer> audioPlayers = new HashMap<>();
 	private List<VoiceChannel> connectedChannels = new ArrayList<>();
@@ -40,7 +38,6 @@ public class BetterAudioManager {
 	private HashMap<Long, Long> boundTextChannels = new HashMap<>();
 	
 	public BetterAudioManager(BetterPlayer betterPlayer) {
-		this.betterPlayer = betterPlayer;
 		
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);
@@ -75,10 +72,6 @@ public class BetterAudioManager {
 		am.openAudioConnection(targetChannel);
 		am.setSelfDeafened(false);
 		am.setSendingHandler(new AudioSender(audioPlayers.get(targetChannel.getGuild().getIdLong())));
-		
-		if(betterPlayer.getLibBetterPlayerBinder().isAvailable() /*&& betterPlayer.getAuthBinder().isActivated(targetChannel.getGuild().getIdLong())*/) {
-			am.setReceivingHandler(new AudioReceiver(betterPlayer));
-		}
 		
 		connectedChannels.add(targetChannel);
 		boundTextChannels.put(targetChannel.getGuild().getIdLong(), senderChannelId);
@@ -227,7 +220,7 @@ public class BetterAudioManager {
 				.setDescription(message)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		
-		senderChannel.sendMessage(eb.build()).queue();
+		senderChannel.sendMessageEmbeds(eb.build()).queue();
 		
 		//Play the next song!
 		loadTrack(qi.getIdentifier(), guildId);

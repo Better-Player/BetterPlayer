@@ -102,7 +102,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 							.addField("Position in queue", String.valueOf(posInQueue +1), true)
 							.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 					
-					senderChannel.sendMessage(eb.build()).queue();
+					senderChannel.sendMessageEmbeds(eb.build()).queue();
 				} else {	
 					senderChannel.sendMessage("Unknown playlist or the playlist contains no videos!").queue();
 				}
@@ -203,7 +203,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 					.addField("Position in queue", String.valueOf(posInQueue +1), true)
 					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
-			senderChannel.sendMessage(eb.build()).queue();
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		}
 	}
 }

@@ -84,7 +84,7 @@ public class MoveCommandExecutor implements CommandExecutor {
 					.addBlankField(true)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 
-			senderChannel.sendMessage(eb.build()).queue();
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		} else if(args.length == 2) {
 			if(!(Utils.verifyPositiveInteger(parameters.getArgs()[0], senderChannel) || Utils.verifyPositiveInteger(parameters.getArgs()[1], senderChannel))) {
 				return;
@@ -123,7 +123,7 @@ public class MoveCommandExecutor implements CommandExecutor {
 					.addField("New position", String.valueOf(indexTo), true)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
-			senderChannel.sendMessage(eb.build()).queue();
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		}
 	}	
 }

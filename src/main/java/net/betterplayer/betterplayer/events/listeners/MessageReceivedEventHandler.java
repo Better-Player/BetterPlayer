@@ -77,7 +77,7 @@ public class MessageReceivedEventHandler extends ListenerAdapter {
 						.setDescription("Use ``" + guildCommandPrefix + "help`` for a list of supported commands");
 				
 				//Send the embed
-				senderChannel.sendMessage(builder.build()).queue();
+				senderChannel.sendMessageEmbeds(builder.build()).queue();
 			}
 		}
 	}

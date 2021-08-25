@@ -116,6 +116,6 @@ public class HelpCommandExecutor implements CommandExecutor {
 		}
 
 		//Send the embed
-		senderChannel.sendMessage(embedBuilder.build()).queue();
+		senderChannel.sendMessageEmbeds(embedBuilder.build()).queue();
 	}
 }

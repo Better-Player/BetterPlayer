@@ -13,9 +13,9 @@ import org.json.JSONObject;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;
-import nl.thedutchmc.httplib.Http;
-import nl.thedutchmc.httplib.Http.RequestMethod;
-import nl.thedutchmc.httplib.Http.ResponseObject;
+import dev.array21.httplib.Http;
+import dev.array21.httplib.Http.RequestMethod;
+import dev.array21.httplib.Http.ResponseObject;
 
 public class YoutubeSearch {
 	

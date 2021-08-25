@@ -15,8 +15,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
-import net.betterplayer.betterplayer.bindings.AuthBinder;
-import net.betterplayer.betterplayer.bindings.LibBetterPlayerBinder;
 import net.betterplayer.betterplayer.commands.CommandManager;
 import net.betterplayer.betterplayer.config.BotConfig;
 import net.betterplayer.betterplayer.config.guild.GuildConfigManager;
@@ -37,9 +35,6 @@ public class BetterPlayer {
 	private CommandManager commandManager;
 	private BotConfig config;
 	private GuildConfigManager guildConfig;
-	private AuthBinder authBinder;
-	private LibBetterPlayerBinder libBetterPlayerBinder;
-
 	public static void main(String[] args) {		
 		List<String> argsList = Arrays.asList(args);
 		
@@ -77,22 +72,6 @@ public class BetterPlayer {
 		//Fetch the Guild configs
 		guildConfig = new GuildConfigManager(config);
 
-		authBinder = new AuthBinder(guildConfig.getSqlManager(), (String) config.getConfigValue("dbName"));
-		if(authBinder.isAvailabe()) {
-			BetterPlayer.logInfo("Authentication is available. Using it.");
-			authBinder.setup();
-		} else {
-			BetterPlayer.logInfo("Authentication is not available. Not using it.");
-		}
-		
-		libBetterPlayerBinder = new LibBetterPlayerBinder();
-		if(libBetterPlayerBinder.isAvailable()) {
-			BetterPlayer.logInfo("LibBetterPlayer is available. Using it.");
-			libBetterPlayerBinder.setup();
-		} else {
-			BetterPlayer.logInfo("LibBetterPlayer is not available. Not using it.");
-		}
-		
 		//Create all objects required for operation
 		jdaHandler = new JdaHandler(this);
 		betterAudioManager = new BetterAudioManager(this);
@@ -129,19 +108,6 @@ public class BetterPlayer {
 				} catch(Exception e) {}
 			}
 		}, "shutdown-thread"));
-	}
-	
-	/**
-	 * Get the AuthBinder<br>
-	 * <strong> Before using AuthBinder, check {@link AuthBinder#isAvailabe()}</strong>
-	 * @return Returns the AuthBinder
-	 */
-	public AuthBinder getAuthBinder() {
-		return this.authBinder;
-	}
-	
-	public LibBetterPlayerBinder getLibBetterPlayerBinder() {
-		return this.libBetterPlayerBinder;
 	}
 	
 	/**

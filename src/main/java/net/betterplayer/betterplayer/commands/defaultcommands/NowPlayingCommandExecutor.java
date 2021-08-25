@@ -82,6 +82,6 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 				
 		//Send the embed
-		senderChannel.sendMessage(eb.build()).queue();
+		senderChannel.sendMessageEmbeds(eb.build()).queue();
 	}
 }

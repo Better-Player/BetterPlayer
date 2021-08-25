@@ -26,9 +26,9 @@ import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
-import nl.thedutchmc.httplib.Http;
-import nl.thedutchmc.httplib.Http.RequestMethod;
-import nl.thedutchmc.httplib.Http.ResponseObject;
+import dev.array21.httplib.Http;
+import dev.array21.httplib.Http.RequestMethod;
+import dev.array21.httplib.Http.ResponseObject;
 
 /**
  * This command will provide lyrics for the currently playing song, if any are available<br>
@@ -186,7 +186,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 				}
 				
 				//Attach the file to the message
-				senderChannel.sendFile(tmpFile, "thumbnail." + extension).embed(eb.build()).queue();
+				senderChannel.sendFile(tmpFile, "thumbnail." + extension).setEmbeds(eb.build()).queue();
 				try {
 					Thread.sleep(5000);
 				} catch(InterruptedException e) {
@@ -195,7 +195,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 				
 				tmpFile.delete();
 			} else {
-				senderChannel.sendMessage(eb.build()).queue();
+				senderChannel.sendMessageEmbeds(eb.build()).queue();
 			}
 		}
 	}

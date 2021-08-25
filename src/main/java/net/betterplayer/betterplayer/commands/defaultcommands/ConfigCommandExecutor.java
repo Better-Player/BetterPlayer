@@ -67,7 +67,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					.addField(option, value.toString(), false)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 
-			senderChannel.sendMessage(eb.build()).queue();
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		} else if(args.length == 3 && args[0].equalsIgnoreCase("set")) {
 			//Set operation
 			String option = args[1].toLowerCase();
@@ -104,7 +104,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 					.addField(option, "From " + originalValue.toString() + " to " + value, false)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
-			senderChannel.sendMessage(eb.build()).queue();
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		} else {
 			//Sender idd not provide the correct number of arguments
 			senderChannel.sendMessage("Invalid number of arguments provided. See ``" + betterPlayer.getGuildConfig().getConfigValue(parameters.getGuildId(), "commandprefix") + "help`` for more info!").queue();
