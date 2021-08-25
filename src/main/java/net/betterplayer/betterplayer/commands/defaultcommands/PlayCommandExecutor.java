@@ -67,17 +67,38 @@ public class PlayCommandExecutor implements CommandExecutor {
 				senderChannel.sendMessage("That URL is invalid!").queue();
 			}
 			
-			//If the query parameters contains the key 'list' we're dealing with a playlist
-			//However if the value of the 'list' parameter is 'LL', it's the thumbs up playlist.
-			//If the value is 'WL', that is the Watch Later playlist.
-			//We cannot read these so we won't treat it as a playlist
-			if(urlQueryParameters.containsKey("list") && !urlQueryParameters.get("list").equals("LL") && !urlQueryParameters.get("list").equals("WL")) {
+			if(urlQueryParameters.containsKey("v")) {
+				String videoId = urlQueryParameters.get("v");
+				
+				VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
+				
+				if(vd != null) {
+					processVideoDetails(betterPlayer, parameters, vd, true);
+				} else {
+					senderChannel.sendMessage("Unknown video!").queue();
+				}
+				
+				return;
+				
+			} else if(urlQueryParameters.containsKey("list") && !urlQueryParameters.containsKey("v")) {
+	 			//If the query parameters contains the key 'list' we're dealing with a playlist
 				String listId = urlQueryParameters.get("list");
+				
+				// Your Likes playlist
+				if(listId.equals("LL")) {
+					senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Your Likes' playlist, as it is automatically generated and only visible to you.").queue();
+					return;
+				}
+				
+				// Watch Later playlist
+				if(listId.equals("WL")) {
+					senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Watch Later' playlist, as it is automatically generated and only visible to you.").queue();
+					return;
+				}
 				
 				senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();						
 				
 				List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(this.config.getGoogleApiKey(), listId, senderChannel, null);
-				
 				if(vds != null && vds.size() >= 1) {					
 					for(VideoDetails details : vds) {								
 						processVideoDetails(betterPlayer, parameters, details, false);
@@ -106,26 +127,16 @@ public class PlayCommandExecutor implements CommandExecutor {
 				}
 				
 				return;
-			} else if(urlQueryParameters.containsKey("v")) {
-				String videoId = urlQueryParameters.get("v");
-				
-				VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
-				
-				if(vd != null) {
-					processVideoDetails(betterPlayer, parameters, vd, true);
-				} else {
-					senderChannel.sendMessage("Unknown video!").queue();
-				}
-				
-				return;
 			}
 			
-		} else if(this.config.isUseGoogleApiForSearch()) {
-			VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, true);
 		} else {
-			VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, true);
+			if(this.config.isUseGoogleApiForSearch()) {
+				VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
+				processVideoDetails(betterPlayer, parameters, details, true);
+			} else {
+				VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
+				processVideoDetails(betterPlayer, parameters, details, true);
+			}
 		}
 	}
 		
@@ -156,10 +167,6 @@ public class PlayCommandExecutor implements CommandExecutor {
 		
 		//Create a QueueItem for the video
 		QueueItem qi = new QueueItem(videoDetails.getId(), videoDetails.getTitle(), videoDetails.getChannel());
-		
-		//Add the item to the queue
-		//qm.addToQueue(guildId, qi);
-		//qm.addToQueue(qi, parameters.getGuildId());
 		
 		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {
 			qm.setNowPlaying(guildId, qi);
