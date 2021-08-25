@@ -8,6 +8,7 @@ import dev.array21.jdbd.datatypes.SqlRow;
 import dev.array21.jdbd.drivers.MysqlDriver;
 import dev.array21.jdbd.drivers.MysqlDriverFactory;
 import dev.array21.jdbd.exceptions.SqlException;
+import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.Nullable;
 import net.betterplayer.betterplayer.config.ConfigManifest;
 
@@ -17,6 +18,7 @@ public class GuildConfigManager {
 			
 	public GuildConfigManager(ConfigManifest config) {
 		
+		BetterPlayer.logInfo("Loading database driver.");
 		try {
 			this.database = new MysqlDriverFactory()
 					.setHost(config.getDbHost())
@@ -42,6 +44,7 @@ public class GuildConfigManager {
 	 * @param existingTables W
 	 */
 	private void migrate() {
+		BetterPlayer.logInfo("Migrating database, where needed.");
 		try {
 			PreparedStatement pr = new PreparedStatement("CREATE TABLE IF NOT EXISTS guildConfigs (`guildid` BIGINT NOT NULL PRIMARY KEY, `commandprefix` VARCHAR(1) NOT NULL)");
 			this.database.execute(pr);

@@ -24,7 +24,6 @@ import net.betterplayer.betterplayer.utils.Utils;
 public class BetterPlayer {
 	public static volatile boolean DEBUG = false;
 	public static volatile boolean IS_READY = false;
-	public static volatile boolean IS_DOCKER = false;
 	
 	private static BetterPlayer INSTANCE;
 	private static final Logger LOGGER = LogManager.getLogger(BetterPlayer.class);
@@ -35,18 +34,10 @@ public class BetterPlayer {
 	private CommandManager commandManager;
 	private ConfigManifest config;
 	private GuildConfigManager guildConfig;
-	public static void main(String[] args) {		
+	
+	public static void main(String[] args) {
+		logInfo("BetterPlayer loading.");
 		List<String> argsList = Arrays.asList(args);
-		
-		//Check if we're running in Docker
-		if(System.getenv("IS_DOCKER") != null && System.getenv("IS_DOCKER").equalsIgnoreCase("true")) {
-			IS_DOCKER = true;
-			
-			//Check the DEBUG env variable
-			if(System.getenv("DEBUG") != null && System.getenv("DEBUG").equalsIgnoreCase("true")) {
-				DEBUG = true;
-			}
-		}
 		
 		if(argsList.contains("--debug")) DEBUG = true;
 		
@@ -65,27 +56,23 @@ public class BetterPlayer {
 	private void init() {
 		INSTANCE = this;
 
+		logInfo("Reading configuration.");
+		
 		this.config = ConfigManifest.fromEnv();
-		
-		//Fetch the Guild configs
-		guildConfig = new GuildConfigManager(config);
-
-		//Create all objects required for operation
-		jdaHandler = new JdaHandler(this);
-		betterAudioManager = new BetterAudioManager(this);
-		commandManager = new CommandManager(this, config);
-		eventManager = new EventManager(commandManager, this);
-		
-		//libBetterPlayerBinder.transformDiscordAudioToSpec(new short[] {0, 1, 0, 1});
+		this.guildConfig = new GuildConfigManager(config);
+		this.jdaHandler = new JdaHandler();
+		this.betterAudioManager = new BetterAudioManager(this);
+		this.commandManager = new CommandManager(this, this.config);
+		this.eventManager = new EventManager(this.commandManager, this);
 		
 		//Initialize JDA and connect to Discord
-		jdaHandler.initJda(this.config.getBotToken());
+		this.jdaHandler.initJda(this.config.getBotToken());
+
+		// Register default events
+		logInfo("Loading default events.");
+		this.eventManager.registerDefaultEvents(this.jdaHandler.getJda());
 				
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}		
+		logInfo("BetterPlayer started.");
 	}
 	
 	private void setupShutdown() {
@@ -96,13 +83,13 @@ public class BetterPlayer {
 			public void run() {
 				
 				//Disconnect from all connected voice channels
-				betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
-					betterAudioManager.leaveAudioChannel(vc, false);
+				BetterPlayer.this.betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
+					BetterPlayer.this.betterAudioManager.leaveAudioChannel(vc, false);
 				});
 				
 				//Shutdown the JDA. This is guaranteed to throw errors, but we do not care for them.
 				try {
-					jdaHandler.shutdownJda();
+					BetterPlayer.this.jdaHandler.shutdownJda();
 				} catch(Exception e) {}
 			}
 		}, "shutdown-thread"));

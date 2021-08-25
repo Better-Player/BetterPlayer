@@ -11,14 +11,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class JdaHandler {
 	
 	private JDA jda;
-	private final BetterPlayer betterPlayer;
-	
-	public JdaHandler(BetterPlayer betterPlayer) {
-		this.betterPlayer = betterPlayer;
-	}
 	
 	public void initJda(String token) {
-
 		JDABuilder jdaBuilder = JDABuilder.createDefault(token)
 				.enableIntents(
 						GatewayIntent.GUILD_MESSAGES,
@@ -27,6 +21,7 @@ public class JdaHandler {
 				.setActivity(Activity.playing("https://github.com/TheDutchMC/BetterPlayer"));
 
 		try {
+			BetterPlayer.logInfo("Loading JDA");
 			jda = jdaBuilder.build();
 			jda.awaitReady();
 		} catch(LoginException e) {
@@ -35,11 +30,7 @@ public class JdaHandler {
 		} catch (InterruptedException e) {
 			BetterPlayer.logError("Unable to complete startup. JDA Connection was interrupted. Run with --debug for more info.");
 			BetterPlayer.logDebug(Utils.getStackTrace(e));
-		}
-		
-		betterPlayer.getEventManager().registerDefaultEvents(jda);
-		
-		//betterPlayer.getBetterAudioManager().joinAudioChannel(734870031359541251L);
+		}		
 	}
 	
 	public void shutdownJda() throws Exception {

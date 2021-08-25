@@ -38,6 +38,7 @@ public class BetterAudioManager {
 	private HashMap<Long, Long> boundTextChannels = new HashMap<>();
 	
 	public BetterAudioManager(BetterPlayer betterPlayer) {
+		BetterPlayer.logInfo("Loading audio manager");
 		
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);

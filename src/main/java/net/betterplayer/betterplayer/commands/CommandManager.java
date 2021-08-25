@@ -91,7 +91,7 @@ public class CommandManager {
 	 * This function will set up the default CommandExecutors shipped with BetterPlayer
 	 */
 	private void setupDefault() {
-		BetterPlayer.logInfo("Loading commands...");
+		BetterPlayer.logInfo("Loading commands.");
 		try {
 			registerAnnotatedCommands();
 		} catch(IOException e) {
@@ -99,7 +99,7 @@ public class CommandManager {
 			BetterPlayer.logInfo(Utils.getStackTrace(e));
 		}
 		
-		BetterPlayer.logInfo(String.format("Successfully loaded %d commands.", this.commandDetails.size()));
+		BetterPlayer.logInfo(String.format("Loaded %d commands.", this.commandDetails.size()));
 	}
 	
 	private void registerAnnotatedCommands() throws IOException {
@@ -157,76 +157,5 @@ public class CommandManager {
 			}
 			
 		});
-		
-		/*
-		File jarPath;
-		try {
-			jarPath = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-		} catch (URISyntaxException e) {
-			BetterPlayer.logError("Unable to determine the path to the JAR which is currently used.");
-			BetterPlayer.logDebug(Utils.getStackTrace(e));
-
-			System.exit(1);
-			return;
-		}
-		
-		JarFile jarFile = new JarFile(jarPath);
-		
-		//Get all files ending in class
-		// - Replace .class with nothing
-		// - Replace '/' with '.'
-		//
-		// So e.g net/betterplayer/betterplayer/commands/defaultcommands/PlayCommandExecutor.class
-		// becomes: net.betterplayer.betterplayer.commands.defaultcommands.PlayCommandExecutor
-		List<String> classNamesInJar = jarFile.stream()
-				.map(ZipEntry::getName)
-				.filter(name -> name.endsWith(".class"))
-				.map(name -> name
-						.replace(".class", "")
-						.replace('/', '.'))
-				.distinct()
-				.collect(Collectors.toList());
-		
-		jarFile.close();
-				
-		for(String className : classNamesInJar) {
-			
-			//We only want to load classes in within our domain
-			//Since we wont encounter any BotCommands outside of it
-			if(!className.startsWith("net.betterplayer")) {
-				continue;
-			}
-			
-			//Check if the Class is annotated with the @BotCommand annotation
-			Pair<Boolean, Class<?>> annotatedChecked;
-			try {
-				annotatedChecked = isAnnotatedWith(className, BotCommand.class);
-			} catch(ClassNotFoundException e) {
-				BetterPlayer.logError(String.format("Unable to determine if '%s' is annotated with the @BotCommand annotation", className));
-				BetterPlayer.logDebug(Utils.getStackTrace(e));
-
-				continue;
-			}
-			
-			if(annotatedChecked.getFirst()) {
-				//Class is annotated with the @BotCommand annotation
-				
-
-			}
-		}*/
 	}
-	
-	/**
-	 * Check if a Class is annotated with an annotation
-	 * @param className The name of the Class
-	 * @param annotation The annotation Class
-	 * @return Returns a Pair, where A is a Boolean indicating whether the Class is annotated with the provided annotation. B is a Class<?> object for the className
-	 * @throws ClassNotFoundException Thrown when the provided className does not exist
-	 */
-	/*
-	private Pair<Boolean, Class<?>>isAnnotatedWith(String className, Class<? extends Annotation> annotation) throws ClassNotFoundException {
-		Class<?> clazz = Class.forName(className, false, this.getClass().getClassLoader());
-		return new Pair<Boolean, Class<?>>(clazz.isAnnotationPresent(annotation), clazz);
-	}
-	*/
 }
