@@ -1,7 +1,9 @@
 # BetterPlayer
 An open-source music bot for Discord written in Java.
 
-## Running BetterPlayer
+You can add BetterPlayer to your Discord server by going to [https://join.betterplayer.net](https://join.betterplayer.net), alternatively you can choose to host your own instance of BetterPlayer 
+
+## Running BetterPlayer  yourself
 Requirments:
 - Runtime which can run Docker containers
 - MySQL Database
