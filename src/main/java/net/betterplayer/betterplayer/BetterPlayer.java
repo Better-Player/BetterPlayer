@@ -59,6 +59,7 @@ public class BetterPlayer {
 		logInfo("Reading configuration.");
 		
 		this.config = ConfigManifest.fromEnv();
+		this.config.verifyPrint();
 		this.guildConfig = new GuildConfigManager(config);
 		this.jdaHandler = new JdaHandler();
 		this.betterAudioManager = new BetterAudioManager(this);

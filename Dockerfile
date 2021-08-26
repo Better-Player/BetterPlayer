@@ -1,22 +1,16 @@
 #Builder docker container
-FROM openjdk:11.0.10-jdk as builder
-RUN mkdir -p /usr/src/betterplayer
-COPY . /usr/src/betterplayer
+FROM gradle:7.2-jdk16 AS BUILDER
+COPY ./src /usr/src/betterplayer/src
+COPY build.gradle /usr/src/betterplayer
+COPY settings.gradle /usr/src/betterplayer
 
 WORKDIR /usr/src/betterplayer
-RUN chmod +x gradlew
 
-RUN ./gradlew shadowjar
+RUN gradle releasejar
 
 
-#Runtime Docker container
-FROM openjdk:11.0.10-jre
-ENV IS_DOCKER=true
+FROM ubuntu:focal
+RUN apt update && apt install --no-install-recommends -y ca-certificates openjdk-16-jre-headless
+COPY --from=BUILDER /usr/src/betterplayer/releases/BetterPlayer-*-RELEASE.jar /usr/jar/betterplayer.jar
 
-RUN mkdir -p /app/
-
-COPY --from=builder /usr/src/betterplayer/releases/*.jar /app/betterplayer.jar
-COPY ./entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+ENTRYPOINT [ "java", "-jar", "/usr/jar/betterplayer.jar" ]
