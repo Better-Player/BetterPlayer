@@ -3,6 +3,8 @@ An open-source music bot for Discord written in Java.
 
 You can add BetterPlayer to your Discord server by going to [https://join.betterplayer.net](https://join.betterplayer.net), alternatively you can choose to host your own instance of BetterPlayer 
 
+If you want to use the Beta version of BetterPlayer, or have a second instance of BetterPlayer available in your server, you can add BetterPlayer Canary at [https://canary.betterplayer.net](https://canary.betterplayer.net)
+
 ## Commands
 The default prefix is `$`. To see a list of all commands, their shorthands and what they do use `$help` in a channel where BetterPlayer can send and receive messages
 
