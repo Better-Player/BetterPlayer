@@ -179,6 +179,8 @@ public class QueueManager {
 			return;
 		}
 		
+		this.nowPlaying.remove(guildId);
+		
 		guildQueue.clear();
 		this.queues.put(guildId, guildQueue);
 	}

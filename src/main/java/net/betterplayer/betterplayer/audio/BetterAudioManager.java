@@ -16,6 +16,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.JdaHandler;
+import net.betterplayer.betterplayer.annotations.Nullable;
 import net.betterplayer.betterplayer.audio.io.AudioSender;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
@@ -58,6 +59,52 @@ public class BetterAudioManager {
 		if(!audioPlayers.containsKey(guildId)) {
 			audioPlayers.put(guildId, audioPlayer);
 		}
+	}
+	
+	public enum SkipAction {
+		QUEUE_END,
+		NEXT_TRACK,
+		OK
+	}
+	
+	/**
+	 * Skip N seconds of the current track. If the new position is higher than the track duration, then the next track will be queued
+	 * @param guildId The ID of the guild
+	 * @param seconds N seconds to skip
+	 * @return Returns the action performed
+	 */
+	@Nullable
+	public SkipAction skipSeconds(long guildId, long n) {
+		AudioPlayer ap = this.audioPlayers.get(guildId);
+		if(ap == null) {
+			return null;
+		}
+		
+		AudioTrack at = ap.getPlayingTrack();
+		if(at == null) {
+			return null;
+		}
+		
+		long pos = at.getPosition();
+		long newPos = pos + (n * 1000);
+		
+		long dur = at.getDuration();
+		if(newPos >= dur) {
+			QueueManager qm = this.queueManager;
+			
+			QueueItem qi = qm.pollQueue(guildId);
+			if(qi == null) {
+				this.setPlaying(guildId, false);
+				return SkipAction.QUEUE_END;
+			}
+			
+			qm.setNowPlaying(guildId, qi);
+			this.loadTrack(qi.getIdentifier(), guildId);
+			return SkipAction.NEXT_TRACK;
+		}
+		
+		at.setPosition(newPos);
+		return SkipAction.OK;
 	}
 	
 	public boolean hasAudioPlayer(long guildId) {
@@ -131,15 +178,16 @@ public class BetterAudioManager {
 	}
 	
 	public AudioObject getCurrentlyPlaying(long guildId) {
-		QueueItem qi = queueManager.peekQueue(guildId);
-		if(qi == null) return null;
+		QueueItem np = queueManager.getNowPlaying(guildId);
+		
+		if(np == null) return null;
 		
 		AudioPlayer ap = audioPlayers.get(guildId);
 		
 		if(ap == null) return null;
 		AudioTrack at = ap.getPlayingTrack();
 		
-		AudioObject ao = new AudioObject(at, ap, qi.getTrackName(), qi.getTrackArtist());
+		AudioObject ao = new AudioObject(at, ap, np.getTrackName(), np.getTrackArtist());
 		return ao;
 	}
 	

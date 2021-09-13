@@ -153,7 +153,6 @@ public class CommandManager {
 				
 				BetterPlayer.logDebug(String.format("Loaded BotCommand: '%s' (%s)", botCommandAnnotation.name(), clazz.getName()));
 			}
-			
 		});
 	}
 }

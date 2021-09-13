@@ -51,18 +51,19 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		
 		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 		QueueManager qm = bam.getQueueManager();
-				
+	
+		
+		if(queueIndex >= qm.getQueueSize(guildId)) {
+			senderChannel.sendMessage("Invalid queue index!").queue();
+			return;
+		}
+	
 		//Get the queue item we want to remove, since we want to inform the user what they removed
 		QueueItem itemToRemove = qm.peekQueueAtIndex(guildId, queueIndex);
 		
 		//If the itemToRemove is null, that means the index the user provided is more than the length of the queue
 		if(itemToRemove == null) {
 			senderChannel.sendMessage("No song found at that position in the queue!").queue();
-			return;
-		}
-		
-		if(queueIndex >= qm.getQueueSize(guildId)) {
-			senderChannel.sendMessage("Invalid queue index!").queue();
 			return;
 		}
 		
