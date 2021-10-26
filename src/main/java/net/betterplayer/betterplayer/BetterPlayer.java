@@ -79,20 +79,17 @@ public class BetterPlayer {
 	private void setupShutdown() {
 		
 		//Before our application is terminated by the JVM we want to try to properly stop all we need to
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				
-				//Disconnect from all connected voice channels
-				BetterPlayer.this.betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
-					BetterPlayer.this.betterAudioManager.leaveAudioChannel(vc, false);
-				});
-				
-				//Shutdown the JDA. This is guaranteed to throw errors, but we do not care for them.
-				try {
-					BetterPlayer.this.jdaHandler.shutdownJda();
-				} catch(Exception e) {}
-			}
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+
+			//Disconnect from all connected voice channels
+			BetterPlayer.this.betterAudioManager.getConnectedVoiceChannels().forEach(vc -> {
+				BetterPlayer.this.betterAudioManager.leaveAudioChannel(vc, false);
+			});
+
+			//Shutdown the JDA. This is guaranteed to throw errors, but we do not care for them.
+			try {
+				BetterPlayer.this.jdaHandler.shutdownJda();
+			} catch(Exception e) {}
 		}, "shutdown-thread"));
 	}
 	
@@ -144,10 +141,8 @@ public class BetterPlayer {
 	 * @param targetPath The path where the resource should be saved
 	 */
 	public void saveResource(String name, String targetPath) {
-		InputStream in = null;
-		
 		try {
-			in = this.getClass().getResourceAsStream("/" + name);
+			InputStream in = this.getClass().getResourceAsStream("/" + name);
 			
 			if(name == null) {
 				throw new FileNotFoundException("Cannot find file " + name + " in jar!");

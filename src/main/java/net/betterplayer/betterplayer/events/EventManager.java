@@ -9,8 +9,8 @@ import net.dv8tion.jda.api.JDA;
 
 public class EventManager {
 	
-	private CommandManager commandManager;
-	private BetterPlayer betterPlayer;
+	private final CommandManager commandManager;
+	private final BetterPlayer betterPlayer;
 	
 	public EventManager(CommandManager commandManager, BetterPlayer betterPlayer) {
 		this.commandManager = commandManager;

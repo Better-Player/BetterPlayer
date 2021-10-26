@@ -4,8 +4,8 @@ import net.dv8tion.jda.api.entities.Member;
 
 public class CommandParameters {
 
-	private Member senderMember;
-	private long senderId, channelId, guildId;
+	private final Member senderMember;
+	private final long senderId, channelId, guildId;
 	private String[] args;
 	
 	public CommandParameters(long senderId, long channelId, long guildId, Member senderMember) {

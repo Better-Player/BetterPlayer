@@ -58,14 +58,14 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		}
 		
 		//Construct the visual indicator of how far into the track we are
-		String trackProgress = "";
+		StringBuilder trackProgress = new StringBuilder();
 		for(int i = 0; i < 20; i++) {
 			
 			//If i is equal to the percentageComplete, do a dot rather than a hyphen
 			if(i == percentageTrackComplete) {
-				trackProgress += "\u25CF"; //Black dot
+				trackProgress.append("\u25CF"); //Black dot
 			} else {
-				trackProgress += "-";
+				trackProgress.append("-");
 			}
 		}
 		
@@ -77,7 +77,7 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		EmbedBuilder eb = new EmbedBuilder()
 				.setTitle(currentItem.getTrackArtist() + " - " + currentItem.getTrackName())
 				.setColor(Color.GRAY)
-				.addField("Progress", trackProgress, true)
+				.addField("Progress", trackProgress.toString(), true)
 				.appendDescription(progressTimeStamp)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 				

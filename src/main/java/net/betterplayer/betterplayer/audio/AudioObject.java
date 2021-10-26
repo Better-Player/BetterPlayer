@@ -5,10 +5,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 public class AudioObject {
 
-	private AudioTrack track;
-	private AudioPlayer player;
-	private String name;
-	private String artist;
+	private final AudioTrack track;
+	private final AudioPlayer player;
+	private final String name;
+	private final String artist;
 	
 	public AudioObject(AudioTrack track, AudioPlayer player, String name, String artist) {
 		this.track = track;

@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MessageReceivedEventHandler extends ListenerAdapter {
 
-	private EventManager eventManager;
-	private BetterPlayer betterPlayer;
+	private final EventManager eventManager;
+	private final BetterPlayer betterPlayer;
 	
 	public MessageReceivedEventHandler(EventManager eventManager, BetterPlayer betterPlayer) {
 		this.eventManager = eventManager;

@@ -91,7 +91,7 @@ public class Utils {
 				return false;
 			}
 		} else {
-			senderChannel.sendMessage("You must provide a valid number!");
+			senderChannel.sendMessage("You must provide a valid number!").queue();
 			return false;
 		}
 		

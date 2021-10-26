@@ -41,7 +41,6 @@ public class GuildConfigManager {
 	
 	/**
 	 * Initialize the database with the default required tables for BetterPlayer
-	 * @param existingTables W
 	 */
 	private void migrate() {
 		BetterPlayer.logInfo("Migrating database, where needed.");
@@ -93,8 +92,7 @@ public class GuildConfigManager {
 	/**
 	 * Set a config value for a guild
 	 * @param guildId 
-	 * @param key
-	 * @param value
+	 * @param manifest
 	 */
 	public void setManifest(long guildId, GuildConfigManifest manifest) {
 		HashMap<Long, GuildConfigManifest> configs = this.getGuildConfigs();

@@ -58,18 +58,6 @@ public class MoveCommandExecutor implements CommandExecutor {
 			int realIndex = indexToMove +1;
 						
 			QueueItem itemToMove = qm.peekQueueAtIndex(guildId, realIndex);
-						
-			/*
-			List<QueueItem> upcomingQueue = qm.getFullQueue(guildId).subList(currentQueueIndex+1, qm.getFullQueue(guildId).size()); 
-			upcomingQueue.remove(itemToMove);
-			upcomingQueue.add(0, itemToMove);
-			
-			List<QueueItem> newQueue = new LinkedList<>();
-			newQueue.addAll(qm.getFullQueue(guildId).subList(0, currentQueueIndex+1));
-			newQueue.addAll(upcomingQueue);
-			
-			qm.setQueue(guildId, newQueue);*/
-			
 			qm.addToQueueFront(guildId, itemToMove);
 			
 			//+1 because we've just added an item to the queue, meaning all old indexes
@@ -112,7 +100,7 @@ public class MoveCommandExecutor implements CommandExecutor {
 			fullQueue.add(realTo, itemToMove);
 			
 			//Apply the new queue
-			java.util.Queue<QueueItem> newQueue = new LinkedList<QueueItem>(fullQueue);
+			java.util.Queue<QueueItem> newQueue = new LinkedList<>(fullQueue);
 			qm.setQueue(guildId, newQueue);
 			
 			EmbedBuilder eb = new EmbedBuilder()

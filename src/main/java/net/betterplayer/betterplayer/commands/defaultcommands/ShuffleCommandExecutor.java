@@ -45,7 +45,7 @@ public class ShuffleCommandExecutor implements CommandExecutor {
 		Collections.shuffle(queue, new Random());
 
 		//Set the new queue
-		java.util.Queue<QueueItem> newQueue = new LinkedList<QueueItem>(queue); 
+		java.util.Queue<QueueItem> newQueue = new LinkedList<>(queue);
 		qm.setQueue(guildId, newQueue);
 		
 		//Inform the user

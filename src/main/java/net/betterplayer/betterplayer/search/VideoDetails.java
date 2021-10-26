@@ -1,7 +1,7 @@
 package net.betterplayer.betterplayer.search;
 
 public class VideoDetails {
-	private String id, duration, thumbnailUrl, title, channel;
+	private final String id, duration, thumbnailUrl, title, channel;
     
     public VideoDetails(String id, String duration, String thumbnailUrl, String title, String channel) {
     	this.id = id;

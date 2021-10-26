@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.entities.User;
 @BotCommand(name = "play", description = "Play a YouTube video, playlist, or search for a video", aliases = {"p"})
 public class PlayCommandExecutor implements CommandExecutor {
 
-	private ConfigManifest config;
+	private final ConfigManifest config;
 	
 	public PlayCommandExecutor(ConfigManifest config) {
 		this.config = config;
@@ -61,9 +61,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			Map<String, String> urlQueryParameters = null;
 			try {
 				urlQueryParameters = Utils.splitQuery(new URL(arg0));
-			} catch (UnsupportedEncodingException e) {
-				senderChannel.sendMessage("That URL is invalid!").queue();
-			} catch (MalformedURLException e) {
+			} catch (UnsupportedEncodingException | MalformedURLException e) {
 				senderChannel.sendMessage("That URL is invalid!").queue();
 			}
 			

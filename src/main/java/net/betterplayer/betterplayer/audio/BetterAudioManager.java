@@ -33,10 +33,10 @@ public class BetterAudioManager {
 	private final QueueManager queueManager;
 	private final JdaHandler jdaHandler;
 	
-	private HashMap<Long, AudioPlayer> audioPlayers = new HashMap<>();
-	private List<VoiceChannel> connectedChannels = new ArrayList<>();
-	private HashMap<Long, Boolean> guildsPlaying = new HashMap<>();
-	private HashMap<Long, Long> boundTextChannels = new HashMap<>();
+	private final HashMap<Long, AudioPlayer> audioPlayers = new HashMap<>();
+	private final List<VoiceChannel> connectedChannels = new ArrayList<>();
+	private final HashMap<Long, Boolean> guildsPlaying = new HashMap<>();
+	private final HashMap<Long, Long> boundTextChannels = new HashMap<>();
 	
 	public BetterAudioManager(BetterPlayer betterPlayer) {
 		BetterPlayer.logInfo("Loading audio manager");
@@ -70,7 +70,7 @@ public class BetterAudioManager {
 	/**
 	 * Skip N seconds of the current track. If the new position is higher than the track duration, then the next track will be queued
 	 * @param guildId The ID of the guild
-	 * @param seconds N seconds to skip
+	 * @param n N seconds to skip
 	 * @return Returns the action performed
 	 */
 	@Nullable

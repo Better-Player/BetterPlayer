@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class GuildJoinEventHandler extends ListenerAdapter {
 
-	private BetterPlayer betterPlayer;
+	private final BetterPlayer betterPlayer;
 	
 	public GuildJoinEventHandler(BetterPlayer betterPlayer) {
 		this.betterPlayer = betterPlayer;

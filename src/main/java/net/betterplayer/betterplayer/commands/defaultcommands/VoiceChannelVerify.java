@@ -14,7 +14,7 @@ public class VoiceChannelVerify {
 	/**
 	 * Verify that the user is in the same voice channel as BetterPlayer
 	 * @param betterPlayer BetterPlayer object
-	 * @param parameter CommandParameters
+	 * @param parameters CommandParameters
 	 * @param joinIfNotConnected Should BetterPlayer join the voice channel if it isn't already connected
 	 * @return Returns true if BetterPlayer and the user are in the same voice channel, false otherwise
 	 */
