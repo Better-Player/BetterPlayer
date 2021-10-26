@@ -20,10 +20,7 @@ targetCompatibility = 1.16
 
 repositories {
 	mavenCentral()
-
-	maven { url 'https://jitpack.io' }
 	maven { url 'https://m2.dv8tion.net/releases' }
-
 	mavenLocal()
 }
 
@@ -46,16 +43,8 @@ dependencies {
 
 	//HttpLib, for communicating with external APIs
 	implementation 'dev.array21:httplib:1.2.1'
-
 	implementation 'dev.array21:jdbd:1.0.4'
 }
-
-//Without this Eclipse wont pick up on the proprietary dependencies
-/*eclipse {
-	classpath {
-		plusConfigurations += [configurations.proprietary]
-	}
-}*/
 
 task releaseJar(type: ShadowJar) {
 	description 'Build a release Jar'
