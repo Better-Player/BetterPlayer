@@ -1,9 +1,6 @@
 package net.betterplayer.betterplayer.audio;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -92,11 +89,12 @@ public class BetterAudioManager {
 		if(newPos >= dur) {
 			QueueManager qm = this.queueManager;
 			
-			QueueItem qi = qm.pollQueue(guildId);
-			if(qi == null) {
+			Optional<QueueItem> oqi = qm.pollQueue(guildId);
+			if(oqi.isEmpty()) {
 				this.setPlaying(guildId, false);
 				return SkipAction.QUEUE_END;
 			}
+			QueueItem qi = oqi.get();
 			
 			qm.setNowPlaying(guildId, qi);
 			this.loadTrack(qi.getIdentifier(), guildId);
@@ -178,10 +176,12 @@ public class BetterAudioManager {
 	}
 	
 	public AudioObject getCurrentlyPlaying(long guildId) {
-		QueueItem np = queueManager.getNowPlaying(guildId);
-		
-		if(np == null) return null;
-		
+		Optional<QueueItem> onp = queueManager.getNowPlaying(guildId);
+		if(onp.isEmpty()) {
+			return null;
+		}
+		QueueItem np = onp.get();
+
 		AudioPlayer ap = audioPlayers.get(guildId);
 		
 		if(ap == null) return null;
@@ -235,10 +235,7 @@ public class BetterAudioManager {
 			}
 			
 			@Override
-			public void playlistLoaded(AudioPlaylist playlist) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void playlistLoaded(AudioPlaylist playlist) {}
 			
 			@Override
 			public void noMatches() {
@@ -258,12 +255,13 @@ public class BetterAudioManager {
 		
 		//Skip to the next song
 		//queueManager.incrementQueueIndex(guildId);
-		QueueItem qi = queueManager.pollQueue(guildId);
-		
-		if(qi == null) {
+		Optional<QueueItem> oqi = queueManager.pollQueue(guildId);
+		if(oqi.isEmpty()) {
 			return;
 		}
-						
+
+		QueueItem qi = oqi.get();
+
 		EmbedBuilder eb = new EmbedBuilder()
 				.setTitle("Unable to load track")
 				.setDescription(message)

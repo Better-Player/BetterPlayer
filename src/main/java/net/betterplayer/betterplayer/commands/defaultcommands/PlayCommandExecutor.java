@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -108,7 +109,13 @@ public class PlayCommandExecutor implements CommandExecutor {
 						qm.createQueue(parameters.getGuildId());
 					}
 					
-					int posInQueue = qm.getQueueSize(parameters.getGuildId());
+					Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
+					if(oPosInQueue.isEmpty()) {
+						BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
+						senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+						return;
+					}
+					int posInQueue = oPosInQueue.get();
 
 					VideoDetails videoDetails = vds.get(0);
 					EmbedBuilder eb = new EmbedBuilder()
@@ -193,7 +200,13 @@ public class PlayCommandExecutor implements CommandExecutor {
 		
 		//Get the size of the queue, we display this as position in queue to the user.
 		//we don't have to do +1 here, because the length is not 0-based.
-		int posInQueue = qm.getQueueSize(parameters.getGuildId());
+		Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
+		if(oPosInQueue.isEmpty()) {
+			BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
+			senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+			return;
+		}
+		int posInQueue = oPosInQueue.get();
 		
 		//If announce is true, then we want to send a message to the senderChannel
 		if(announce) {

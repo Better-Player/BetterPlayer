@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -50,18 +51,26 @@ public class QueueCommandExecutor implements CommandExecutor {
 				.setTitle("Queue for " + jda.getGuildById(guildId).getName());
 		
 		//First we get the currently playing item
-		QueueItem currentlyPlaying = qm.getNowPlaying(guildId);
-		if(currentlyPlaying == null || !bam.isPlaying(guildId)) {
+		Optional<QueueItem> oCurrentlyPlaying = qm.getNowPlaying(guildId);
+		if(oCurrentlyPlaying.isEmpty() || !bam.isPlaying(guildId)) {
 			senderChannel.sendMessage("I'm currently not playing anything, so the queue is empty!").queue();
 			return;
 		}
+		QueueItem currentlyPlaying = oCurrentlyPlaying.get();
 		
 		eb.appendDescription("__Now Playing:__\n");
 		eb.appendDescription(currentlyPlaying.getTrackArtist() + " - " + currentlyPlaying.getTrackName() + "\n\n");
 		
 		//Next up we're going to get the rest of the queue
-		List<QueueItem> queue = qm.getFullQueue(guildId);
-		if(qm.getQueueSize(guildId) > 0) {
+		Optional<LinkedList<QueueItem>> oQueue = qm.getFullQueue(guildId);
+		if(oQueue.isEmpty()) {
+			senderChannel.sendMessage("Nothing is currently playing!").queue();
+			return;
+		}
+ 		LinkedList<QueueItem> queue = oQueue.get();
+
+		// Get is safe here because we know the Queue exists
+		if(qm.getQueueSize(guildId).get() > 0) {
 			eb.appendDescription("__Up Next:__\n");
 
 			List<String> queueStrings = new LinkedList<>();
@@ -93,7 +102,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 					//We have to subtract one, because users are 1-based, and the queue is 0 based
 					page = Integer.valueOf(parameters.getArgs()[0]) -1;
 				} else {
-					senderChannel.sendMessage("You must provide a valid number!");
+					senderChannel.sendMessage("You must provide a valid number!").queue();
 				}
 			}
 			
@@ -110,7 +119,11 @@ public class QueueCommandExecutor implements CommandExecutor {
 					
 			//Iterate over the queueStrings list, from the first item on the page to the last item.
 			int iCondition = (page * maxItemsPerPage + maxItemsPerPage);
-			iCondition = (iCondition >= queueStrings.size()) ? queueStrings.size() : iCondition;
+
+			// Keeping this here for now
+			// iCondition = (iCondition >= queueStrings.size()) ? queueStrings.size() : iCondition;
+			iCondition = Math.min(iCondition, queueStrings.size());
+
 			for(int i = (page * maxItemsPerPage); i < iCondition; i++) {
 				eb.appendDescription(queueStrings.get(i));
 			}

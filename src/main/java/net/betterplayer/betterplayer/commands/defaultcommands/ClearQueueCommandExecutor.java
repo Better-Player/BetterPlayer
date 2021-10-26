@@ -5,11 +5,15 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
+import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.util.LinkedList;
+import java.util.Optional;
 
 /**
  * This command will provide the user with a way to clear the entire queue for the guild<br>
@@ -38,12 +42,14 @@ public class ClearQueueCommandExecutor implements CommandExecutor {
 		* - It is null when the bot has not yet joined a voice channel for this guild, so it has never created a queue for the guild
 		* - It's size is 0 when a user has already cleared the queue
 		*/
-		if(bam.getQueueManager().getFullQueue(guildId) == null) {
+		Optional<LinkedList<QueueItem>> oFullQueue =  bam.getQueueManager().getFullQueue(guildId);
+		if(oFullQueue.isEmpty()) {
 			senderChannel.sendMessage("The queue is already empty!").queue();
 			return;
 		}
+		LinkedList<QueueItem> fullQueue = oFullQueue.get();
 			
-		if(bam.getQueueManager().getFullQueue(guildId).size() == 0) {
+		if(fullQueue.size() == 0) {
 			senderChannel.sendMessage("The queue is already empty!").queue();
 			return;
 		}

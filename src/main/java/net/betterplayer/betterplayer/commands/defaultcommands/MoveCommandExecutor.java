@@ -2,7 +2,7 @@ package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -57,7 +57,13 @@ public class MoveCommandExecutor implements CommandExecutor {
 			QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
 			int realIndex = indexToMove +1;
 						
-			QueueItem itemToMove = qm.peekQueueAtIndex(guildId, realIndex);
+			Optional<QueueItem> oItemToMove = qm.peekQueueAtIndex(guildId, realIndex);
+			if(oItemToMove.isEmpty()) {
+				senderChannel.sendMessage("The track you want to move does not exist").queue();
+				return;
+			}
+			QueueItem itemToMove = oItemToMove.get();
+
 			qm.addToQueueFront(guildId, itemToMove);
 			
 			//+1 because we've just added an item to the queue, meaning all old indexes
@@ -89,10 +95,20 @@ public class MoveCommandExecutor implements CommandExecutor {
 			int realTo = indexTo -1;
 			
 			//Get the item we should move
-			QueueItem itemToMove = qm.peekQueueAtIndex(guildId, realFrom);
-			
-			List<QueueItem> fullQueue = qm.getFullQueue(guildId);
-			
+			Optional<QueueItem> oItemToMove = qm.peekQueueAtIndex(guildId, realFrom);
+			if(oItemToMove.isEmpty()) {
+				senderChannel.sendMessage("The track you want to move does not exist").queue();
+				return;
+			}
+			QueueItem itemToMove = oItemToMove.get();
+
+			Optional<LinkedList<QueueItem>> oFullQueue = qm.getFullQueue(guildId);
+			if(oFullQueue.isEmpty()) {
+				senderChannel.sendMessage("No Queue exists for this server").queue();
+				return;
+			}
+			LinkedList<QueueItem> fullQueue = oFullQueue.get();
+
 			//Remove the item from it's current position
 			fullQueue.remove(realFrom);
 			

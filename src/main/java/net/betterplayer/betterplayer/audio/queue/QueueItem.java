@@ -2,7 +2,7 @@ package net.betterplayer.betterplayer.audio.queue;
 
 public class QueueItem {
 
-	private String trackName, identifier, trackArtist;
+	private final String trackName, identifier, trackArtist;
 	
 	public QueueItem(String identifier, String trackName, String trackArtist) {
 		this.identifier = identifier;

@@ -1,6 +1,7 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -41,14 +42,16 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		QueueManager qm = betterAudioManager.getQueueManager();
 		
 		//Get the track which is currently playing, we want to tell the user what they skipped
-		QueueItem currentlyPlaying = qm.getNowPlaying(guildId);
+		Optional<QueueItem> oCurrentlyPlaying = qm.getNowPlaying(guildId);
 				
 		//Get the new current queue item
-		QueueItem qi = qm.pollQueue(guildId);
+		Optional<QueueItem> oqi = qm.pollQueue(guildId);
 		
 		//If the new queue item (qi) is null, that means there is no next track.
 		//If that is the case, we don't play. Otherwhise we will play the next track
-		if(qi != null) {
+		if(oqi.isPresent()) {
+			QueueItem qi = oqi.get();
+
 			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
 			qm.setNowPlaying(guildId, qi);
 		} else {
@@ -56,11 +59,13 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 			betterAudioManager.setPlaying(parameters.getGuildId(), false);
 		}
 		
-		if(currentlyPlaying == null) {
+		if(oCurrentlyPlaying.isEmpty()) {
 			senderChannel.sendMessage("Nothing is currently playing!").queue();
 			return;
 		}
-		
+
+		QueueItem currentlyPlaying = oCurrentlyPlaying.get();
+
 		//Inform the user what they skipped
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Force skipped " + currentlyPlaying.getTrackName(), "https://google.com", sender.getEffectiveAvatarUrl())

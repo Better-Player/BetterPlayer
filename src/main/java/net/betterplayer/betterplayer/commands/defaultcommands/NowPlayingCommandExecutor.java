@@ -1,6 +1,7 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -71,8 +72,13 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		
 		String progressTimeStamp = Utils.milisToTimeStamp(trackPosition) + "/" + Utils.milisToTimeStamp(trackDuration);
 		
-		QueueItem currentItem = betterPlayer.getBetterAudioManager().getQueueManager().getNowPlaying(guildId);
-		
+		Optional<QueueItem> oCurrentItem = betterPlayer.getBetterAudioManager().getQueueManager().getNowPlaying(guildId);
+		if(oCurrentItem.isEmpty()) {
+			senderChannel.sendMessage("I'm currently not playing anything!").queue();
+			return;
+		}
+		QueueItem currentItem = oCurrentItem.get();
+
 		//Construct the embed
 		EmbedBuilder eb = new EmbedBuilder()
 				.setTitle(currentItem.getTrackArtist() + " - " + currentItem.getTrackName())

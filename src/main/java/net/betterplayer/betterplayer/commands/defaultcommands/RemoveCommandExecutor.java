@@ -1,6 +1,7 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -51,22 +52,29 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		
 		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 		QueueManager qm = bam.getQueueManager();
-	
-		
-		if(queueIndex >= qm.getQueueSize(guildId)) {
+
+		Optional<Integer> oQueueSize = qm.getQueueSize(guildId);
+		if(oQueueSize.isEmpty()) {
+			senderChannel.sendMessage("No Queue exists for this server").queue();
+			return;
+		}
+		int queueSize = oQueueSize.get();
+
+		if(queueIndex >= queueSize) {
 			senderChannel.sendMessage("Invalid queue index!").queue();
 			return;
 		}
 	
 		//Get the queue item we want to remove, since we want to inform the user what they removed
-		QueueItem itemToRemove = qm.peekQueueAtIndex(guildId, queueIndex);
+		Optional<QueueItem> oItemToRemove = qm.peekQueueAtIndex(guildId, queueIndex);
 		
 		//If the itemToRemove is null, that means the index the user provided is more than the length of the queue
-		if(itemToRemove == null) {
+		if(oItemToRemove.isEmpty()) {
 			senderChannel.sendMessage("No song found at that position in the queue!").queue();
 			return;
 		}
-		
+		QueueItem itemToRemove = oItemToRemove.get();
+
 		//Attempt to delete the item from the queue
 		qm.removeFromQueue(guildId, queueIndex);
 		

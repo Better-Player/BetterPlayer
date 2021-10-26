@@ -1,9 +1,6 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
@@ -39,8 +36,13 @@ public class ShuffleCommandExecutor implements CommandExecutor {
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
 		
 		//Get the current queue index and the full queue
-		List<QueueItem> queue = qm.getFullQueue(guildId);
-			
+		Optional<LinkedList<QueueItem>> oQueue = qm.getFullQueue(guildId);
+		if(oQueue.isEmpty()) {
+			senderChannel.sendMessage("No Queue exists for this server").queue();
+			return;
+		}
+		LinkedList<QueueItem> queue = oQueue.get();
+
 		//Shuffle the part of the queue that is yet to be played
 		Collections.shuffle(queue, new Random());
 

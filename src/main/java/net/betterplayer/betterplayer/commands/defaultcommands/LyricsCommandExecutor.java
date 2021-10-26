@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
@@ -37,7 +38,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 @BotCommand(name = "lyrics", description = "Get the lyrics for the song which is currently playing", aliases = {"l"})
 public class LyricsCommandExecutor implements CommandExecutor {
 
-	private ConfigManifest botConfig;
+	private final ConfigManifest botConfig;
 	private final String KSOFT_LYRICS_SEARCH = "https://api.ksoft.si/lyrics/search";
 	
 	public LyricsCommandExecutor(ConfigManifest botConfig) {
@@ -61,7 +62,13 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		}
 		
 		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
-		QueueItem currentlyPlaying = qm.getNowPlaying(parameters.getGuildId());
+		Optional<QueueItem> oCurrentlyPlaying = qm.getNowPlaying(parameters.getGuildId());
+		if(oCurrentlyPlaying.isEmpty()) {
+			senderChannel.sendMessage("BetterPlayer is currently not playing anything.").queue();
+			return;
+		}
+		QueueItem currentlyPlaying = oCurrentlyPlaying.get();
+
 		String searchQuery = currentlyPlaying.getTrackArtist() + currentlyPlaying.getTrackName();
 				
 		//Verify that the administrator provided a KSoft API token

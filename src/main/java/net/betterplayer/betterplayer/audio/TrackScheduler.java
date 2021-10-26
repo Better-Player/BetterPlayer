@@ -8,6 +8,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 
+import java.util.Optional;
+
 public class TrackScheduler extends AudioEventAdapter {
 	
 	private final BetterAudioManager betterAudioManager;
@@ -22,14 +24,14 @@ public class TrackScheduler extends AudioEventAdapter {
 			
 			long guildId = betterAudioManager.getGuildId(audioPlayer);		
 			QueueManager qm = betterAudioManager.getQueueManager();
-			
-			QueueItem qi = qm.pollQueue(guildId);
-			
-			if(qi == null) {
+
+			Optional<QueueItem> oqi = qm.pollQueue(guildId);
+			if(oqi.isEmpty()) {
 				this.betterAudioManager.setPlaying(guildId, false);
 				return;
 			}
-			
+			QueueItem qi = oqi.get();
+
 			qm.setNowPlaying(guildId, qi);
 			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
 		}
