@@ -84,4 +84,9 @@ public class Migration {
     private void V2() throws SqlException {
         db.execute(new PreparedStatement("CREATE TABLE savedQueues (`savedQueueId` BIGINT NOT NULL PRIMARY KEY, `queuePosition` INT NOT NULL, `trackName` TEXT NOT NULL, `trackIdentifier` TEXT NOT NULL, `artistName` TEXT NOT NULL)"));
     }
+
+    private void V3() throws SqlException {
+        db.execute(new PreparedStatement("ALTER TABLE savedQueues DROP PRIMARY KEY"));
+        db.execute(new PreparedStatement("ALTER TABLE savedQueues ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY"));
+    }
 }
