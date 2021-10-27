@@ -171,7 +171,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 		}
 		
 		//Create a QueueItem for the video
-		QueueItem qi = new QueueItem(videoDetails.getId(), videoDetails.getTitle(), videoDetails.getChannel());
+		QueueItem qi = new QueueItem(videoDetails.getTitle(), videoDetails.getId(), videoDetails.getChannel());
 		
 		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {
 			qm.setNowPlaying(guildId, qi);

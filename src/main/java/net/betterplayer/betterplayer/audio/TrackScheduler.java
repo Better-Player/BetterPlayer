@@ -26,12 +26,16 @@ public class TrackScheduler extends AudioEventAdapter {
 			long guildId = betterAudioManager.getGuildId(audioPlayer);
 			QueueManager qm = betterAudioManager.getQueueManager();
 
-			Optional<QueueItem> oPreviousTrack = qm.getNowPlaying(guildId);
-			if(oPreviousTrack.isEmpty()) {
-				BetterPlayer.logError("oPreviousTrack is Empty. This should not be possible on track end");
-				return;
+			if(qm.isLoopMode(guildId)) {
+				Optional<QueueItem> oPreviousTrack = qm.getNowPlaying(guildId);
+				if(oPreviousTrack.isEmpty()) {
+					BetterPlayer.logError("oPreviousTrack is Empty. This should not be possible on track end");
+					return;
+				}
+				QueueItem previousTrack = oPreviousTrack.get();
+
+				qm.addToQueue(guildId, previousTrack);
 			}
-			QueueItem previousTrack = oPreviousTrack.get();
 
 			Optional<QueueItem> oNextTrack = qm.pollQueue(guildId);
 			if(oNextTrack.isEmpty()) {
@@ -43,9 +47,6 @@ public class TrackScheduler extends AudioEventAdapter {
 			qm.setNowPlaying(guildId, nextTrack);
 			betterAudioManager.loadTrack(nextTrack.trackIdentifier(), guildId);
 
-			if(qm.isLoopMode(guildId)) {
-				qm.addToQueue(guildId, previousTrack);
-			}
 		}
 	}
 	
