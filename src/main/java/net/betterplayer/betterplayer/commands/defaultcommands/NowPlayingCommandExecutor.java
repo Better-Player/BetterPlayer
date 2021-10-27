@@ -36,20 +36,21 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		}
 		
 		//Get the track which is currently playing, its total length, and how far we're in
-		AudioObject currentlyPlaying = betterPlayer.getBetterAudioManager().getCurrentlyPlaying(guildId);
+		Optional<AudioObject> oCurrentlyPlaying = betterPlayer.getBetterAudioManager().getCurrentlyPlaying(guildId);
 		
-		if(currentlyPlaying == null) {
+		if(oCurrentlyPlaying.isEmpty()) {
+			senderChannel.sendMessage("I'm currently not playing anything!").queue();
+			return;
+		}
+		AudioObject currentlyPlaying = oCurrentlyPlaying.get();
+		
+		if(currentlyPlaying.track() == null) {
 			senderChannel.sendMessage("I'm currently not playing anything!").queue();
 			return;
 		}
 		
-		if(currentlyPlaying.getAudioTrack() == null) {
-			senderChannel.sendMessage("I'm currently not playing anything!").queue();
-			return;
-		}
-		
-		long trackDuration = currentlyPlaying.getAudioTrack().getDuration();
-		long trackPosition = currentlyPlaying.getAudioTrack().getPosition();
+		long trackDuration = currentlyPlaying.track().getDuration();
+		long trackPosition = currentlyPlaying.track().getPosition();
 		
 		//Calculate the percentage of completion. Rather than going 0-10, we go 0-20
 		//This is because 10 hyphens isn't all that much
@@ -81,7 +82,7 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 
 		//Construct the embed
 		EmbedBuilder eb = new EmbedBuilder()
-				.setTitle(currentItem.getTrackArtist() + " - " + currentItem.getTrackName())
+				.setTitle(currentItem.artistName() + " - " + currentItem.trackName())
 				.setColor(Color.GRAY)
 				.addField("Progress", trackProgress.toString(), true)
 				.appendDescription(progressTimeStamp)

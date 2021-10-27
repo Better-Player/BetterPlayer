@@ -59,7 +59,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 		QueueItem currentlyPlaying = oCurrentlyPlaying.get();
 		
 		eb.appendDescription("__Now Playing:__\n");
-		eb.appendDescription(currentlyPlaying.getTrackArtist() + " - " + currentlyPlaying.getTrackName() + "\n\n");
+		eb.appendDescription(currentlyPlaying.artistName() + " - " + currentlyPlaying.trackName() + "\n\n");
 		
 		//Next up we're going to get the rest of the queue
 		Optional<LinkedList<QueueItem>> oQueue = qm.getFullQueue(guildId);
@@ -77,7 +77,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 			
 			for(int i = 0; i < queue.size(); i++) {
 				QueueItem qi = queue.get(i);
-				queueStrings.add("**" + (i + 1) + ".** " + qi.getTrackArtist() + " - " + qi.getTrackName() + "\n");
+				queueStrings.add("**" + (i + 1) + ".** " + qi.artistName() + " - " + qi.trackName() + "\n");
 			}
 			
 			//If the user provided no page number, that means they just want the first page

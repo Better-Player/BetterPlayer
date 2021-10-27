@@ -52,10 +52,11 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		if(oqi.isPresent()) {
 			QueueItem qi = oqi.get();
 
-			betterAudioManager.loadTrack(qi.getIdentifier(), guildId);
+			betterAudioManager.loadTrack(qi.trackIdentifier(), guildId);
 			qm.setNowPlaying(guildId, qi);
 		} else {
-			betterAudioManager.getAudioPlayer(guildId).destroy();
+			// We know the player exists, this has been verified it above.
+			betterAudioManager.getAudioPlayer(guildId).get().destroy();
 			betterAudioManager.setPlaying(parameters.getGuildId(), false);
 		}
 		
@@ -68,7 +69,7 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 
 		//Inform the user what they skipped
 		EmbedBuilder eb = new EmbedBuilder()
-				.setAuthor("Force skipped " + currentlyPlaying.getTrackName(), "https://google.com", sender.getEffectiveAvatarUrl())
+				.setAuthor("Force skipped " + currentlyPlaying.trackName(), "https://google.com", sender.getEffectiveAvatarUrl())
 				.setColor(Color.GRAY)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		

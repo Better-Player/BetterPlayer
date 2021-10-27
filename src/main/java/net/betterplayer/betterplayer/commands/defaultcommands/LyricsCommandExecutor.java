@@ -69,7 +69,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		}
 		QueueItem currentlyPlaying = oCurrentlyPlaying.get();
 
-		String searchQuery = currentlyPlaying.getTrackArtist() + currentlyPlaying.getTrackName();
+		String searchQuery = currentlyPlaying.artistName() + currentlyPlaying.trackName();
 				
 		//Verify that the administrator provided a KSoft API token
 		if(this.botConfig.getKsoftApiToken() == null) {

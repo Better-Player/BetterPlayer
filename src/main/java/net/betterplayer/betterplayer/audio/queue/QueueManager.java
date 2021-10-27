@@ -1,22 +1,24 @@
 package net.betterplayer.betterplayer.audio.queue;
 
-import org.checkerframework.checker.nullness.Opt;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 
 public class QueueManager {
 
 	/**
 	 * K = Guild Id<br>
-	 * V = The LinkedList Queue for the Guild
+	 * V = The GuildQueue associated with the guild
 	 */
-	private HashMap<Long, Queue<QueueItem>> queues = new HashMap<>();
+	private final HashMap<Long, GuildQueue> queues = new HashMap<>();
 	
 	/**
 	 * K = Guild ID<br>
 	 * V = QueueItem which is currently playing
 	 */
-	private HashMap<Long, QueueItem> nowPlaying = new HashMap<>();
+	private final HashMap<Long, QueueItem> nowPlaying = new HashMap<>();
 	
 	/**
 	 * Set the QueueItem which is currently playing
@@ -26,6 +28,34 @@ public class QueueManager {
 	public void setNowPlaying(long guildId, QueueItem queueItem) {
 		this.nowPlaying.put(guildId, queueItem);
 	}
+
+	/**
+	 * Check if a Guild has Loop Mode enabled
+	 * @param guildId The ID of the Guild to check
+	 * @return Returns true if the Guild has Loop Mode enabled, false if it does not. Returns false if the Guild has no Queue
+	 */
+	public boolean isLoopMode(long guildId) {
+		if(this.queues.containsKey(guildId)) {
+			return this.queues.get(guildId).isLoopMode();
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set the Loop Mode for a Guild
+	 * @param guildId The ID of the Guild
+	 * @param loopMode The Loop Mode. True indicates looping is enabled
+	 */
+	public void setLoopMode(long guildId, boolean loopMode) {
+		GuildQueue gc = this.queues.get(guildId);
+		if(gc == null) {
+			return;
+		}
+
+		gc.setLoopMode(loopMode);
+		this.queues.put(guildId, gc);
+	}
 	
 	/**
 	 * Get the QueueItem which is currently playing
@@ -33,7 +63,7 @@ public class QueueManager {
 	 * @return Returns the requested QueueItem. Empty if nothing is currently playing
 	 */
 	public Optional<QueueItem> getNowPlaying(long guildId) {
-		return Optional.of(this.nowPlaying.get(guildId));
+		return Optional.ofNullable(this.nowPlaying.get(guildId));
 	}
 	
 	/**
@@ -42,13 +72,13 @@ public class QueueManager {
 	 * @return Returns the requested QueueItem. Empty if the guild has no queue, or if the queue is empty
 	 */
 	public Optional<QueueItem> pollQueue(long guildId) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
+		Queue<QueueItem> guildQueue = this.queues.get(guildId).getQueue();
 		
 		if(guildQueue == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(guildQueue.poll());
+		return Optional.ofNullable(guildQueue.poll());
 	}
 	
 	/**
@@ -57,13 +87,13 @@ public class QueueManager {
 	 * @return Returns the requested QueueItem. Empty if the guild has no queue, or if the queue is empty.
 	 */
 	public Optional<QueueItem> peekQueue(long guildId) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
+		Queue<QueueItem> guildQueue = this.queues.get(guildId).getQueue();
 		
 		if(guildQueue == null) {
 			return Optional.empty();
 		}
-		
-		return Optional.of(guildQueue.peek());
+
+		return Optional.ofNullable(guildQueue.peek());
 	}
 	
 	/**
@@ -72,13 +102,13 @@ public class QueueManager {
 	 * @return Returns the queue as a LinkedList. Empty if the Guild has no queue.
 	 */
 	public Optional<LinkedList<QueueItem>> getFullQueue(long guildId) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
+		Queue<QueueItem> guildQueue = this.queues.get(guildId).getQueue();
 		
 		if(guildQueue == null) {
 			return Optional.empty();
 		}
 		
-		return Optional.of(new LinkedList<>(guildQueue));
+		return Optional.ofNullable(new LinkedList<>(guildQueue));
 	}
 	
 	/**
@@ -88,12 +118,13 @@ public class QueueManager {
 	 * @param index The index in the queue, 0-based.
 	 */
 	public void removeFromQueue(long guildId, int index) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
-		
+		GuildQueue gc = this.queues.get(guildId);
 		//Null-check
-		if(guildQueue == null) {
+		if(gc == null) {
 			return;
 		}
+
+		Queue<QueueItem> guildQueue = gc.getQueue();
 		
 		//Convert to a LinkedList, because you cannot remove items from a queue at a given index
 		List<QueueItem> guildQueueAsList = new LinkedList<>(guildQueue);
@@ -103,9 +134,11 @@ public class QueueManager {
 		
 		//Next convert the LinkedList back into a LinkedList queue
 		Queue<QueueItem> newGuildQueue = new LinkedList<>(guildQueueAsList);
-	
+
+		gc.setQueue(newGuildQueue);
+
 		//Set the new queue in place of the old one
-		this.queues.put(guildId, newGuildQueue);
+		this.queues.put(guildId, gc);
 	}
 	
 	/**
@@ -115,15 +148,17 @@ public class QueueManager {
 	 * @param queueItem The Item to add to the queue
 	 */
 	public void addToQueue(long guildId, QueueItem queueItem) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
-		
-		if(guildQueue == null) {
+		GuildQueue gc = this.queues.get(guildId);
+		//Null-check
+		if(gc == null) {
 			return;
 		}
-		
+
+		Queue<QueueItem> guildQueue = gc.getQueue();
 		guildQueue.add(queueItem);
-		
-		this.queues.put(guildId, guildQueue);
+
+		gc.setQueue(guildQueue);
+		this.queues.put(guildId, gc);
 	}
 	
 	/**
@@ -132,11 +167,13 @@ public class QueueManager {
 	 * @param queueItem The QueueItem to add
 	 */
 	public void addToQueueFront(long guildId, QueueItem queueItem) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
-		
-		if(guildQueue == null) {
+		GuildQueue gc = this.queues.get(guildId);
+		//Null-check
+		if(gc == null) {
 			return;
 		}
+
+		Queue<QueueItem> guildQueue = gc.getQueue();
 
 		List<QueueItem> queueItemList = new LinkedList<>();
 		queueItemList.add(queueItem);
@@ -146,7 +183,9 @@ public class QueueManager {
 		
 		//Set the new queue back in the hashmap
 		Queue<QueueItem> newGuildQueue = new LinkedList<>(queueItemList);
-		this.queues.put(guildId, newGuildQueue);
+		gc.setQueue(newGuildQueue);
+
+		this.queues.put(guildId, gc);
 	}
 	
 	/**
@@ -154,7 +193,7 @@ public class QueueManager {
 	 * @param guildId The ID of the guild
 	 */
 	public void createQueue(long guildId) {
-		this.queues.put(guildId, new LinkedList<>());
+		this.queues.put(guildId, new GuildQueue());
 	}
 	
 	/**
@@ -172,16 +211,18 @@ public class QueueManager {
 	 * @param guildId The ID of the guild
 	 */
 	public void clearQueue(long guildId) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
-		
-		if(guildQueue == null) {
+		GuildQueue gc = this.queues.get(guildId);
+		//Null-check
+		if(gc == null) {
 			return;
 		}
-		
+
+		Queue<QueueItem> guildQueue = gc.getQueue();
 		this.nowPlaying.remove(guildId);
 		
 		guildQueue.clear();
-		this.queues.put(guildId, guildQueue);
+		gc.setQueue(guildQueue);
+		this.queues.put(guildId, gc);
 	}
 	
 	/**
@@ -199,13 +240,13 @@ public class QueueManager {
 	 * @return Returns the size of the queue. Empty if the guild has no queue
 	 */
 	public Optional<Integer> getQueueSize(long guildId) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
-		
-		if(guildQueue == null) {
+		GuildQueue gc = this.queues.get(guildId);
+		//Null-check
+		if(gc == null) {
 			return Optional.empty();
 		}
-		
-		return Optional.of(guildQueue.size());
+		Queue<QueueItem> guildQueue = gc.getQueue();
+		return Optional.ofNullable(guildQueue.size());
 	}
 	
 	/**
@@ -216,7 +257,12 @@ public class QueueManager {
 	 * @return Returns the requested QueueItem. Null if the guild has no queue
 	 */
 	public Optional<QueueItem> peekQueueAtIndex(long guildId, int index) {
-		Queue<QueueItem> guildQueue = this.queues.get(guildId);
+		GuildQueue gc = this.queues.get(guildId);
+		//Null-check
+		if(gc == null) {
+			return Optional.empty();
+		}
+		Queue<QueueItem> guildQueue = gc.getQueue();
 		
 		//Null-check
 		if(guildQueue == null) {
@@ -225,8 +271,8 @@ public class QueueManager {
 		
 		//Convert to a LinkedList, because you cannot remove items from a queue at a given index
 		List<QueueItem> guildQueueAsList = new LinkedList<>(guildQueue);
-		
-		return Optional.of(guildQueueAsList.get(index));
+
+		return Optional.ofNullable(guildQueueAsList.get(index));
 	}
 	
 	/**
@@ -238,7 +284,15 @@ public class QueueManager {
 		if(!(queue instanceof LinkedList<?>)) {
 			throw new RuntimeException("Provided queue is not a LinkedList.");
 		}
-		
-		this.queues.put(guildId, queue);
+
+		if(this.queues.containsKey(guildId)) {
+			GuildQueue gc = this.queues.get(guildId);
+			gc.setQueue(queue);
+			this.queues.put(guildId, gc);
+		} else {
+			GuildQueue gc = new GuildQueue();
+			gc.setQueue(queue);
+			this.queues.put(guildId, gc);
+		}
 	}
 }

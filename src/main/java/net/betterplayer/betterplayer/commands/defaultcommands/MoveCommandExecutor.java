@@ -71,9 +71,9 @@ public class MoveCommandExecutor implements CommandExecutor {
 			qm.removeFromQueue(guildId, realIndex+1);
 			
 			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle("Moved " + itemToMove.getTrackName() + " to first in queue!")
+					.setTitle("Moved " + itemToMove.trackName() + " to first in queue!")
 					.setColor(Color.GRAY)
-					.addField("Artist", itemToMove.getTrackArtist(), true)
+					.addField("Artist", itemToMove.artistName(), true)
 					.addField("Position in queue", "1", true)
 					.addBlankField(true)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
@@ -120,9 +120,9 @@ public class MoveCommandExecutor implements CommandExecutor {
 			qm.setQueue(guildId, newQueue);
 			
 			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle("Moved " + itemToMove.getTrackName() + "!")
+					.setTitle("Moved " + itemToMove.trackName() + "!")
 					.setColor(Color.GRAY)
-					.addField("Artist", itemToMove.getTrackArtist(), true)
+					.addField("Artist", itemToMove.artistName(), true)
 					.addField("Original position", String.valueOf(indexFrom), true)
 					.addField("New position", String.valueOf(indexTo), true)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");

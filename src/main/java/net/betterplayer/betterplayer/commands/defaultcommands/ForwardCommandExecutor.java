@@ -1,6 +1,8 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.awt.Color;
+import java.util.Optional;
+
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.audio.BetterAudioManager.SkipAction;
@@ -38,12 +40,13 @@ public class ForwardCommandExecutor implements CommandExecutor {
 		}	
 		
 		int seconds = Integer.parseInt(parameters.getArgs()[0]);
-		SkipAction sa = betterPlayer.getBetterAudioManager().skipSeconds(guildId, seconds);
-		
-		if(sa == null) {
+		Optional<SkipAction> osa = betterPlayer.getBetterAudioManager().skipSeconds(guildId, seconds);
+
+		if(osa.isEmpty()) {
 			senderChannel.sendMessage("BetterPlayer is currently not playing anything!").queue();
 			return;
 		}
+		SkipAction sa = osa.get();
 		
 		EmbedBuilder eb;
 		switch(sa) {

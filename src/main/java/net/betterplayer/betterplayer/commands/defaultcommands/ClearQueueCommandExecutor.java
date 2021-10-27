@@ -55,7 +55,8 @@ public class ClearQueueCommandExecutor implements CommandExecutor {
 		}
 
 		//Stop the currently playing audio track
-		AudioPlayer ap = bam.getAudioPlayer(guildId);
+		// get() is safe because we know there is an AudioPlayer at this point
+		AudioPlayer ap = bam.getAudioPlayer(guildId).get();
 		ap.stopTrack();
 		
 		//Clear the queue

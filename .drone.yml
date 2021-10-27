@@ -1,44 +1,118 @@
 kind: pipeline
-type: kubernetes
-name: betterplayer
-service_account: drone-runner
+type: docker
+name: build-release
 
-triggers:
+trigger:
   event:
   - tag
 
 steps:
-- name: Build with Gradle
-  image: openjdk:11
-  commands:
-  - chmod +x gradlew
-  - ./gradlew releasejar
-
 - name: Build Docker container
   image: plugins/docker
   settings:
-    repo: registry.thedutchmc.nl/betterplayer
+    repo: docker-registry.k8s.array21.dev/betterplayer-bot
     tags:
     - latest
-    registry: registry.thedutchmc.nl
+    - ${DRONE_TAG}
+    registry: docker-registry.k8s.array21.dev
 
-- name: deploy
-  image: sinlead/drone-kubectl
-  settings:
-    kubernetes_server:
-      from_secret: k8s_server
-    kubernetes_cert:
-      from_secret: k8s_cert
-    kubernetes_token:
-      from_secret: k8s_token
+- name: Deploy to Kubernetes
+  image: ubuntu:latest
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    SSH_KEY:
+      from_secret: ssh_key
+
   commands:
-    - kubectl set image deployment/betterplayer-deployment betterplayer=registry.thedutchmc.nl/betterplayer:latest
+    - apt update && apt install -y openssh-client
+
+    - mkdir -p $HOME/.ssh/
+    - eval `ssh-agent`
+    - echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
+
+    - rm -rf $HOME/.ssh/config
+    - touch $HOME/.ssh/config
+    - echo "Host *\n\tStrictHostKeyChecking no" > $HOME/.ssh/config
+
+    - "ssh droneci@kube-ssh.intern.array21.dev kubectl set image -n prodlab deployment/betterplayer-bot betterplayer-bot=docker-registry.k8s.array21.dev/betterplayer-bot:${DRONE_TAG}"
+    - "ssh droneci@kube-ssh.intern.array21.dev kubectl rollout restart deploy -n prodlab betterplayer-bot"
+    - "ssh droneci@kube-ssh.intern.array21.dev kubectl rollout restart deploy -n prodlab betterplayer-canary-bot"
 
 - name: slack
   image: plugins/slack
   settings:
     webhook:
       from_secret: discord_webhook
-    username: Drone CI/CD - EspoGmailSync
+    username: Drone CI/CD - BetterPlayer - build-release
   when:
-    status: [ success, failure ]
+    status: [ failure ]
+---
+kind: pipeline
+type: docker
+name: build-latest
+
+trigger:
+  branch:
+  - master
+
+steps:
+- name: Build Docker container
+  image: plugins/docker
+  settings:
+    repo: docker-registry.k8s.array21.dev/betterplayer-bot
+    tags:
+    - latest
+    registry: docker-registry.k8s.array21.dev
+
+- name: Deploy to Kubernetes
+  image: ubuntu:latest
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    SSH_KEY:
+      from_secret: ssh_key
+
+  commands:
+    - apt update && apt install -y openssh-client
+
+    - mkdir -p $HOME/.ssh/
+    - eval `ssh-agent`
+    - echo "$SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
+
+    - rm -rf $HOME/.ssh/config
+    - touch $HOME/.ssh/config
+    - echo "Host *\n\tStrictHostKeyChecking no" > $HOME/.ssh/config
+
+    - "ssh droneci@kube-ssh.intern.array21.dev kubectl rollout restart deploy -n prodlab betterplayer-canary-bot"
+
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: discord_webhook
+    username: Drone CI/CD - BetterPlayer - build-latest
+  when:
+    status: [ failure ]
+---
+kind: pipeline
+type: docker
+name: build-and-test
+
+trigger:
+  event:
+  - pull_request
+  - push
+
+steps:
+- name: Gradle Build
+  image: gradle:7.2-jdk16
+  commands:
+  - gradle build
+
+- name: Slack notifications
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: discord_webhook
+    username: Drone CI/CD - BetterPlayer - build-and-test
+  when:
+    status: [ failure ]

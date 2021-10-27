@@ -82,7 +82,7 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Removed from the queue", "https://google.com", jda.getUserById(parameters.getSenderId()).getEffectiveAvatarUrl())
 				.setColor(Color.GRAY)
-				.setTitle(itemToRemove.getTrackArtist() + " - " + itemToRemove.getTrackName())
+				.setTitle(itemToRemove.artistName() + " - " + itemToRemove.trackName())
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		
 		//Send the embed
