@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
@@ -70,7 +69,7 @@ public class ForceSkipCommandExecutor implements CommandExecutor {
 		//Inform the user what they skipped
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Force skipped " + currentlyPlaying.trackName(), "https://google.com", sender.getEffectiveAvatarUrl())
-				.setColor(Color.GRAY)
+				.setColor(BetterPlayer.GRAY)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		
 		//Send the embed

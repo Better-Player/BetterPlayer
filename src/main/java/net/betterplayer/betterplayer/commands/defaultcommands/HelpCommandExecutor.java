@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.List;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -33,7 +32,7 @@ public class HelpCommandExecutor implements CommandExecutor {
 		//Set all constant fields of the embed
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 				.setTitle("BetterPlayer Help Menu")
-				.setColor(Color.GRAY);
+				.setColor(BetterPlayer.GRAY);
 				
 		//If the user provided no page number, that means they just want the first page
 		int pageIndex = 0;

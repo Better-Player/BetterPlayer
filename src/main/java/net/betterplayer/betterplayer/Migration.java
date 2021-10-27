@@ -30,19 +30,14 @@ public class Migration {
 
         int nextMigration = 1;
         if(rows.length != 0) {
-            nextMigration = (int)(long) rows[0].getLong("migration");
+            nextMigration = (int)(long) rows[0].getLong("migration") + 1;
         }
 
         applyMethod(nextMigration);
-
-        // Update the migration count
-        long epochSeconds = Instant.now().toEpochMilli() / 1000L;
-        PreparedStatement pr = new PreparedStatement("INSERT INTO __betterplayer_migrations (ts) VALUES ('?')");
-        pr.bind(0, epochSeconds);
-        db.execute(pr);
     }
 
     private void applyMethod(int method) throws SqlException {
+        BetterPlayer.logDebug("Applying migration " + method);
         Method migrationMethod;
         try {
             migrationMethod = Migration.class.getDeclaredMethod(String.format("V%d", method));
@@ -51,6 +46,8 @@ public class Migration {
             BetterPlayer.logInfo("Migrations up to date.");
             return;
         }
+
+        BetterPlayer.logDebug("Invoking method for migration " + method);
 
         try {
             migrationMethod.invoke(this);
@@ -70,7 +67,14 @@ public class Migration {
             e.printStackTrace();
         }
 
-        applyMethod(method + 1);
+        BetterPlayer.logDebug("Updating __betterplayer_migrations for Migration " + method);
+        long epochSeconds = Instant.now().toEpochMilli() / 1000L;
+        PreparedStatement pr = new PreparedStatement("INSERT INTO __betterplayer_migrations (migration, ts) VALUES ('?', '?')");
+        pr.bind(0, method);
+        pr.bind(1, epochSeconds);
+        db.execute(pr);
+
+        applyMethod(++method);
     }
 
     private void V1() throws SqlException {
@@ -78,6 +82,6 @@ public class Migration {
     }
 
     private void V2() throws SqlException {
-        db.execute(new PreparedStatement("CREATE TABLE savedQueues (`savedQueueId BIGINT NOT NULL PRIMARY KEY`, `queuePosition` INT NOT NULL, `trackName` TEXT NOT NULL, `trackIdentifier`, TEXT NOT NULL, `artistName` TEXT NOT NULL)"));
+        db.execute(new PreparedStatement("CREATE TABLE savedQueues (`savedQueueId` BIGINT NOT NULL PRIMARY KEY, `queuePosition` INT NOT NULL, `trackName` TEXT NOT NULL, `trackIdentifier` TEXT NOT NULL, `artistName` TEXT NOT NULL)"));
     }
 }

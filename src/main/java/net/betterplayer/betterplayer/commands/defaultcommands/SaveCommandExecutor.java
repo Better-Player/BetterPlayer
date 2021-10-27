@@ -14,9 +14,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.awt.Color;
-import java.util.Optional;
-
 @BotCommand(name = "save", description = "Save the current Queue for later use")
 public class SaveCommandExecutor implements CommandExecutor {
 
@@ -51,7 +48,7 @@ public class SaveCommandExecutor implements CommandExecutor {
         GuildConfigManifest ggm = betterPlayer.getGuildConfig().getManifest(guildId);
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle("Your Queue has been saved!")
-                .setColor(Color.GRAY)
+                .setColor(BetterPlayer.GRAY)
                 .setDescription(String.format("To load this queue, you can use `%sload %d`", ggm.getCommandPrefix(), queueId))
                 .setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 

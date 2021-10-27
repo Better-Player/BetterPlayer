@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -134,7 +133,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 			
 			//Base items for the embed
 			EmbedBuilder eb = new EmbedBuilder();
-			eb.setColor(Color.GRAY);
+			eb.setColor(BetterPlayer.GRAY);
 			eb.setDescription(lyricsSplitEvery2000Chars[i]);
 			eb.setFooter("Brought to you by BetterPlayer. Lyrics powered by KSoft.Si", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			

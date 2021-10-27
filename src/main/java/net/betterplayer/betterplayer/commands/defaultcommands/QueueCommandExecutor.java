@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class QueueCommandExecutor implements CommandExecutor {
 		* - Guild name
 		*/
 		EmbedBuilder eb = new EmbedBuilder()
-				.setColor(Color.GRAY)
+				.setColor(BetterPlayer.GRAY)
 				.setTitle("Queue for " + jda.getGuildById(guildId).getName());
 		
 		//First we get the currently playing item

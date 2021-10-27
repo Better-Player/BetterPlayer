@@ -3,11 +3,18 @@ package net.betterplayer.betterplayer.audio.queue;
 import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.datatypes.SqlRow;
 import net.betterplayer.betterplayer.utils.Pair;
+import net.betterplayer.betterplayer.utils.Utils;
+
+import java.nio.charset.StandardCharsets;
 
 public record QueueItem(String trackName, String trackIdentifier, String artistName) {
 
     public static Pair<Integer, QueueItem> fromRow(SqlRow row) {
-        return new Pair<>((int)(long) row.getLong("queuePosition"), new QueueItem(row.getString("trackName"), row.getString("trackIdentifier"), row.getString("artistName")));
+        byte[] bTrackName = Utils.toPrimitive(row.getBytes("trackName"));
+        byte[] bArtistName = Utils.toPrimitive(row.getBytes("artistName"));
+        byte[] bTrackIdentifier = Utils.toPrimitive(row.getBytes("trackIdentifier"));
+
+        return new Pair<>((int)(long) row.getLong("queuePosition"), new QueueItem(new String(bTrackName, StandardCharsets.UTF_8), new String(bTrackIdentifier, StandardCharsets.UTF_8), new String(bArtistName, StandardCharsets.UTF_8)));
     }
 
     public PreparedStatement toStmt(long savedQueueId, int position) {

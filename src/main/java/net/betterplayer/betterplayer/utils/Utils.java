@@ -97,4 +97,13 @@ public class Utils {
 		
 		return true;
     }
+
+    public static byte[] toPrimitive(Byte[] object) {
+        byte[] b = new byte[object.length];
+        for(int i = 0; i < object.length; i++) {
+            b[i] = object[i];
+        }
+
+        return b;
+    }
 }

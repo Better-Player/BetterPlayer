@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -72,7 +71,7 @@ public class MoveCommandExecutor implements CommandExecutor {
 			
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Moved " + itemToMove.trackName() + " to first in queue!")
-					.setColor(Color.GRAY)
+					.setColor(BetterPlayer.GRAY)
 					.addField("Artist", itemToMove.artistName(), true)
 					.addField("Position in queue", "1", true)
 					.addBlankField(true)
@@ -121,7 +120,7 @@ public class MoveCommandExecutor implements CommandExecutor {
 			
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Moved " + itemToMove.trackName() + "!")
-					.setColor(Color.GRAY)
+					.setColor(BetterPlayer.GRAY)
 					.addField("Artist", itemToMove.artistName(), true)
 					.addField("Original position", String.valueOf(indexFrom), true)
 					.addField("New position", String.valueOf(indexTo), true)

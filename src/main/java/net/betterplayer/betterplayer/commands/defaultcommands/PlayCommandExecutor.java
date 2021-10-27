@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,7 +120,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 					EmbedBuilder eb = new EmbedBuilder()
 							.setTitle("Added " + vds.size() + " tracks to the queue!")
 							.setThumbnail(videoDetails.getThumbnailUrl())
-							.setColor(Color.GRAY)
+							.setColor(BetterPlayer.GRAY)
 							.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
 							.addField("Position in queue", String.valueOf(posInQueue +1), true)
 							.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
@@ -213,7 +212,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle(videoDetails.getTitle())
 					.setThumbnail(videoDetails.getThumbnailUrl())
-					.setColor(Color.GRAY)
+					.setColor(BetterPlayer.GRAY)
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
 					.addField("Channel", videoDetails.getChannel(), true)
 					.addField("Duration", videoDetails.getDuration(), true)

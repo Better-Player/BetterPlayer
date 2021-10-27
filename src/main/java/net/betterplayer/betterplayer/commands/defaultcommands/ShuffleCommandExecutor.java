@@ -1,7 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.util.*;
-
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
@@ -11,6 +9,11 @@ import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Random;
 
 /**
  * This command provides the user with a way to shuffle the queue<br>

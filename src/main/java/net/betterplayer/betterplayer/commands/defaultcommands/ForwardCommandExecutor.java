@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
@@ -69,7 +68,7 @@ public class ForwardCommandExecutor implements CommandExecutor {
 		}
 		
 		eb.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
-		eb.setColor(Color.GRAY);
+		eb.setColor(BetterPlayer.GRAY);
 
 		senderChannel.sendMessageEmbeds(eb.build()).queue();
 	}

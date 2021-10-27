@@ -29,7 +29,8 @@ import net.betterplayer.betterplayer.utils.Utils;
 public class BetterPlayer {
 	public static volatile boolean DEBUG = false;
 	public static volatile boolean IS_READY = false;
-	
+	public static final int GRAY = 9807270; // https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
+
 	private static BetterPlayer INSTANCE;
 	private static final Logger LOGGER = LogManager.getLogger(BetterPlayer.class);
 	
@@ -45,7 +46,9 @@ public class BetterPlayer {
 		logInfo("BetterPlayer loading.");
 		List<String> argsList = Arrays.asList(args);
 		
-		if(argsList.contains("--debug")) DEBUG = true;
+		if(argsList.contains("--debug") || System.getenv("DEBUG") != null) {
+			DEBUG = true;
+		}
 		
 		if(DEBUG) {
 			LOGGER.setLevel(Level.DEBUG);

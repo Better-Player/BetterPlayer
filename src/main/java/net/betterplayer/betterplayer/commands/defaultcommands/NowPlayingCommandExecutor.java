@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
@@ -83,7 +82,7 @@ public class NowPlayingCommandExecutor implements CommandExecutor {
 		//Construct the embed
 		EmbedBuilder eb = new EmbedBuilder()
 				.setTitle(currentItem.artistName() + " - " + currentItem.trackName())
-				.setColor(Color.GRAY)
+				.setColor(BetterPlayer.GRAY)
 				.addField("Progress", trackProgress.toString(), true)
 				.appendDescription(progressTimeStamp)
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");

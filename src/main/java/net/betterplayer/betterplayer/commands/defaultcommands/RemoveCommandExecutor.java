@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.util.Optional;
 
 import net.betterplayer.betterplayer.BetterPlayer;
@@ -81,7 +80,7 @@ public class RemoveCommandExecutor implements CommandExecutor {
 		//Inform the user what they removed
 		EmbedBuilder eb = new EmbedBuilder()
 				.setAuthor("Removed from the queue", "https://google.com", jda.getUserById(parameters.getSenderId()).getEffectiveAvatarUrl())
-				.setColor(Color.GRAY)
+				.setColor(BetterPlayer.GRAY)
 				.setTitle(itemToRemove.artistName() + " - " + itemToRemove.trackName())
 				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 		

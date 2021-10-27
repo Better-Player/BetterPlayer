@@ -1,6 +1,5 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
-import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +82,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Configuration for " + guild.getName())
-					.setColor(Color.GRAY)
+					.setColor(BetterPlayer.GRAY)
 					.addField(option, value, false)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 
@@ -137,7 +136,7 @@ public class ConfigCommandExecutor implements CommandExecutor {
 			
 			EmbedBuilder eb = new EmbedBuilder()
 					.setTitle("Configuration for " + guild.getName())
-					.setColor(Color.GRAY)
+					.setColor(BetterPlayer.GRAY)
 					.addField(option, "From " + originalValue.toString() + " to " + value, false)
 					.setFooter("Brought to you by BetterPlayer", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
 			
