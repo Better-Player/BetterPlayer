@@ -228,7 +228,7 @@ public class QueueManager {
 			if (qi.a() == 0) {
 				this.nowPlaying.put(guildId, qi.b());
 			} else {
-				queueItems[qi.a()] = qi.b();
+				queueItems[qi.a() -1] = qi.b();
 			}
 		}
 
