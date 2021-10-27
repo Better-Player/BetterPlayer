@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Optional;
 
 @BotCommand(name = "save", description = "Save the current Queue for later use")

@@ -5,7 +5,6 @@ import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.datatypes.SqlRow;
 import dev.array21.jdbd.exceptions.SqlException;
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.Constants;
 import net.betterplayer.betterplayer.utils.Pair;
 
 import java.util.Arrays;
@@ -214,7 +213,7 @@ public class QueueManager {
 	 */
 	public boolean loadQueue(long guildId, long savedPlaylistId) throws SqlException {
 		DatabaseDriver db = BetterPlayer.getBetterPlayer().getDatabaseDriver();
-		PreparedStatement pr = new PreparedStatement(String.format("SELECT * FROM %s WHERE savedQueueId = '?'", Constants.SAVED_PLAYLISTS_TABLE));
+		PreparedStatement pr = new PreparedStatement("SELECT * FROM savedQueues WHERE savedQueueId = '?'");
 		pr.bind(0, savedPlaylistId);
 		SqlRow[] rows = db.query(pr);
 

@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import dev.array21.jdbd.DatabaseDriver;
+import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.drivers.MysqlDriverFactory;
+import dev.array21.jdbd.exceptions.SqlException;
 import net.betterplayer.betterplayer.gson.in.KsoftGetLyricsResponse;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -75,6 +77,15 @@ public class BetterPlayer {
 					.build();
 		} catch (IOException e) {
 			logError("Failed to create Database driver");
+			logError(Utils.getStackTrace(e));
+			System.exit(1);
+		}
+
+		logInfo("Applying migrations");
+		try {
+			new Migration(this.databaseDriver).migrate();
+		} catch(SqlException e) {
+			logError(String.format("Failed to apply migrations: %s", e.getMessage()));
 			logError(Utils.getStackTrace(e));
 			System.exit(1);
 		}

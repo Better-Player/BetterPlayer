@@ -2,7 +2,6 @@ package net.betterplayer.betterplayer.audio.queue;
 
 import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.datatypes.SqlRow;
-import net.betterplayer.betterplayer.Constants;
 import net.betterplayer.betterplayer.utils.Pair;
 
 public record QueueItem(String trackName, String trackIdentifier, String artistName) {
@@ -12,7 +11,7 @@ public record QueueItem(String trackName, String trackIdentifier, String artistN
     }
 
     public PreparedStatement toStmt(long savedQueueId, int position) {
-        PreparedStatement pr = new PreparedStatement(String.format("INSERT INTO %s (savedQueueId, queuePosition, trackName, trackIdentifier, artistName) VALUES ('?', '?', '?', '?', '?')", Constants.SAVED_PLAYLISTS_TABLE));
+        PreparedStatement pr = new PreparedStatement("INSERT INTO savedQueues (savedQueueId, queuePosition, trackName, trackIdentifier, artistName) VALUES ('?', '?', '?', '?', '?')");
         pr.bind(0, savedQueueId);
         pr.bind(1, position);
         pr.bind(2, this.trackName);

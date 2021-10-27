@@ -11,30 +11,14 @@ import java.util.HashMap;
 
 public class GuildConfigManager {
 
-	private DatabaseDriver driver;
+	private final DatabaseDriver driver;
 
 	public GuildConfigManager(DatabaseDriver driver) {
 		this.driver = driver;
-		this.migrate();
 	}
 	
 	public DatabaseDriver getDatabaseDriver() {
 		return this.driver;
-	}
-	
-	
-	/**
-	 * Initialize the database with the default required tables for BetterPlayer
-	 */
-	private void migrate() {
-		BetterPlayer.logInfo("Migrating database, where needed.");
-		try {
-			PreparedStatement pr = new PreparedStatement("CREATE TABLE IF NOT EXISTS guildConfigs (`guildid` BIGINT NOT NULL PRIMARY KEY, `commandprefix` VARCHAR(1) NOT NULL)");
-			this.driver.execute(pr);
-		} catch(SqlException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
 	}
 	
 	/**
