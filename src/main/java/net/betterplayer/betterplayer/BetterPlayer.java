@@ -10,6 +10,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import dev.array21.jdbd.DatabaseDriver;
+import dev.array21.jdbd.drivers.MysqlDriverFactory;
+import net.betterplayer.betterplayer.gson.in.KsoftGetLyricsResponse;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -34,6 +37,7 @@ public class BetterPlayer {
 	private CommandManager commandManager;
 	private ConfigManifest config;
 	private GuildConfigManager guildConfig;
+	private DatabaseDriver databaseDriver;
 	
 	public static void main(String[] args) {
 		logInfo("BetterPlayer loading.");
@@ -60,7 +64,22 @@ public class BetterPlayer {
 		
 		this.config = ConfigManifest.fromEnv();
 		this.config.verifyPrint();
-		this.guildConfig = new GuildConfigManager(config);
+
+		BetterPlayer.logInfo("Creating Database driver");
+		try {
+			this.databaseDriver = new MysqlDriverFactory()
+					.setHost(config.getDbHost())
+					.setDatabase(config.getDbDatabase())
+					.setUsername(config.getDbUsername())
+					.setPassword(config.getDbPassword())
+					.build();
+		} catch (IOException e) {
+			logError("Failed to create Database driver");
+			logError(Utils.getStackTrace(e));
+			System.exit(1);
+		}
+
+		this.guildConfig = new GuildConfigManager(this.databaseDriver);
 		this.jdaHandler = new JdaHandler();
 		this.betterAudioManager = new BetterAudioManager(this);
 		this.commandManager = new CommandManager(this, this.config);
@@ -92,7 +111,15 @@ public class BetterPlayer {
 			} catch(Exception e) {}
 		}, "shutdown-thread"));
 	}
-	
+
+	/**
+	 * Get the DatabaseDriver
+	 * @return The DatabaseDriver
+	 */
+	public DatabaseDriver getDatabaseDriver() {
+		return this.databaseDriver;
+	}
+
 	/**
 	 * Get the BetterAudioManager
 	 * @return Returns the BetterAudioManager

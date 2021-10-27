@@ -1,12 +1,24 @@
 package net.betterplayer.betterplayer.audio.queue;
 
+import dev.array21.jdbd.DatabaseDriver;
+import dev.array21.jdbd.datatypes.PreparedStatement;
+import dev.array21.jdbd.datatypes.SqlRow;
+import dev.array21.jdbd.exceptions.SqlException;
+import net.betterplayer.betterplayer.BetterPlayer;
+import net.betterplayer.betterplayer.Constants;
+import net.betterplayer.betterplayer.utils.Pair;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Random;
 
 public class QueueManager {
+
+	private static final Random RANDOM = new Random();
 
 	/**
 	 * K = Guild Id<br>
@@ -160,7 +172,75 @@ public class QueueManager {
 		gc.setQueue(guildQueue);
 		this.queues.put(guildId, gc);
 	}
-	
+
+	/**
+	 * Save a Guild's Queue
+	 * @param guildId The ID of the Guild
+	 * @return Returns the ID of the saved Queue. This can be used by users to load the Queue later
+	 * @throws SqlException Thrown when a database operation fails
+	 */
+	public Optional<Long> saveQueue(long guildId) throws SqlException {
+		GuildQueue gc = this.queues.get(guildId);
+		if(gc == null) {
+			return Optional.empty();
+		}
+
+		final long leftLimit = 10_000L;
+		final long rightLimit = 100_000L;
+		final long savedPlaylistId = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+
+		DatabaseDriver db = BetterPlayer.getBetterPlayer().getDatabaseDriver();
+
+		QueueItem currentlyPlaying = this.nowPlaying.get(guildId);
+		PreparedStatement currentlyPlayingPr = currentlyPlaying.toStmt(savedPlaylistId, 0);
+		db.execute(currentlyPlayingPr);
+
+		LinkedList<QueueItem> queue = new LinkedList<>(gc.getQueue());
+		for(int i = 1; i < queue.size() + 1; i++) {
+			QueueItem qi = queue.get(i - 1);
+			PreparedStatement pr = qi.toStmt(savedPlaylistId, i);
+			db.execute(pr);
+		}
+
+		return Optional.of(savedPlaylistId);
+	}
+
+	/**
+	 * Load a Guild's Queue from the database. The caller is responsible for resuming the playback of the Queue
+	 * @param guildId The ID of the Guild
+	 * @param savedPlaylistId The ID of the saved Queue
+	 * @return True if the saved Queue exists, false if it does not
+	 * @throws SqlException Thrown when a database exception occurs
+	 */
+	public boolean loadQueue(long guildId, long savedPlaylistId) throws SqlException {
+		DatabaseDriver db = BetterPlayer.getBetterPlayer().getDatabaseDriver();
+		PreparedStatement pr = new PreparedStatement(String.format("SELECT * FROM %s WHERE savedQueueId = '?'", Constants.SAVED_PLAYLISTS_TABLE));
+		pr.bind(0, savedPlaylistId);
+		SqlRow[] rows = db.query(pr);
+
+		if(rows.length == 0) {
+			return false;
+		}
+
+		QueueItem[] queueItems = new QueueItem[rows.length - 1];
+		for(SqlRow r : rows) {
+			Pair<Integer, QueueItem> qi = QueueItem.fromRow(r);
+
+			if (qi.a() == 0) {
+				this.nowPlaying.put(guildId, qi.b());
+			} else {
+				queueItems[qi.a()] = qi.b();
+			}
+		}
+
+		LinkedList<QueueItem> queueContents = new LinkedList<>(Arrays.asList(queueItems));
+		GuildQueue gc = new GuildQueue();
+		gc.setQueue(queueContents);
+		this.queues.put(guildId, gc);
+
+		return true;
+	}
+
 	/**
 	 * Add a QueueItem to the front of the queue
 	 * @param guildId The ID of the Guild

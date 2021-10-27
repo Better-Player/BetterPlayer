@@ -1,41 +1,25 @@
 package net.betterplayer.betterplayer.config.guild;
 
-import java.io.IOException;
-import java.util.HashMap;
-
+import dev.array21.jdbd.DatabaseDriver;
 import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.datatypes.SqlRow;
-import dev.array21.jdbd.drivers.MysqlDriver;
-import dev.array21.jdbd.drivers.MysqlDriverFactory;
 import dev.array21.jdbd.exceptions.SqlException;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.Nullable;
-import net.betterplayer.betterplayer.config.ConfigManifest;
+
+import java.util.HashMap;
 
 public class GuildConfigManager {
-		
-	private MysqlDriver database;
-			
-	public GuildConfigManager(ConfigManifest config) {
-		
-		BetterPlayer.logInfo("Loading database driver.");
-		try {
-			this.database = new MysqlDriverFactory()
-					.setHost(config.getDbHost())
-					.setDatabase(config.getDbDatabase())
-					.setUsername(config.getDbUsername())
-					.setPassword(config.getDbPassword())
-					.build();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
+
+	private DatabaseDriver driver;
+
+	public GuildConfigManager(DatabaseDriver driver) {
+		this.driver = driver;
 		this.migrate();
 	}
 	
-	public MysqlDriver getDatabaseDriver() {
-		return this.database;
+	public DatabaseDriver getDatabaseDriver() {
+		return this.driver;
 	}
 	
 	
@@ -46,7 +30,7 @@ public class GuildConfigManager {
 		BetterPlayer.logInfo("Migrating database, where needed.");
 		try {
 			PreparedStatement pr = new PreparedStatement("CREATE TABLE IF NOT EXISTS guildConfigs (`guildid` BIGINT NOT NULL PRIMARY KEY, `commandprefix` VARCHAR(1) NOT NULL)");
-			this.database.execute(pr);
+			this.driver.execute(pr);
 		} catch(SqlException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -62,7 +46,7 @@ public class GuildConfigManager {
 		HashMap<Long, GuildConfigManifest> configs = new HashMap<>();
 		SqlRow[] rs;
 		try {
-			rs = this.database.query(new PreparedStatement("SELECT guildid,commandprefix FROM guildConfigs"));
+			rs = this.driver.query(new PreparedStatement("SELECT guildid,commandprefix FROM guildConfigs"));
 		} catch(SqlException e) {
 			e.printStackTrace();
 			return null;
@@ -102,7 +86,7 @@ public class GuildConfigManager {
 			pr.bind(1, guildId);
 			
 			try {
-				this.database.execute(pr);
+				this.driver.execute(pr);
 			} catch(SqlException e) {
 				e.printStackTrace();
 			}
@@ -112,7 +96,7 @@ public class GuildConfigManager {
 			pr.bind(1, manifest.getCommandPrefix());
 			
 			try {
-				this.database.execute(pr);
+				this.driver.execute(pr);
 			} catch(SqlException e) {
 				e.printStackTrace();
 			}
@@ -131,7 +115,7 @@ public class GuildConfigManager {
 		pr.bind(1, manifest.getCommandPrefix());
 		
 		try {
-			this.database.execute(pr);
+			this.driver.execute(pr);
 		} catch(SqlException e) {
 			e.printStackTrace();
 		}
@@ -148,7 +132,7 @@ public class GuildConfigManager {
 		pr.bind(0, guildId);
 		
 		try {
-			this.database.execute(pr);
+			this.driver.execute(pr);
 		} catch(SqlException e) {
 			e.printStackTrace();
 		}

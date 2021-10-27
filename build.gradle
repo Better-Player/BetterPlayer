@@ -27,21 +27,11 @@ repositories {
 dependencies {
 	implementation 'net.dv8tion:JDA:4.3.0_310'
 	implementation 'com.google.guava:guava:30.1.1-jre'
-
-	//SLF4J, logging
     implementation  'org.slf4j:slf4j-log4j12:1.7.29'
-	
-	//LavaPlayer, Discord sound library
 	implementation  'com.sedmelluq:lavaplayer:1.3.77'
-	
-	//JSON, for communicating with external APIs
 	implementation  'org.json:json:20201115'
 	implementation  'com.google.code.gson:gson:2.8.6'
-
-	//Apache Commons
 	implementation 'org.apache.commons:commons-lang3:3.0'
-
-	//HttpLib, for communicating with external APIs
 	implementation 'dev.array21:httplib:1.2.1'
 	implementation 'dev.array21:jdbd:1.0.4'
 }
