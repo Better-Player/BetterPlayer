@@ -75,6 +75,9 @@ public class Migration {
 
     private void V1() throws SqlException {
         db.execute(new PreparedStatement("CREATE TABLE guildConfigs (`guildid` BIGINT NOT NULL PRIMARY KEY, `commandprefix` VARCHAR(1) NOT NULL)"));
+    }
+
+    private void V2() throws SqlException {
         db.execute(new PreparedStatement("CREATE TABLE savedQueues (`savedQueueId BIGINT NOT NULL PRIMARY KEY`, `queuePosition` INT NOT NULL, `trackName` TEXT NOT NULL, `trackIdentifier`, TEXT NOT NULL, `artistName` TEXT NOT NULL)"));
     }
 }
