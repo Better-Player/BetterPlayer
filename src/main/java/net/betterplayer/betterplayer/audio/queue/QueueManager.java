@@ -6,6 +6,7 @@ import dev.array21.jdbd.datatypes.SqlRow;
 import dev.array21.jdbd.exceptions.SqlException;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.utils.Pair;
+import org.checkerframework.checker.nullness.Opt;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -160,7 +161,6 @@ public class QueueManager {
 	 */
 	public void addToQueue(long guildId, QueueItem queueItem) {
 		GuildQueue gc = this.queues.get(guildId);
-		//Null-check
 		if(gc == null) {
 			return;
 		}
@@ -351,6 +351,10 @@ public class QueueManager {
 		//Convert to a LinkedList, because you cannot remove items from a queue at a given index
 		List<QueueItem> guildQueueAsList = new LinkedList<>(guildQueue);
 
+		if(index >= guildQueueAsList.size()) {
+			return Optional.empty();
+		}
+
 		return Optional.ofNullable(guildQueueAsList.get(index));
 	}
 	
@@ -364,14 +368,15 @@ public class QueueManager {
 			throw new RuntimeException("Provided queue is not a LinkedList.");
 		}
 
+
+		GuildQueue gc;
 		if(this.queues.containsKey(guildId)) {
-			GuildQueue gc = this.queues.get(guildId);
-			gc.setQueue(queue);
-			this.queues.put(guildId, gc);
+			gc = this.queues.get(guildId);
 		} else {
-			GuildQueue gc = new GuildQueue();
-			gc.setQueue(queue);
-			this.queues.put(guildId, gc);
+			gc = new GuildQueue();
 		}
+		
+		gc.setQueue(queue);
+		this.queues.put(guildId, gc);
 	}
 }
