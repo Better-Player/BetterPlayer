@@ -24,6 +24,9 @@ public class ConfigManifest {
 	private String dbUsername;
 	@Required
 	private String dbPassword;
+
+	private String spotifyClientId;
+	private String spotifyClientSecret;
 	
 	private ConfigManifest() {}
 	
@@ -56,7 +59,7 @@ public class ConfigManifest {
 		Boolean boolValue = Boolean.valueOf(this.useGoogleApiForSearch.toLowerCase());
 		return boolValue;
 	}
-	
+
 	public String getGoogleApiKey() {
 		return this.googleApiKey;
 	}
@@ -65,7 +68,17 @@ public class ConfigManifest {
 	public String getKsoftApiToken() {
 		return this.ksoftApiToken;
 	}
-	
+
+	@Nullable
+	public String getSpotifyClientId() {
+		return this.spotifyClientId;
+	}
+
+	@Nullable
+	public String getSpotifyClientSecret() {
+		return this.spotifyClientSecret;
+	}
+
 	/**
 	 * Create a ConfigManifest from Environmental variables
 	 * @return An instance of ConfigManifest

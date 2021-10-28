@@ -24,7 +24,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
-import net.betterplayer.betterplayer.gson.in.KsoftGetLyricsResponse;
+import net.betterplayer.betterplayer.apis.gson.KsoftGetLyricsResponse;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;

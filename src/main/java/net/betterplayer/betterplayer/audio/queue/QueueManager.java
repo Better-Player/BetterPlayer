@@ -6,7 +6,6 @@ import dev.array21.jdbd.datatypes.SqlRow;
 import dev.array21.jdbd.exceptions.SqlException;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.utils.Pair;
-import org.checkerframework.checker.nullness.Opt;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,11 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Random;
 
 public class QueueManager {
-
-	private static final Random RANDOM = new Random();
 
 	/**
 	 * K = Guild Id<br>
@@ -375,7 +371,7 @@ public class QueueManager {
 		} else {
 			gc = new GuildQueue();
 		}
-		
+
 		gc.setQueue(queue);
 		this.queues.put(guildId, gc);
 	}

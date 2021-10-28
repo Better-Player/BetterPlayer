@@ -11,10 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import dev.array21.jdbd.DatabaseDriver;
-import dev.array21.jdbd.datatypes.PreparedStatement;
 import dev.array21.jdbd.drivers.MysqlDriverFactory;
 import dev.array21.jdbd.exceptions.SqlException;
-import net.betterplayer.betterplayer.gson.in.KsoftGetLyricsResponse;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -124,6 +122,14 @@ public class BetterPlayer {
 				BetterPlayer.this.jdaHandler.shutdownJda();
 			} catch(Exception e) {}
 		}, "shutdown-thread"));
+	}
+
+	/**
+	 * Get the BetterPlayer application configuration
+	 * @return BetterPlayer application configuration
+	 */
+	public ConfigManifest getConfig() {
+		return this.config;
 	}
 
 	/**

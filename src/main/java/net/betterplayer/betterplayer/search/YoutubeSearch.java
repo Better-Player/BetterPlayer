@@ -17,7 +17,7 @@ import dev.array21.httplib.Http;
 import dev.array21.httplib.Http.RequestMethod;
 import dev.array21.httplib.Http.ResponseObject;
 import net.betterplayer.betterplayer.BetterPlayer;
-import net.betterplayer.betterplayer.gson.in.YTMFrontendSearch;
+import net.betterplayer.betterplayer.apis.gson.YTMFrontendSearch;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.entities.TextChannel;
 

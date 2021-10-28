@@ -1,4 +1,4 @@
-package net.betterplayer.betterplayer.gson.in;
+package net.betterplayer.betterplayer.apis.gson;
 
 /**
  * Class describing JSON response included when doing a search via the YouTube music frontend. It's ugly, I know

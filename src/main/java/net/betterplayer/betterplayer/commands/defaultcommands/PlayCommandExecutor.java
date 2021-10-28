@@ -1,14 +1,20 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
+import net.betterplayer.betterplayer.apis.Spotify;
+import net.betterplayer.betterplayer.apis.exceptions.SpotifyApiException;
+import net.betterplayer.betterplayer.apis.gson.SpotifyTrackResponse;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
@@ -21,6 +27,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.w3c.dom.Text;
 
 /**
  * Play command. This will allow the user to play a song via a search query, a YouTube video URL or a YouTube playlist URL
@@ -58,89 +65,161 @@ public class PlayCommandExecutor implements CommandExecutor {
 		//Check if the user supplied a url rather than search terms
 		String arg0 = parameters.getArgs()[0];
 		if(arg0.contains("https://")) {
-			Map<String, String> urlQueryParameters = null;
-			try {
-				urlQueryParameters = Utils.splitQuery(new URL(arg0));
-			} catch (UnsupportedEncodingException | MalformedURLException e) {
-				senderChannel.sendMessage("That URL is invalid!").queue();
-			}
-			
-			if(urlQueryParameters.containsKey("v")) {
-				String videoId = urlQueryParameters.get("v");
-				
-				VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
-				
-				if(vd != null) {
-					processVideoDetails(betterPlayer, parameters, vd, true);
-				} else {
-					senderChannel.sendMessage("Unknown video!").queue();
-				}
-				
-				return;
-				
-			} else if(urlQueryParameters.containsKey("list") && !urlQueryParameters.containsKey("v")) {
-	 			//If the query parameters contains the key 'list' we're dealing with a playlist
-				String listId = urlQueryParameters.get("list");
-				
-				// Your Likes playlist
-				if(listId.equals("LL")) {
-					senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Your Likes' playlist, as it is automatically generated and only visible to you.").queue();
-					return;
-				}
-				
-				// Watch Later playlist
-				if(listId.equals("WL")) {
-					senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Watch Later' playlist, as it is automatically generated and only visible to you.").queue();
-					return;
-				}
-				
-				senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();						
-				
-				List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(this.config.getGoogleApiKey(), listId, senderChannel, null);
-				if(vds != null && vds.size() >= 1) {					
-					for(VideoDetails details : vds) {								
-						processVideoDetails(betterPlayer, parameters, details, false);
-					}
-					
-					User author = jda.getUserById(parameters.getSenderId());
-					QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
-					if(!qm.hasQueue(parameters.getGuildId())) {
-						qm.createQueue(parameters.getGuildId());
-					}
-					
-					Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
-					if(oPosInQueue.isEmpty()) {
-						BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
-						senderChannel.sendMessage("Something went wrong. Please try again later").queue();
-						return;
-					}
-					int posInQueue = oPosInQueue.get();
 
-					VideoDetails videoDetails = vds.get(0);
-					EmbedBuilder eb = new EmbedBuilder()
-							.setTitle("Added " + vds.size() + " tracks to the queue!")
-							.setThumbnail(videoDetails.getThumbnailUrl())
-							.setColor(BetterPlayer.GRAY)
-							.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
-							.addField("Position in queue", String.valueOf(posInQueue +1), true)
-							.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
-					
-					senderChannel.sendMessageEmbeds(eb.build()).queue();
-				} else {	
-					senderChannel.sendMessage("Unknown playlist or the playlist contains no videos!").queue();
+			// YouTube video or playlist
+			if(arg0.contains("youtube.com")) {
+				playYoutube(parameters, betterPlayer);
+			}
+
+			// Spotify track or playlist
+			if(arg0.contains("open.spotify.com")) {
+
+				// Track
+				if(arg0.contains("track")) {
+					playSpotifyTrack(parameters, betterPlayer);
 				}
-				
+
+				//TODO playlist
+			}
+		} else {
+			// Via regular search terms
+			youtubeSearch(betterPlayer, parameters.getArgs(), parameters, senderChannel);
+		}
+	}
+
+	private void playSpotifyTrack(CommandParameters parameters, BetterPlayer betterPlayer) {
+		JDA jda = betterPlayer.getJdaHandler().getJda();
+		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+
+		String arg0 = parameters.getArgs()[0];
+		String[] split = arg0.split(Pattern.quote("/"));
+		if(split.length == 0) {
+			senderChannel.sendMessage("Hm, that URL appears to be invalid").queue();
+			return;
+		}
+
+		String trackIdWithParams = split[split.length - 1];
+		String[] trackIdSplit = trackIdWithParams.split(Pattern.quote("?"));
+		String trackId = trackIdSplit[0];
+
+		ConfigManifest cfgManifest = betterPlayer.getConfig();
+		if(cfgManifest.getSpotifyClientId() == null || cfgManifest.getSpotifyClientSecret() == null) {
+			BetterPlayer.logError("Unable to process Spotify link. The required credentials are not provided");
+			senderChannel.sendMessage("Spotify links are not supported by this instance of BetterPlayer, please contact it's administrator").queue();
+			return;
+		}
+
+		Optional<SpotifyTrackResponse> oTrack;
+		try {
+			oTrack = Spotify.getTrack(trackId);
+		} catch (IOException | SpotifyApiException e) {
+			BetterPlayer.logError(e.getMessage());
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+			return;
+		}
+
+		if(oTrack.isEmpty()) {
+			senderChannel.sendMessage("Hm, I can't find that song, are you sure you copied the correct URL?").queue();
+			return;
+		}
+
+		SpotifyTrackResponse track = oTrack.get();
+		youtubeSearch(betterPlayer, new String[] { track.getArtistName(), track.getName() }, parameters, senderChannel);
+	}
+
+	private void youtubeSearch(BetterPlayer betterPlayer, String[] searchTerms, CommandParameters parameters, TextChannel senderChannel) {
+		if(this.config.isUseGoogleApiForSearch()) {
+			VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), searchTerms, senderChannel);
+			processVideoDetails(betterPlayer, parameters, details, true);
+		} else {
+			VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), searchTerms, senderChannel);
+			processVideoDetails(betterPlayer, parameters, details, true);
+		}
+	}
+
+	private void playYoutube(CommandParameters parameters, BetterPlayer betterPlayer) {
+		JDA jda = betterPlayer.getJdaHandler().getJda();
+		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+		String arg0 = parameters.getArgs()[0];
+
+		Map<String, String> urlQueryParameters = null;
+		try {
+			urlQueryParameters = Utils.splitQuery(new URL(arg0));
+		} catch (UnsupportedEncodingException | MalformedURLException e) {
+			senderChannel.sendMessage("That URL is invalid!").queue();
+		}
+
+		if(urlQueryParameters.containsKey("v")) {
+			String videoId = urlQueryParameters.get("v");
+
+			VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
+
+			if(vd != null) {
+				processVideoDetails(betterPlayer, parameters, vd, true);
+			} else {
+				senderChannel.sendMessage("Unknown video!").queue();
+			}
+
+			return;
+
+		} else if(urlQueryParameters.containsKey("list") && !urlQueryParameters.containsKey("v")) {
+			String listId = urlQueryParameters.get("list");
+			playYoutubePlaylist(parameters, betterPlayer, listId);
+			return;
+		}
+	}
+
+	private void playYoutubePlaylist(CommandParameters parameters, BetterPlayer betterPlayer, String listId) {
+		JDA jda = betterPlayer.getJdaHandler().getJda();
+		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+
+		// Your Likes playlist
+		if(listId.equals("LL")) {
+			senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Your Likes' playlist, as it is automatically generated and only visible to you.").queue();
+			return;
+		}
+
+		// Watch Later playlist
+		if(listId.equals("WL")) {
+			senderChannel.sendMessage("Unfortunately BetterPlayer cannot play your 'Watch Later' playlist, as it is automatically generated and only visible to you.").queue();
+			return;
+		}
+
+		senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();
+
+		List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(this.config.getGoogleApiKey(), listId, senderChannel, null);
+		if(vds != null && vds.size() >= 1) {
+			for(VideoDetails details : vds) {
+				processVideoDetails(betterPlayer, parameters, details, false);
+			}
+
+			User author = jda.getUserById(parameters.getSenderId());
+			QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
+			if(!qm.hasQueue(parameters.getGuildId())) {
+				qm.createQueue(parameters.getGuildId());
+			}
+
+			Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
+			if(oPosInQueue.isEmpty()) {
+				BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
+				senderChannel.sendMessage("Something went wrong. Please try again later").queue();
 				return;
 			}
-			
+			int posInQueue = oPosInQueue.get();
+
+			VideoDetails videoDetails = vds.get(0);
+			EmbedBuilder eb = new EmbedBuilder()
+					.setTitle("Added " + vds.size() + " tracks to the queue!")
+					.setThumbnail(videoDetails.getThumbnailUrl())
+					.setColor(BetterPlayer.GRAY)
+					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
+					.addField("Position in queue", String.valueOf(posInQueue +1), true)
+					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
 		} else {
-			if(this.config.isUseGoogleApiForSearch()) {
-				VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
-				processVideoDetails(betterPlayer, parameters, details, true);
-			} else {
-				VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), parameters.getArgs(), senderChannel);
-				processVideoDetails(betterPlayer, parameters, details, true);
-			}
+			senderChannel.sendMessage("Unknown playlist or the playlist contains no videos!").queue();
 		}
 	}
 		

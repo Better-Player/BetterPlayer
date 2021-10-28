@@ -2,7 +2,6 @@ package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.betterplayer.betterplayer.BetterPlayer;
@@ -25,11 +24,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 public class ConfigCommandExecutor implements CommandExecutor {
 
 	public ConfigCommandExecutor(ConfigManifest botConfig) {}
-	
-	//These config options are booleans
-	final List<String> optionsOfTypeBool = new ArrayList<>(Arrays.asList(
-			"usedeepspeech"
-	));
 	
 	@Override
 	public void fireCommand(BetterPlayer betterPlayer, CommandParameters parameters) {

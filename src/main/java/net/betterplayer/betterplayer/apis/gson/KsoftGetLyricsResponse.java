@@ -1,4 +1,4 @@
-package net.betterplayer.betterplayer.gson.in;
+package net.betterplayer.betterplayer.apis.gson;
 
 import com.google.gson.annotations.SerializedName;
 
