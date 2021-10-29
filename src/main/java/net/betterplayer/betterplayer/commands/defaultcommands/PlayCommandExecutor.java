@@ -2,7 +2,6 @@ package net.betterplayer.betterplayer.commands.defaultcommands;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -14,6 +13,7 @@ import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.apis.Spotify;
 import net.betterplayer.betterplayer.apis.exceptions.SpotifyApiException;
+import net.betterplayer.betterplayer.apis.gson.SpotifyPlaylistResponse;
 import net.betterplayer.betterplayer.apis.gson.SpotifyTrackResponse;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
@@ -22,12 +22,12 @@ import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
 import net.betterplayer.betterplayer.search.VideoDetails;
 import net.betterplayer.betterplayer.search.YoutubeSearch;
+import net.betterplayer.betterplayer.utils.Pair;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import org.w3c.dom.Text;
 
 /**
  * Play command. This will allow the user to play a song via a search query, a YouTube video URL or a YouTube playlist URL
@@ -79,12 +79,90 @@ public class PlayCommandExecutor implements CommandExecutor {
 					playSpotifyTrack(parameters, betterPlayer);
 				}
 
-				//TODO playlist
+				if(arg0.contains("playlist")) {
+					playSpotifyPlaylist(parameters, betterPlayer);
+				}
 			}
 		} else {
 			// Via regular search terms
-			youtubeSearch(betterPlayer, parameters.getArgs(), parameters, senderChannel);
+			youtubeSearch(betterPlayer, parameters.getArgs(), parameters, senderChannel, true);
 		}
+	}
+
+	private void playSpotifyPlaylist(CommandParameters parameters, BetterPlayer betterPlayer) {
+		JDA jda = betterPlayer.getJdaHandler().getJda();
+		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
+
+		String arg0 = parameters.getArgs()[0];
+		String[] split = arg0.split(Pattern.quote("/"));
+		if(split.length == 0) {
+			senderChannel.sendMessage("Hm, that URL appears to be invalid").queue();
+			return;
+		}
+
+		String idWithParams = split[split.length - 1];
+		String[] idSplit = idWithParams.split(Pattern.quote("?"));
+		String playlistId = idSplit[0];
+
+		ConfigManifest cfgManifest = betterPlayer.getConfig();
+		if(cfgManifest.getSpotifyClientId() == null || cfgManifest.getSpotifyClientSecret() == null) {
+			BetterPlayer.logError("Unable to process Spotify link. The required credentials are not provided");
+			senderChannel.sendMessage("Spotify links are not supported by this instance of BetterPlayer, please contact it's administrator").queue();
+			return;
+		}
+
+		senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue(message -> {
+
+			Optional<Pair<SpotifyPlaylistResponse, List<SpotifyTrackResponse>>> oPlaylistPair;
+			try {
+				oPlaylistPair = Spotify.getPlaylist(playlistId);
+			} catch (IOException | SpotifyApiException e) {
+				BetterPlayer.logError(e.getMessage());
+				BetterPlayer.logDebug(Utils.getStackTrace(e));
+				senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+				return;
+			}
+
+			if(oPlaylistPair.isEmpty()) {
+				senderChannel.sendMessage("Hm, I can't find that song, are you sure you copied the correct URL?").queue();
+				return;
+			}
+
+			Pair<SpotifyPlaylistResponse, List<SpotifyTrackResponse>> playlistPair = oPlaylistPair.get();
+
+			List<SpotifyTrackResponse> tracks = playlistPair.b();
+			int length = tracks.size();
+
+			for(int i = 0; i < length; i++) {
+				SpotifyTrackResponse track = tracks.get(i);
+
+				youtubeSearch(betterPlayer, new String[] { track.getArtistName(), track.getName() }, parameters, senderChannel, false);
+
+				if((i + 1) % 10 == 0) {
+					message.editMessage(String.format("Loading playlist... (this might take a couple of seconds) (%d/%d)", i + 1, length)).queue();
+				}
+			}
+
+			QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
+			Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
+			if(oPosInQueue.isEmpty()) {
+				BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
+				senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+				return;
+			}
+			int posInQueue = oPosInQueue.get();
+
+			User author = jda.getUserById(parameters.getSenderId());
+			EmbedBuilder eb = new EmbedBuilder()
+					.setTitle("Added " + playlistPair.b().size() + " tracks to the queue!")
+					.setThumbnail(playlistPair.a().getImage())
+					.setColor(BetterPlayer.GRAY)
+					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
+					.addField("Position in queue", String.valueOf(posInQueue +1), true)
+					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+
+			senderChannel.sendMessageEmbeds(eb.build()).queue();
+		});
 	}
 
 	private void playSpotifyTrack(CommandParameters parameters, BetterPlayer betterPlayer) {
@@ -125,16 +203,16 @@ public class PlayCommandExecutor implements CommandExecutor {
 		}
 
 		SpotifyTrackResponse track = oTrack.get();
-		youtubeSearch(betterPlayer, new String[] { track.getArtistName(), track.getName() }, parameters, senderChannel);
+		youtubeSearch(betterPlayer, new String[] { track.getArtistName(), track.getName() }, parameters, senderChannel, true);
 	}
 
-	private void youtubeSearch(BetterPlayer betterPlayer, String[] searchTerms, CommandParameters parameters, TextChannel senderChannel) {
+	private void youtubeSearch(BetterPlayer betterPlayer, String[] searchTerms, CommandParameters parameters, TextChannel senderChannel, boolean announce) {
 		if(this.config.isUseGoogleApiForSearch()) {
 			VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), searchTerms, senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, true);
+			processVideoDetails(betterPlayer, parameters, details, announce);
 		} else {
 			VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), searchTerms, senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, true);
+			processVideoDetails(betterPlayer, parameters, details, announce);
 		}
 	}
 

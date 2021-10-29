@@ -4,18 +4,20 @@ import com.google.gson.Gson;
 import dev.array21.httplib.Http;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.apis.exceptions.SpotifyApiException;
+import net.betterplayer.betterplayer.apis.gson.SpotifyPlaylistResponse;
+import net.betterplayer.betterplayer.apis.gson.SpotifyPlaylistTracksResponse;
 import net.betterplayer.betterplayer.apis.gson.SpotifyTokenResponse;
 import net.betterplayer.betterplayer.apis.gson.SpotifyTrackResponse;
 import net.betterplayer.betterplayer.config.ConfigManifest;
-import net.betterplayer.betterplayer.search.VideoDetails;
-import org.checkerframework.checker.nullness.Opt;
+import net.betterplayer.betterplayer.utils.Pair;
 
-import javax.print.attribute.standard.Media;
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 public class Spotify {
@@ -47,6 +49,53 @@ public class Spotify {
         return Optional.of(r);
     }
 
+    public static Optional<Pair<SpotifyPlaylistResponse, List<SpotifyTrackResponse>>> getPlaylist(String playlistId) throws IOException {
+        HashMap<String, String> headers = getDefaultHeaders();
+
+        Http.ResponseObject ro = http.makeRequest(Http.RequestMethod.GET, String.format("%s/playlists/%s", baseUrl, playlistId), null, null, null, headers);
+        if(ro.getResponseCode() != 200) {
+            if(ro.getResponseCode() == 404) {
+                return Optional.empty();
+            }
+
+            throw new SpotifyApiException(String.format("Failed to fetch playlist: %s", ro.getConnectionMessage()));
+        }
+
+        SpotifyPlaylistResponse r = gson.fromJson(ro.getMessage(), SpotifyPlaylistResponse.class);
+
+        Optional<List<SpotifyTrackResponse>> tracks = getPlaylistNext(String.format("%s/playlists/%s/tracks?offset=0&limit=100", baseUrl, playlistId), headers);
+        if(tracks.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new Pair<>(r, tracks.get()));
+    }
+
+    private static Optional<List<SpotifyTrackResponse>> getPlaylistNext(String next, HashMap<String, String> headers) throws IOException {
+        Http.ResponseObject ro = http.makeRequest(Http.RequestMethod.GET, next, null, null, null, headers);
+        if(ro.getResponseCode() != 200) {
+            if(ro.getResponseCode() == 404) {
+                return Optional.empty();
+            }
+
+            throw new SpotifyApiException(String.format("Failed to fetch playlist: %s", ro.getConnectionMessage()));
+        }
+
+        SpotifyPlaylistTracksResponse r = gson.fromJson(ro.getMessage(), SpotifyPlaylistTracksResponse.class);
+
+        List<SpotifyTrackResponse> tracks = new ArrayList<>(Arrays.asList(r.getTracks()));
+        if(r.getNext() != null) {
+            Optional<List<SpotifyTrackResponse>> recursedTracks = getPlaylistNext(r.getNext(), headers);
+            if(recursedTracks.isEmpty()) {
+                return Optional.empty();
+            }
+
+            tracks.addAll(recursedTracks.get());
+        }
+
+        return Optional.of(tracks);
+    }
+
     private static HashMap<String, String> getDefaultHeaders() throws IOException {
         final HashMap<String, String> r = new HashMap<>();
         r.put("Authorization", String.format("Bearer %s", getLoginToken()));
@@ -69,7 +118,6 @@ public class Spotify {
         }
 
         SpotifyTokenResponse r = gson.fromJson(ro.getMessage(), SpotifyTokenResponse.class);
-
         return r.getAccessToken();
     }
 }
