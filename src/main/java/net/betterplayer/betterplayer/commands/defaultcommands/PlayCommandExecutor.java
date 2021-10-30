@@ -12,7 +12,9 @@ import java.util.regex.Pattern;
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
 import net.betterplayer.betterplayer.apis.Spotify;
+import net.betterplayer.betterplayer.apis.YouTube;
 import net.betterplayer.betterplayer.apis.exceptions.SpotifyApiException;
+import net.betterplayer.betterplayer.apis.exceptions.YouTubeApiException;
 import net.betterplayer.betterplayer.apis.gson.SpotifyPlaylistResponse;
 import net.betterplayer.betterplayer.apis.gson.SpotifyTrackResponse;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
@@ -20,8 +22,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
-import net.betterplayer.betterplayer.search.VideoDetails;
-import net.betterplayer.betterplayer.search.YoutubeSearch;
+import net.betterplayer.betterplayer.apis.VideoDetails;
 import net.betterplayer.betterplayer.utils.Pair;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -207,13 +208,26 @@ public class PlayCommandExecutor implements CommandExecutor {
 	}
 
 	private void youtubeSearch(BetterPlayer betterPlayer, String[] searchTerms, CommandParameters parameters, TextChannel senderChannel, boolean announce) {
-		if(this.config.isUseGoogleApiForSearch()) {
-			VideoDetails details = new YoutubeSearch().searchViaApi(this.config.getGoogleApiKey(), searchTerms, senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, announce);
-		} else {
-			VideoDetails details = new YoutubeSearch().searchViaFrontend(this.config.getGoogleApiKey(), searchTerms, senderChannel);
-			processVideoDetails(betterPlayer, parameters, details, announce);
+		Optional<VideoDetails> oDetails;
+		try {
+			if(this.config.isUseGoogleApiForSearch()) {
+				oDetails = YouTube.apiSearch(searchTerms);
+			} else {
+				oDetails = YouTube.frontendSearch(searchTerms);
+			}
+		} catch(IOException | YouTubeApiException e) {
+			BetterPlayer.logError(String.format("Failed to search track: %s", e.getMessage()));
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			senderChannel.sendMessage("Something went wrong. Please try again later.").queue();
+			return;
 		}
+
+		if(oDetails.isEmpty()) {
+			senderChannel.sendMessage("I was unable to find any results.").queue();
+			return;
+		}
+
+		processVideoDetails(betterPlayer, parameters, oDetails.get(), announce);
 	}
 
 	private void playYoutube(CommandParameters parameters, BetterPlayer betterPlayer) {
@@ -228,20 +242,27 @@ public class PlayCommandExecutor implements CommandExecutor {
 			senderChannel.sendMessage("That URL is invalid!").queue();
 		}
 
-		if(urlQueryParameters.containsKey("v")) {
+		if(urlQueryParameters.containsKey("v") && !urlQueryParameters.containsKey("list")) {
 			String videoId = urlQueryParameters.get("v");
 
-			VideoDetails vd = new YoutubeSearch().getVideoDetails(this.config.getGoogleApiKey(), videoId, senderChannel);
-
-			if(vd != null) {
-				processVideoDetails(betterPlayer, parameters, vd, true);
-			} else {
-				senderChannel.sendMessage("Unknown video!").queue();
+			Optional<VideoDetails> vd;
+			try {
+				vd = YouTube.getVideoDetails(videoId);
+			} catch(IOException | YouTubeApiException e) {
+				BetterPlayer.logError(String.format("Failed to get video information: %s", e.getMessage()));
+				BetterPlayer.logDebug(Utils.getStackTrace(e));
+				senderChannel.sendMessage("Something went wrong. Please try again later.").queue();
+				return;
 			}
 
-			return;
+			if(vd.isEmpty()) {
+				senderChannel.sendMessage("I was unable to find that video").queue();
+				return;
+			}
 
-		} else if(urlQueryParameters.containsKey("list") && !urlQueryParameters.containsKey("v")) {
+			processVideoDetails(betterPlayer, parameters, vd.get(), true);
+
+		} else if(urlQueryParameters.containsKey("list")) {
 			String listId = urlQueryParameters.get("list");
 			playYoutubePlaylist(parameters, betterPlayer, listId);
 			return;
@@ -266,39 +287,55 @@ public class PlayCommandExecutor implements CommandExecutor {
 
 		senderChannel.sendMessage("Loading playlist... (this might take a couple of seconds)").queue();
 
-		List<VideoDetails> vds = new YoutubeSearch().searchPlaylistViaApi(this.config.getGoogleApiKey(), listId, senderChannel, null);
-		if(vds != null && vds.size() >= 1) {
-			for(VideoDetails details : vds) {
-				processVideoDetails(betterPlayer, parameters, details, false);
-			}
-
-			User author = jda.getUserById(parameters.getSenderId());
-			QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
-			if(!qm.hasQueue(parameters.getGuildId())) {
-				qm.createQueue(parameters.getGuildId());
-			}
-
-			Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
-			if(oPosInQueue.isEmpty()) {
-				BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
-				senderChannel.sendMessage("Something went wrong. Please try again later").queue();
-				return;
-			}
-			int posInQueue = oPosInQueue.get();
-
-			VideoDetails videoDetails = vds.get(0);
-			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle("Added " + vds.size() + " tracks to the queue!")
-					.setThumbnail(videoDetails.getThumbnailUrl())
-					.setColor(BetterPlayer.GRAY)
-					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
-					.addField("Position in queue", String.valueOf(posInQueue +1), true)
-					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
-
-			senderChannel.sendMessageEmbeds(eb.build()).queue();
-		} else {
-			senderChannel.sendMessage("Unknown playlist or the playlist contains no videos!").queue();
+		Optional<List<VideoDetails>> oVds;
+		try {
+			oVds =  YouTube.getPlaylistitems(listId);
+		} catch(IOException | YouTubeApiException e) {
+			BetterPlayer.logError(String.format("Failed to get playlist information: %s", e.getMessage()));
+			BetterPlayer.logDebug(Utils.getStackTrace(e));
+			senderChannel.sendMessage("Something went wrong. Please try again later.").queue();
+			return;
 		}
+
+		if(oVds.isEmpty()) {
+			senderChannel.sendMessage("I was unable to find that playlist.").queue();
+			return;
+		}
+		List<VideoDetails> vds = oVds.get();
+
+		if(vds.isEmpty()) {
+			senderChannel.sendMessage("That playlist does not contain any videos.").queue();
+			return;
+		}
+
+		for(VideoDetails details : vds) {
+			processVideoDetails(betterPlayer, parameters, details, false);
+		}
+
+		User author = jda.getUserById(parameters.getSenderId());
+		QueueManager qm = betterPlayer.getBetterAudioManager().getQueueManager();
+		if(!qm.hasQueue(parameters.getGuildId())) {
+			qm.createQueue(parameters.getGuildId());
+		}
+
+		Optional<Integer> oPosInQueue = qm.getQueueSize(parameters.getGuildId());
+		if(oPosInQueue.isEmpty()) {
+			BetterPlayer.logError("No queue exists for the current Guild. This should not happen");
+			senderChannel.sendMessage("Something went wrong. Please try again later").queue();
+			return;
+		}
+		int posInQueue = oPosInQueue.get();
+
+		VideoDetails videoDetails = vds.get(0);
+		EmbedBuilder eb = new EmbedBuilder()
+				.setTitle("Added " + vds.size() + " tracks to the queue!")
+				.setThumbnail(videoDetails.thumbnail())
+				.setColor(BetterPlayer.GRAY)
+				.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
+				.addField("Position in queue", String.valueOf(posInQueue +1), true)
+				.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");
+
+		senderChannel.sendMessageEmbeds(eb.build()).queue();
 	}
 		
 	/**
@@ -321,13 +358,13 @@ public class PlayCommandExecutor implements CommandExecutor {
 		
 		//Check if VideoDetails and it's parameters are not null
 		//If any of them are that means no results were found and we can stop
-		if(videoDetails == null || videoDetails.getId() == null || videoDetails.getTitle() == null || videoDetails.getChannel() == null) {
+		if(videoDetails == null || videoDetails.id() == null || videoDetails.title() == null || videoDetails.channel() == null) {
 			senderChannel.sendMessage("No results found! Try another search term").queue();
 			return;
 		}
 		
 		//Create a QueueItem for the video
-		QueueItem qi = new QueueItem(videoDetails.getTitle(), videoDetails.getId(), videoDetails.getChannel());
+		QueueItem qi = new QueueItem(videoDetails.title(), videoDetails.id(), videoDetails.channel());
 		
 		if(!betterPlayer.getBetterAudioManager().isPlaying(guildId)) {
 			qm.setNowPlaying(guildId, qi);
@@ -345,7 +382,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			}
 			
 			//Load the track
-			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.getId(), guildId);
+			betterPlayer.getBetterAudioManager().loadTrack(videoDetails.id(), guildId);
 		}
 		
 		//Check if the guild currently has a pause state of true--meaning it's paused
@@ -367,11 +404,11 @@ public class PlayCommandExecutor implements CommandExecutor {
 		//If announce is true, then we want to send a message to the senderChannel
 		if(announce) {
 			EmbedBuilder eb = new EmbedBuilder()
-					.setTitle(videoDetails.getTitle())
-					.setThumbnail(videoDetails.getThumbnailUrl())
+					.setTitle(videoDetails.title())
+					.setThumbnail(videoDetails.thumbnail())
 					.setColor(BetterPlayer.GRAY)
 					.setAuthor("Adding to the queue", "https://google.com", author.getEffectiveAvatarUrl())
-					.addField("Channel", videoDetails.getChannel(), true)
+					.addField("Channel", videoDetails.channel(), true)
 					.addField("Duration", videoDetails.getDuration(), true)
 					.addField("Position in queue", String.valueOf(posInQueue +1), true)
 					.setFooter("Brought to you by BetterPlayer. Powered by YouTube", "https://archive.org/download/mx-player-icon/mx-player-icon.png");

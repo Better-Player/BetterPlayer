@@ -6,7 +6,7 @@ package net.betterplayer.betterplayer.apis.gson;
  * @author Tobias de Bruijn
  *
  */
-public class YTMFrontendSearch {
+public class YouTubeMusicFrontendSearchResponse {
 	private Content contents;
 	
 	/**

@@ -2,7 +2,7 @@ package net.betterplayer.betterplayer.apis.gson;
 
 import com.google.gson.annotations.SerializedName;
 
-public class KsoftGetLyricsResponse {
+public class KsoftLyricsResponse {
 
 	private long total;
 	private int took;

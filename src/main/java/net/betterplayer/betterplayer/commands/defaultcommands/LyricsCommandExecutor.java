@@ -24,7 +24,7 @@ import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
-import net.betterplayer.betterplayer.apis.gson.KsoftGetLyricsResponse;
+import net.betterplayer.betterplayer.apis.gson.KsoftLyricsResponse;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -109,10 +109,10 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		
 		//Deserialize
 		final Gson gson = new Gson();
-		KsoftGetLyricsResponse lyricsResponse = gson.fromJson(apiResponse.getMessage(), KsoftGetLyricsResponse.class);
+		KsoftLyricsResponse lyricsResponse = gson.fromJson(apiResponse.getMessage(), KsoftLyricsResponse.class);
 		
 		//Get the lyrics data
-		KsoftGetLyricsResponse.Data[] lyricsData = lyricsResponse.getData();
+		KsoftLyricsResponse.Data[] lyricsData = lyricsResponse.getData();
 		
 		//If there length is 0, the API returned no results
 		if(lyricsData.length == 0) {
@@ -121,7 +121,7 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		}
 		
 		//We're only really interested in the first of the provided results
-		KsoftGetLyricsResponse.Data firstData = lyricsData[0];
+		KsoftLyricsResponse.Data firstData = lyricsData[0];
 		String lyrics = firstData.getLyrics();
 		
 		//Discord only allows a description to have 2048 characters.

@@ -29,9 +29,9 @@ public class Spotify {
     /**
      * Get details about a Spotify track. This requires that {@link ConfigManifest#getSpotifyClientId()} and {@link ConfigManifest#getSpotifyClientSecret()} be set
      * @param trackId The ID of the track
-     * @return The Track's information
-     * @throws IOException
-     * @throws SpotifyApiException
+     * @return Information about the track. Empty if the track does not exist
+     * @throws IOException When an IOException occurs
+     * @throws SpotifyApiException When the API returned a non-200 status code
      */
     public static Optional<SpotifyTrackResponse> getTrack(String trackId) throws IOException {
         HashMap<String, String> headers = getDefaultHeaders();
@@ -49,6 +49,13 @@ public class Spotify {
         return Optional.of(r);
     }
 
+    /**
+     * Get details about a Spotify playlist. This requires that {@link ConfigManifest#getSpotifyClientId()} and {@link ConfigManifest#getSpotifyClientSecret()} be set
+     * @param playlistId The ID of the playlist
+     * @return A Pair containing the Playlist information and a List of tracks. Empty if the Playlist does not exist
+     * @throws IOException When an IOException occurs
+     * @throws SpotifyApiException When the API returned a non-200 status code
+     */
     public static Optional<Pair<SpotifyPlaylistResponse, List<SpotifyTrackResponse>>> getPlaylist(String playlistId) throws IOException {
         HashMap<String, String> headers = getDefaultHeaders();
 
