@@ -8,7 +8,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import net.betterplayer.betterplayer.BetterPlayer;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class Utils {
@@ -46,10 +48,11 @@ public class Utils {
     public static Map<String, String> splitQuery(URL url) throws UnsupportedEncodingException {
         Map<String, String> query_pairs = new LinkedHashMap<String, String>();
         String query = url.getQuery();
+
         String[] pairs = query.split("&");
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
-            if(idx + 1 > pairs.length - 1) {
+            if(idx + 1 > pair.length() - 1) {
                 continue;
             }
             query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));

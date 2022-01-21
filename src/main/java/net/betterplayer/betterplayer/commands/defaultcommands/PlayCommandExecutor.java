@@ -240,6 +240,7 @@ public class PlayCommandExecutor implements CommandExecutor {
 			urlQueryParameters = Utils.splitQuery(new URL(arg0));
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
 			senderChannel.sendMessage("That URL is invalid!").queue();
+			return;
 		}
 
 		if(urlQueryParameters.containsKey("v") && !urlQueryParameters.containsKey("list")) {
@@ -261,7 +262,6 @@ public class PlayCommandExecutor implements CommandExecutor {
 			}
 
 			processVideoDetails(betterPlayer, parameters, vd.get(), true);
-
 		} else if(urlQueryParameters.containsKey("list")) {
 			String listId = urlQueryParameters.get("list");
 			playYoutubePlaylist(parameters, betterPlayer, listId);
