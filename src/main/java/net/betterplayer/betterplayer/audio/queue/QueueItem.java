@@ -6,6 +6,7 @@ import net.betterplayer.betterplayer.utils.Pair;
 import net.betterplayer.betterplayer.utils.Utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public record QueueItem(String trackName, String trackIdentifier, String artistName) {
 
@@ -21,9 +22,9 @@ public record QueueItem(String trackName, String trackIdentifier, String artistN
         PreparedStatement pr = new PreparedStatement("INSERT INTO savedQueues (savedQueueId, queuePosition, trackName, trackIdentifier, artistName) VALUES ('?', '?', '?', '?', '?')");
         pr.bind(0, savedQueueId);
         pr.bind(1, position);
-        pr.bind(2, this.trackName);
+        pr.bind(2, this.trackName.replaceAll(Pattern.quote("'"), ""));
         pr.bind(3, this.trackIdentifier);
-        pr.bind(4, this.artistName);
+        pr.bind(4, this.artistName.replaceAll(Pattern.quote("'"), ""));
 
         return pr;
     }
