@@ -69,7 +69,7 @@ public class Migration {
 
         BetterPlayer.logDebug("Updating __betterplayer_migrations for Migration " + method);
         long epochSeconds = Instant.now().toEpochMilli() / 1000L;
-        PreparedStatement pr = new PreparedStatement("INSERT INTO __betterplayer_migrations (migration, ts) VALUES ('?', '?')");
+        PreparedStatement pr = new PreparedStatement("INSERT INTO __betterplayer_migrations (migration, ts) VALUES (?, ?)");
         pr.bind(0, method);
         pr.bind(1, epochSeconds);
         db.execute(pr);

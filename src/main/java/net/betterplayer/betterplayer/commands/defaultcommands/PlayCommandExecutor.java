@@ -72,6 +72,31 @@ public class PlayCommandExecutor implements CommandExecutor {
 				playYoutube(parameters, betterPlayer);
 			}
 
+			if (arg0.contains("youtu.be")) {
+				String[] parts = arg0.split(Pattern.quote("/"));
+				if(parts.length == 0) {
+					senderChannel.sendMessage("Invalid URL").queue();
+					return;
+				}
+				String id = parts[parts.length - 1];
+				Optional<VideoDetails> vd;
+				try {
+					vd = YouTube.getVideoDetails(id);
+				} catch(IOException | YouTubeApiException e) {
+					BetterPlayer.logError(String.format("Failed to get video information: %s", e.getMessage()));
+					BetterPlayer.logDebug(Utils.getStackTrace(e));
+					senderChannel.sendMessage("Something went wrong. Please try again later.").queue();
+					return;
+				}
+
+				if(vd.isEmpty()) {
+					senderChannel.sendMessage("I was unable to find that video").queue();
+					return;
+				}
+
+				processVideoDetails(betterPlayer, parameters, vd.get(), true);
+			}
+
 			// Spotify track or playlist
 			if(arg0.contains("open.spotify.com")) {
 

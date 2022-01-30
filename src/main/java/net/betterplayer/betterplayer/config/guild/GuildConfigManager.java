@@ -65,7 +65,7 @@ public class GuildConfigManager {
 	public void setManifest(long guildId, GuildConfigManifest manifest) {
 		HashMap<Long, GuildConfigManifest> configs = this.getGuildConfigs();
 		if(configs.containsKey(guildId)) {
-			PreparedStatement pr = new PreparedStatement("UPDATE guildConfigs SET commandprefix = '?' WHERE guildid = '?'");
+			PreparedStatement pr = new PreparedStatement("UPDATE guildConfigs SET commandprefix = ? WHERE guildid = ?");
 			pr.bind(0, manifest.getCommandPrefix());
 			pr.bind(1, guildId);
 			
@@ -75,7 +75,7 @@ public class GuildConfigManager {
 				e.printStackTrace();
 			}
 		} else {
-			PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES ('?', '?')");
+			PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES (?, ?)");
 			pr.bind(0, guildId);
 			pr.bind(1, manifest.getCommandPrefix());
 			
@@ -94,7 +94,7 @@ public class GuildConfigManager {
 	public GuildConfigManifest getDefaultManifest(long guildId) {
 		GuildConfigManifest manifest = GuildConfigManifest.defaultManifest();
 		
-		PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES ('?', '?')");
+		PreparedStatement pr = new PreparedStatement("INSERT INTO guildConfigs (guildid, commandprefix) VALUES (?, ?)");
 		pr.bind(0, guildId);
 		pr.bind(1, manifest.getCommandPrefix());
 		
@@ -112,7 +112,7 @@ public class GuildConfigManager {
 	 * @param guildId The ID of the guild to remove
 	 */
 	public void removeGuild(long guildId) {
-		PreparedStatement pr = new PreparedStatement("DELETE FROM guildConfigs WHERE guildid = '?'");
+		PreparedStatement pr = new PreparedStatement("DELETE FROM guildConfigs WHERE guildid = ?");
 		pr.bind(0, guildId);
 		
 		try {

@@ -209,7 +209,7 @@ public class QueueManager {
 	 */
 	public boolean loadQueue(long guildId, long savedPlaylistId) throws SqlException {
 		DatabaseDriver db = BetterPlayer.getBetterPlayer().getDatabaseDriver();
-		PreparedStatement pr = new PreparedStatement("SELECT * FROM savedQueues WHERE savedQueueId = '?'");
+		PreparedStatement pr = new PreparedStatement("SELECT * FROM savedQueues WHERE savedQueueId = ?");
 		pr.bind(0, savedPlaylistId);
 		SqlRow[] rows = db.query(pr);
 
