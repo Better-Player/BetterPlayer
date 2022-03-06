@@ -19,9 +19,12 @@ import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
+
+import javax.swing.text.html.Option;
 
 public class BetterAudioManager {
 
@@ -63,14 +66,22 @@ public class BetterAudioManager {
 		NEXT_TRACK,
 		OK
 	}
-	
+
+	/**
+	 * Get the ID of the TextChannel BetterPlayer is bound to in a Guild
+	 * @param guildId The ID of the guild
+	 * @return The ID of the text channel
+	 */
+	public Optional<Long> getBoundTextChannel(long guildId) {
+		return Optional.ofNullable(this.boundTextChannels.get(guildId));
+	}
+
 	/**
 	 * Skip N seconds of the current track. If the new position is higher than the track duration, then the next track will be queued
 	 * @param guildId The ID of the guild
 	 * @param n N seconds to skip
 	 * @return Returns the action performed. Empty if no audio player exists for the provided guildId, or if no track is currently playing for the provided guildId
 	 */
-	@Nullable
 	public Optional<SkipAction> skipSeconds(long guildId, long n) {
 		AudioPlayer ap = this.audioPlayers.get(guildId);
 		if(ap == null) {
@@ -336,5 +347,13 @@ public class BetterAudioManager {
 	 */
 	public Optional<AudioPlayer> getAudioPlayer(long guildId) {
 		return Optional.ofNullable(this.audioPlayers.get(guildId));
+	}
+
+	/**
+	 * Get the JDA instance
+	 * @return the JDA instance
+	 */
+	public JDA getJda() {
+		return this.jdaHandler.getJda();
 	}
 }

@@ -1,5 +1,6 @@
 package net.betterplayer.betterplayer.commands.defaultcommands;
 
+/*
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,17 +17,22 @@ import com.google.gson.Gson;
 import dev.array21.httplib.Http;
 import dev.array21.httplib.Http.RequestMethod;
 import dev.array21.httplib.Http.ResponseObject;
+*/
 import net.betterplayer.betterplayer.BetterPlayer;
 import net.betterplayer.betterplayer.annotations.BotCommand;
+/*
 import net.betterplayer.betterplayer.audio.BetterAudioManager;
 import net.betterplayer.betterplayer.audio.queue.QueueItem;
 import net.betterplayer.betterplayer.audio.queue.QueueManager;
+*/
 import net.betterplayer.betterplayer.commands.CommandExecutor;
 import net.betterplayer.betterplayer.commands.CommandParameters;
 import net.betterplayer.betterplayer.config.ConfigManifest;
+/*
 import net.betterplayer.betterplayer.apis.gson.KsoftLyricsResponse;
 import net.betterplayer.betterplayer.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+*/
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -34,14 +40,14 @@ import net.dv8tion.jda.api.entities.TextChannel;
  * This command will provide lyrics for the currently playing song, if any are available<br>
  * This command requires the user to be connected to the same voice channel as BetterPlayer
  */
-@BotCommand(name = "lyrics", description = "Get the lyrics for the song which is currently playing", aliases = {"l"})
+@BotCommand(name = "lyrics", description = "**[DEPRECATED]** Get the lyrics for the song which is currently playing", aliases = {"l"})
 public class LyricsCommandExecutor implements CommandExecutor {
 
-	private final ConfigManifest botConfig;
-	private final String KSOFT_LYRICS_SEARCH = "https://api.ksoft.si/lyrics/search";
-	
+	//private final ConfigManifest botConfig;
+	//private final String KSOFT_LYRICS_SEARCH = "https://api.ksoft.si/lyrics/search";
+
 	public LyricsCommandExecutor(ConfigManifest botConfig) {
-		this.botConfig = botConfig;
+	//	this.botConfig = botConfig;
 	}
 	
 	@Override
@@ -53,7 +59,11 @@ public class LyricsCommandExecutor implements CommandExecutor {
 		
 		JDA jda = betterPlayer.getJdaHandler().getJda();
 		TextChannel senderChannel = jda.getTextChannelById(parameters.getChannelId());
-		
+
+		// The endpoint has been deprecated
+		senderChannel.sendMessage("This command is no longer available").queue();
+
+		/*
 		BetterAudioManager bam = betterPlayer.getBetterAudioManager();
 		if(!bam.isPlaying(parameters.getGuildId())) {
 			senderChannel.sendMessage("BetterPlayer is currently not playing anything.").queue();
@@ -202,5 +212,6 @@ public class LyricsCommandExecutor implements CommandExecutor {
 				senderChannel.sendMessageEmbeds(eb.build()).queue();
 			}
 		}
+		 */
 	}
 }
