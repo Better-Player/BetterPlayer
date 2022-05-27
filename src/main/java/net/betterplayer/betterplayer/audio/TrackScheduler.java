@@ -38,7 +38,7 @@ public class TrackScheduler extends AudioEventAdapter {
 			addTrackIfLoop(guildId);
 			tryPlayNext(guildId);
 
-			// CHeck if we can inform the user
+			// Check if we can inform the user
 			Optional<Long> maybeBoundChannel = this.betterAudioManager.getBoundTextChannel(guildId);
 			if(maybeBoundChannel.isPresent()) {
 				// Notify that the track could not be played
